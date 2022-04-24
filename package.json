@@ -9,10 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@xstate/react": "^3.0.0",
     "daisyui": "^2.14.2",
     "next": "12.1.5",
     "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "react-dom": "18.0.0",
+    "react-flow-renderer": "^10.1.2",
+    "xstate": "^4.31.0"
   },
   "devDependencies": {
     "@types/node": "17.0.25",
