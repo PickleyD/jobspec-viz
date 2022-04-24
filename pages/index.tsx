@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { Flow } from "../modules/flow"
+import { Palette } from "../modules/palette"
 
 const Home: NextPage = () => {
   return (
@@ -13,8 +14,15 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-full h-full">
-        <Flow />
+      <main className="w-full h-full relative">
+        <div className="w-full h-full fixed z-0">
+          <Flow />
+        </div>
+        <div className="w-full h-full fixed z-10">
+          <div className="p-8 absolute right-0">
+            <Palette />
+          </div>
+        </div>
       </main>
     </div>
   )

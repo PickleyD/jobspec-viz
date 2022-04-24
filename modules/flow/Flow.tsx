@@ -66,7 +66,7 @@ export const Flow = ({ className }: FlowProps) => {
         // elements={elements}
         nodes={demoNodes}
         edges={edges}
-        nodeTypes={nodeTypes}
+        // nodeTypes={nodeTypes}
         snapToGrid={true}
         snapGrid={[15, 15]}
       >
