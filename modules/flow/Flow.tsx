@@ -1,8 +1,8 @@
 import ReactFlow, {
   Controls,
   BackgroundProps,
-  Node,
-  Edge,
+  ReactFlowProvider,
+  ReactFlowInstance
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
@@ -15,14 +15,11 @@ import { TaskNode } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useDrop } from "react-dnd";
+import { XYCoords } from "../workspace/taskNodeMachine";
 
 const nodesSelector = (state: any) => state.context.nodes;
-
-const nodeTypes = {
-  task: TaskNode,
-};
 
 export interface FlowProps {
   className?: string;
@@ -37,15 +34,17 @@ export const Flow = ({ className }: FlowProps) => {
   const nodeToFlowElement = (node: any) => {
     const nodeType = node.ref.machine.id;
 
+    const { initialCoords } = node.ref.state.context;
+
     let flowElement = {
       id: node.ref.id,
       type: "",
       data: {},
-      position: { x: 0, y: 0 },
+      position: initialCoords,
     };
 
     switch (nodeType) {
-      case "task":
+      case "taskNode":
         flowElement.type = "task";
         break;
     }
@@ -55,17 +54,12 @@ export const Flow = ({ className }: FlowProps) => {
 
   const elements = [...nodes.tasks.map(nodeToFlowElement)];
 
-  const demoNodes: Node[] = [
-    { id: "1", data: { label: "Node 1" }, position: { x: 5, y: 5 } },
-    { id: "2", data: { label: "Node 2" }, position: { x: 5, y: 100 } },
-  ];
+  // const demoNodes: Node[] = [
+  //   { id: "1", data: { label: "Node 1" }, position: { x: 5, y: 5 } },
+  //   { id: "2", data: { label: "Node 2" }, position: { x: 5, y: 100 } },
+  // ];
 
-  const edges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }];
-
-  type XYCoords = {
-    x: number;
-    y: number;
-  };
+  // const edges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }];
 
   /**
    * Handle drop event. This will mean a new node from
@@ -74,21 +68,22 @@ export const Flow = ({ className }: FlowProps) => {
    * @param monitor
    */
   const handleDrop = (item: any, monitor: any) => {
-    console.log(item);
-    console.log(monitor);
-
     const clientOffset = monitor.getClientOffset() as XYCoords;
 
-    handleAddNewNode(clientOffset);
+    const position = reactFlowInstance?.project(clientOffset) || { x: 0, y: 0};
+
+    handleAddNewNode(position);
   };
 
   const handleAddNewNode = (initialCoords: XYCoords) => {
-    globalServices.workspaceService.send("NEW_NODE_TASK.ADD", {
+    globalServices.workspaceService.send("NEW_TASK_NODE.ADD", {
       options: {
         initialCoords,
       },
     });
   };
+
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
 
   const [{ isOver }, dropRef] = useDrop(
     () => ({
@@ -100,22 +95,26 @@ export const Flow = ({ className }: FlowProps) => {
         };
       },
     }),
-    []
+    [reactFlowInstance]
   );
 
+  const nodeTypes = useMemo(() => ({ task: TaskNode }), []);
+
   return (
-    <div className={topLevelStyles} ref={dropRef}>
-      <ReactFlow
-        // elements={elements}
-        nodes={demoNodes}
-        edges={edges}
-        // nodeTypes={nodeTypes}
-        snapToGrid={true}
-        snapGrid={[15, 15]}
-      >
-        <Controls />
-        <Background gap={15} />
-      </ReactFlow>
-    </div>
+    <ReactFlowProvider>
+      <div className={topLevelStyles} ref={dropRef}>
+        <ReactFlow
+          nodes={elements}
+          edges={[]}
+          nodeTypes={nodeTypes}
+          snapToGrid={true}
+          snapGrid={[15, 15]}
+          onInit={setReactFlowInstance}
+        >
+          <Controls />
+          <Background gap={15} />
+        </ReactFlow>
+      </div>
+    </ReactFlowProvider>
   );
 };

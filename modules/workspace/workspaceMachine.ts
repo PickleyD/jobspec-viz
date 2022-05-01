@@ -1,8 +1,7 @@
 import { createMachine, spawn, assign } from "xstate";
-import { taskNodeMachine } from "./taskNodeMachine";
+import { createTaskNodeMachine, TaskNodeOptions } from "./taskNodeMachine";
 
-type WorkspaceEvent =
-  | { type: "NEW_TASK_NODE.ADD"; id: string };
+type WorkspaceEvent = { type: "NEW_TASK_NODE.ADD"; options: TaskNodeOptions };
 
 interface WorkspaceContext {
   nodes: Nodes;
@@ -34,8 +33,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               {
                 // add a new taskNodeMachine actor with a unique name
                 ref: spawn(
-                  taskNodeMachine,
-                  `task-${event.id}`
+                  createTaskNodeMachine({
+                    initialCoords: event.options.initialCoords,
+                  }),
+                  `task-${event.options.id ?? context.nodes.tasks.length}`
                 ),
               },
             ],
