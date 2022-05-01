@@ -1,9 +1,11 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
-import { Flow } from "../modules/flow"
-import { Palette } from "../modules/palette"
+import type { NextPage } from "next";
+import Head from "next/head";
+import Image from "next/image";
+import styles from "../styles/Home.module.css";
+import { Flow } from "../modules/flow";
+import { Palette } from "../modules/palette";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const Home: NextPage = () => {
   return (
@@ -14,18 +16,20 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-full h-full relative">
-        <div className="w-full h-full fixed z-0">
-          <Flow />
-        </div>
-        <div className="w-full h-full fixed z-10">
-          <div className="p-8 absolute right-0">
-            <Palette />
+      <DndProvider backend={HTML5Backend}>
+        <main className="w-full h-full relative">
+          <div className="w-full h-full fixed z-0">
+            <Flow />
           </div>
-        </div>
-      </main>
+          <div className="w-full h-full fixed z-10 pointer-events-none">
+            <div className="p-8 absolute right-0">
+              <Palette className="pointer-events-auto"/>
+            </div>
+          </div>
+        </main>
+      </DndProvider>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

@@ -14,6 +14,8 @@
     "daisyui": "^2.14.2",
     "next": "12.1.5",
     "react": "18.0.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.0.0",
     "react-flow-renderer": "^10.1.2",
     "xstate": "^4.31.0"
