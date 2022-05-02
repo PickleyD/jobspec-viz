@@ -2,7 +2,10 @@ import ReactFlow, {
   Controls,
   BackgroundProps,
   ReactFlowProvider,
-  ReactFlowInstance
+  ReactFlowInstance,
+  useNodesState,
+  useEdgesState,
+  addEdge
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
@@ -15,7 +18,7 @@ import { TaskNode } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { XYCoords } from "../workspace/taskNodeMachine";
 
@@ -29,7 +32,7 @@ export const Flow = ({ className }: FlowProps) => {
   const topLevelStyles = clsx(className, "h-full w-full");
 
   const globalServices = useContext(GlobalStateContext);
-  const nodes = useSelector(globalServices.workspaceService, nodesSelector);
+  const nodesFromMachine = useSelector(globalServices.workspaceService, nodesSelector);
 
   const nodeToFlowElement = (node: any) => {
     const nodeType = node.ref.machine.id;
@@ -39,20 +42,39 @@ export const Flow = ({ className }: FlowProps) => {
     let flowElement = {
       id: node.ref.id,
       type: "",
-      data: {},
+      data: {
+        label: (
+          <>
+            Example node
+          </>
+        ),
+      },
       position: initialCoords,
     };
 
     switch (nodeType) {
       case "taskNode":
-        flowElement.type = "task";
+        flowElement.type = "default";
         break;
     }
 
     return flowElement;
   };
 
-  const elements = [...nodes.tasks.map(nodeToFlowElement)];
+  const elements = [...nodesFromMachine.tasks.map(nodeToFlowElement)];
+
+  const [prevElementsLength, setPrevElementsLength] = useState(0);
+  useEffect(() => {
+    if (elements.length > 0 && elements.length !== prevElementsLength) {
+      setPrevElementsLength(elements.length);
+      setNodes((nds) => nds.concat(elements[elements.length - 1]));
+    }
+  }, [elements]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(elements);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const onConnect = useCallback((params: any) => setEdges((eds) => addEdge(params, eds)), []);
 
   // const demoNodes: Node[] = [
   //   { id: "1", data: { label: "Node 1" }, position: { x: 5, y: 5 } },
@@ -70,7 +92,7 @@ export const Flow = ({ className }: FlowProps) => {
   const handleDrop = (item: any, monitor: any) => {
     const clientOffset = monitor.getClientOffset() as XYCoords;
 
-    const position = reactFlowInstance?.project(clientOffset) || { x: 0, y: 0};
+    const position = reactFlowInstance?.project(clientOffset) || { x: 0, y: 0 };
 
     handleAddNewNode(position);
   };
@@ -83,7 +105,8 @@ export const Flow = ({ className }: FlowProps) => {
     });
   };
 
-  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [reactFlowInstance, setReactFlowInstance] =
+    useState<ReactFlowInstance | null>(null);
 
   const [{ isOver }, dropRef] = useDrop(
     () => ({
@@ -104,12 +127,15 @@ export const Flow = ({ className }: FlowProps) => {
     <ReactFlowProvider>
       <div className={topLevelStyles} ref={dropRef}>
         <ReactFlow
-          nodes={elements}
-          edges={[]}
+          nodes={nodes}
+          edges={edges}
           nodeTypes={nodeTypes}
           snapToGrid={true}
           snapGrid={[15, 15]}
           onInit={setReactFlowInstance}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
         >
           <Controls />
           <Background gap={15} />
