@@ -2,17 +2,18 @@ import { useDrag } from "react-dnd";
 
 export interface DraggableItemProps {
   children: React.ReactNode;
+  itemProps?: any;
 }
 
 export const ItemTypes = {
-  NODE: "node",
+  NODE: "node"
 };
 
-export const DraggableItem = ({ children }: DraggableItemProps) => {
+export const DraggableItem = ({ children, itemProps = {} }: DraggableItemProps) => {
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: ItemTypes.NODE,
-      //   item: { text },
+      item: itemProps,
       collect: (monitor) => ({
         isDragging: !!monitor.isDragging(),
       }),

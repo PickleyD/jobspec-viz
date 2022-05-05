@@ -5,7 +5,10 @@ import ReactFlow, {
   ReactFlowInstance,
   useNodesState,
   useEdgesState,
-  addEdge
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
+  Edge,
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
@@ -20,7 +23,7 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { useDrop } from "react-dnd";
-import { XYCoords } from "../workspace/taskNodeMachine";
+import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -32,22 +35,21 @@ export const Flow = ({ className }: FlowProps) => {
   const topLevelStyles = clsx(className, "h-full w-full");
 
   const globalServices = useContext(GlobalStateContext);
-  const nodesFromMachine = useSelector(globalServices.workspaceService, nodesSelector);
+  const nodesFromMachine = useSelector(
+    globalServices.workspaceService,
+    nodesSelector
+  );
 
   const nodeToFlowElement = (node: any) => {
     const nodeType = node.ref.machine.id;
 
-    const { initialCoords } = node.ref.state.context;
+    const { initialCoords, taskType } = node.ref.state.context;
 
     let flowElement = {
       id: node.ref.id,
       type: "",
       data: {
-        label: (
-          <>
-            Example node
-          </>
-        ),
+        label: <>{taskType}</>,
       },
       position: initialCoords,
     };
@@ -74,7 +76,37 @@ export const Flow = ({ className }: FlowProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(elements);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const onConnect = useCallback((params: any) => setEdges((eds) => addEdge(params, eds)), []);
+  const [prevEdgesLength, setPrevEdgesLength] = useState(0);
+  useEffect(() => {
+    if (edges.length > 0 && edges.length !== prevEdgesLength) {
+      setPrevEdgesLength(edges.length);
+      console.log("store edges:");
+      console.log(edges);
+
+      globalServices.workspaceService.send("SET_EDGES", {
+        newEdges: edges,
+      });
+    }
+  }, [edges]);
+
+  // const [nodes, setNodes] = useState(elements);
+  // const [edges, setEdges] = useState<Edge<any>[]>([]);
+
+  // const onNodesChange = useCallback((changes: any) => {
+  //   console.log("onNodesChange");
+  //   console.log(changes);
+  //   setNodes((ns) => applyNodeChanges(changes, ns));
+  // }, []);
+  // const onEdgesChange = useCallback((changes: any) => {
+  //   console.log("onEdgesChange");
+  //   console.log(changes);
+  //   return setEdges((es) => applyEdgeChanges(changes, es));
+  // }, []);
+
+  const onConnect = useCallback(
+    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    []
+  );
 
   // const demoNodes: Node[] = [
   //   { id: "1", data: { label: "Node 1" }, position: { x: 5, y: 5 } },
@@ -94,13 +126,14 @@ export const Flow = ({ className }: FlowProps) => {
 
     const position = reactFlowInstance?.project(clientOffset) || { x: 0, y: 0 };
 
-    handleAddNewNode(position);
+    handleAddNewNode(position, item.taskType);
   };
 
-  const handleAddNewNode = (initialCoords: XYCoords) => {
+  const handleAddNewNode = (initialCoords: XYCoords, taskType: TASK_TYPE) => {
     globalServices.workspaceService.send("NEW_TASK_NODE.ADD", {
       options: {
         initialCoords,
+        taskType,
       },
     });
   };
@@ -129,7 +162,7 @@ export const Flow = ({ className }: FlowProps) => {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          nodeTypes={nodeTypes}
+          // nodeTypes={nodeTypes}
           snapToGrid={true}
           snapGrid={[15, 15]}
           onInit={setReactFlowInstance}

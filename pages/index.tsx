@@ -4,6 +4,7 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { Flow } from "../modules/flow";
 import { Palette } from "../modules/palette";
+import { Codegen } from "../modules/codegen";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -24,6 +25,9 @@ const Home: NextPage = () => {
           <div className="w-full h-full fixed z-10 pointer-events-none">
             <div className="p-8 absolute right-0">
               <Palette className="pointer-events-auto"/>
+            </div>
+            <div className="p-8 absolute right-0 bottom-0">
+              <Codegen />
             </div>
           </div>
         </main>

@@ -1,9 +1,13 @@
 import { createMachine, spawn, assign } from "xstate";
 import { createTaskNodeMachine, TaskNodeOptions } from "./taskNodeMachine";
+import { Edge } from "react-flow-renderer"
 
-type WorkspaceEvent = { type: "NEW_TASK_NODE.ADD"; options: TaskNodeOptions };
+type WorkspaceEvent =
+  | { type: "NEW_TASK_NODE.ADD"; options: TaskNodeOptions }
+  | { type: "SET_EDGES"; newEdges: Edge<any>[] };
 
 interface WorkspaceContext {
+  edges: Edge<any>[];
   nodes: Nodes;
 }
 
@@ -19,6 +23,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       idle: {},
     },
     context: {
+      edges: [],
       nodes: {
         tasks: [],
       },
@@ -35,6 +40,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 ref: spawn(
                   createTaskNodeMachine({
                     initialCoords: event.options.initialCoords,
+                    taskType: event.options.taskType,
                   }),
                   `task-${event.options.id ?? context.nodes.tasks.length}`
                 ),
@@ -43,6 +49,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           }),
         }),
       },
+      "SET_EDGES": {
+        actions: assign({
+          edges: (context, event) => event.newEdges,
+        }),
+      }
     },
   }
 );

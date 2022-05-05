@@ -31,17 +31,29 @@ export const Palette = ({ className }: PaletteProps) => {
         </div>
         <ul className="py-2 flex flex-col gap-1">
           <li>
-            <DraggableItem>
+            <DraggableItem
+              itemProps={{
+                taskType: "DIVIDE",
+              }}
+            >
               <TaskChip name="Divide" />
             </DraggableItem>
           </li>
           <li>
-            <DraggableItem>
+            <DraggableItem
+              itemProps={{
+                taskType: "SUM",
+              }}
+            >
               <TaskChip name="Sum" />
             </DraggableItem>
           </li>
           <li>
-            <DraggableItem>
+            <DraggableItem
+              itemProps={{
+                taskType: "MEDIAN",
+              }}
+            >
               <TaskChip name="Median" />
             </DraggableItem>
           </li>
