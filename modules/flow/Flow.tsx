@@ -9,6 +9,7 @@ import ReactFlow, {
   applyEdgeChanges,
   applyNodeChanges,
   Edge,
+  getOutgoers
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
@@ -76,6 +77,27 @@ export const Flow = ({ className }: FlowProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(elements);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
+  const getTaskNodeById = (nodeId: string) => nodesFromMachine.tasks.filter((taskNode: any) => taskNode.ref.id === nodeId)
+
+  const handleNewEdge = (newConnection: Edge) => {
+    console.log("new edge")
+    console.log(newConnection)
+
+    const sourceTaskNode = getTaskNodeById(newConnection.source)
+
+    const targetTaskNode = getTaskNodeById(newConnection.target)
+
+    sourceTaskNode.send("ADD_OUTGOING_NODE", {
+      nodeId: targetTaskNode.ref.id,
+    });
+
+    targetTaskNode.send("ADD_INCOMING_NODE", {
+      nodeId: sourceTaskNode.ref.id,
+    });
+
+    onConnect(newConnection)
+  }
+
   const [prevEdgesLength, setPrevEdgesLength] = useState(0);
   useEffect(() => {
     if (edges.length > 0 && edges.length !== prevEdgesLength) {
@@ -86,6 +108,9 @@ export const Flow = ({ className }: FlowProps) => {
       globalServices.workspaceService.send("SET_EDGES", {
         newEdges: edges,
       });
+
+      console.log("getOutgoers")
+      console.log(getOutgoers(nodes[0], nodes, edges))
     }
   }, [edges]);
 
@@ -104,7 +129,7 @@ export const Flow = ({ className }: FlowProps) => {
   // }, []);
 
   const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    (connection: any) => setEdges((eds) => addEdge({ ...connection, animated: true }, eds)),
     []
   );
 
@@ -168,7 +193,7 @@ export const Flow = ({ className }: FlowProps) => {
           onInit={setReactFlowInstance}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
+          onConnect={handleNewEdge}
         >
           <Controls />
           <Background gap={15} />

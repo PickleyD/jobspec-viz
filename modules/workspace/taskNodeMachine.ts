@@ -1,4 +1,4 @@
-import { createMachine } from "xstate";
+import { createMachine, assign } from "xstate";
 
 export type XYCoords = {
   x: number;
@@ -11,20 +11,28 @@ export type TaskNodeOptions = {
   taskType: TASK_TYPE;
 };
 
-type TaskNodeEvent = { type: "" };
+type TaskNodeEvent =
+  | { type: "ADD_INCOMING_NODE"; nodeId: string }
+  | { type: "ADD_OUTGOING_NODE"; nodeId: string }
+  | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
+  | { type: "REMOVE_OUTGOING_NODE"; nodeId: string };
 
-export type TASK_TYPE = "SUM" | "DIVIDE" | "MEDIAN"
+export type TASK_TYPE = "SUM" | "DIVIDE" | "MEDIAN";
 
 interface TaskNodeContext {
   customName?: string;
   initialCoords: XYCoords;
   taskType: TASK_TYPE;
+  incomingNodes: Array<string>;
+  outgoingNodes: Array<string>;
 }
 
 const defaultContext: TaskNodeContext = {
   customName: undefined,
   initialCoords: { x: 0, y: 0 },
-  taskType: "SUM"
+  taskType: "SUM",
+  incomingNodes: [],
+  outgoingNodes: [],
 };
 
 export const createTaskNodeMachine = (
@@ -41,6 +49,40 @@ export const createTaskNodeMachine = (
     initial: "idle",
     states: {
       idle: {},
+    },
+    on: {
+      ADD_INCOMING_NODE: {
+        actions: assign({
+          incomingNodes: (context, event) => [
+            ...context.incomingNodes,
+            event.nodeId,
+          ],
+        }),
+      },
+      ADD_OUTGOING_NODE: {
+        actions: assign({
+          outgoingNodes: (context, event) => [
+            ...context.outgoingNodes,
+            event.nodeId,
+          ],
+        }),
+      },
+      REMOVE_INCOMING_NODE: {
+        actions: assign({
+          incomingNodes: (context, event) =>
+            context.incomingNodes.filter(
+              (incomingNode: string) => incomingNode !== event.nodeId
+            ),
+        }),
+      },
+      REMOVE_OUTGOING_NODE: {
+        actions: assign({
+          outgoingNodes: (context, event) =>
+            context.outgoingNodes.filter(
+              (outgoingNode: string) => outgoingNode !== event.nodeId
+            ),
+        }),
+      },
     },
   });
 };
