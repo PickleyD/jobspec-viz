@@ -77,7 +77,7 @@ export const Flow = ({ className }: FlowProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(elements);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const getTaskNodeById = (nodeId: string) => nodesFromMachine.tasks.filter((taskNode: any) => taskNode.ref.id === nodeId)
+  const getTaskNodeById = (nodeId: string) => nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.id === nodeId)
 
   const handleNewEdge = (newConnection: Edge) => {
     console.log("new edge")
@@ -87,11 +87,11 @@ export const Flow = ({ className }: FlowProps) => {
 
     const targetTaskNode = getTaskNodeById(newConnection.target)
 
-    sourceTaskNode.send("ADD_OUTGOING_NODE", {
+    sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
       nodeId: targetTaskNode.ref.id,
     });
 
-    targetTaskNode.send("ADD_INCOMING_NODE", {
+    targetTaskNode.ref.send("ADD_INCOMING_NODE", {
       nodeId: sourceTaskNode.ref.id,
     });
 
