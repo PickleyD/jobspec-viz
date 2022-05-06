@@ -1,14 +1,14 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
 import { Flow } from "../modules/flow";
 import { Palette } from "../modules/palette";
 import { Codegen } from "../modules/codegen";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { LayoutGroup } from "framer-motion";
 
 const Home: NextPage = () => {
+
   return (
     <div className="bg-base-100 h-screen w-screen">
       <Head>
@@ -23,8 +23,21 @@ const Home: NextPage = () => {
             <Flow />
           </div>
           <div className="w-full h-full fixed z-10 pointer-events-none">
-            <div className="p-8 absolute right-0">
-              <Palette className="pointer-events-auto"/>
+            <div className="p-8 absolute right-0 flex flex-col gap-2">
+              <LayoutGroup>
+                <Palette
+                  className="pointer-events-auto"
+                />
+                <Palette
+                  className="pointer-events-auto"
+                />
+                <Palette
+                  className="pointer-events-auto"
+                />
+                <Palette
+                  className="pointer-events-auto"
+                />
+                </LayoutGroup>
             </div>
             <div className="p-8 absolute right-0 bottom-0">
               <Codegen />
