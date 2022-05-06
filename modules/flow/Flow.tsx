@@ -9,7 +9,8 @@ import ReactFlow, {
   applyEdgeChanges,
   applyNodeChanges,
   Edge,
-  getOutgoers
+  getOutgoers,
+  Connection,
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
@@ -77,26 +78,29 @@ export const Flow = ({ className }: FlowProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(elements);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const getTaskNodeById = (nodeId: string) => nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.id === nodeId)
+  const getTaskNodeById = (nodeId: string) =>
+    nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.id === nodeId);
 
-  const handleNewEdge = (newConnection: Edge) => {
-    console.log("new edge")
-    console.log(newConnection)
+  const handleNewConnection = (newConnection: Connection) => {
+    console.log("new edge");
+    console.log(newConnection);
 
-    const sourceTaskNode = getTaskNodeById(newConnection.source)
+    const sourceTaskNode = getTaskNodeById(newConnection.source || "");
 
-    const targetTaskNode = getTaskNodeById(newConnection.target)
+    const targetTaskNode = getTaskNodeById(newConnection.target || "");
 
-    sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
-      nodeId: targetTaskNode.ref.id,
-    });
+    if (sourceTaskNode && targetTaskNode) {
+      sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
+        nodeId: targetTaskNode.ref.id,
+      });
 
-    targetTaskNode.ref.send("ADD_INCOMING_NODE", {
-      nodeId: sourceTaskNode.ref.id,
-    });
+      targetTaskNode.ref.send("ADD_INCOMING_NODE", {
+        nodeId: sourceTaskNode.ref.id,
+      });
+    }
 
-    onConnect(newConnection)
-  }
+    onConnect(newConnection);
+  };
 
   const [prevEdgesLength, setPrevEdgesLength] = useState(0);
   useEffect(() => {
@@ -109,8 +113,8 @@ export const Flow = ({ className }: FlowProps) => {
         newEdges: edges,
       });
 
-      console.log("getOutgoers")
-      console.log(getOutgoers(nodes[0], nodes, edges))
+      console.log("getOutgoers");
+      console.log(getOutgoers(nodes[0], nodes, edges));
     }
   }, [edges]);
 
@@ -129,7 +133,8 @@ export const Flow = ({ className }: FlowProps) => {
   // }, []);
 
   const onConnect = useCallback(
-    (connection: any) => setEdges((eds) => addEdge({ ...connection, animated: true }, eds)),
+    (connection: any) =>
+      setEdges((eds) => addEdge({ ...connection, animated: true }, eds)),
     []
   );
 
@@ -193,7 +198,7 @@ export const Flow = ({ className }: FlowProps) => {
           onInit={setReactFlowInstance}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onConnect={handleNewEdge}
+          onConnect={handleNewConnection}
         >
           <Controls />
           <Background gap={15} />
