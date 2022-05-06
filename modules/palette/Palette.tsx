@@ -33,6 +33,7 @@ export const Palette = ({ className }: PaletteProps) => {
           height: isOpen ? "auto" : "48px",
           opacity: isOpen ? 1 : 0,
         }}
+        initial={false}
       >
         <div className="p-2">
           <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">

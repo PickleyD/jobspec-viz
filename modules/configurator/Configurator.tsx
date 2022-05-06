@@ -2,11 +2,11 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext } from "react";
 import { Edge } from "react-flow-renderer";
-import { CodeIcon, XIcon } from "@heroicons/react/solid";
+import { CogIcon, XIcon } from "@heroicons/react/solid";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-export interface CodegenProps {
+export interface ConfiguratorProps {
   className?: string;
 }
 
@@ -16,35 +16,8 @@ const edgesSelector = (state: any) => state.context.edges;
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
 
-export const Codegen = ({ className = "" }: CodegenProps) => {
+export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const globalServices = useContext(GlobalStateContext);
-  const nodesFromMachine = useSelector(
-    globalServices.workspaceService,
-    nodesSelector
-  );
-  const edgesFromMachine = useSelector(
-    globalServices.workspaceService,
-    edgesSelector
-  );
-
-  const tasks = [
-    ...Array.from(
-      new Set([
-        ...edgesFromMachine
-          .map((edge: Edge) => edge.source)
-          .filter(
-            (value: string, index: number, self: Array<string>) =>
-              self.indexOf(value) === index
-          ),
-        ...edgesFromMachine
-          .map((edge: Edge) => edge.target)
-          .filter(
-            (value: string, index: number, self: Array<string>) =>
-              self.indexOf(value) === index
-          ),
-      ])
-    ),
-  ];
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -57,7 +30,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           isOpen ? "swap-active" : ""
         }`}
       >
-        <CodeIcon className="swap-off fill-current h-5 w-5 text-blue-500" />
+        <CogIcon className="swap-off fill-current h-5 w-5 text-blue-500" />
         <XIcon className="swap-on fill-current h-5 w-5 text-blue-500" />
       </label>
 
@@ -74,7 +47,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
       >
         <div className="p-2">
           <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
-            Code
+            Configurator
           </div>
           <div className="h-60 w-60">Content</div>
         </div>
