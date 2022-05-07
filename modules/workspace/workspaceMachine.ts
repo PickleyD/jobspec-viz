@@ -41,6 +41,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   createTaskNodeMachine({
                     initialCoords: event.options.initialCoords,
                     taskType: event.options.taskType,
+                    customId: `task-${event.options.id ?? context.nodes.tasks.length}`
                   }),
                   `task-${event.options.id ?? context.nodes.tasks.length}`
                 ),

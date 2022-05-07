@@ -15,12 +15,13 @@ type TaskNodeEvent =
   | { type: "ADD_INCOMING_NODE"; nodeId: string }
   | { type: "ADD_OUTGOING_NODE"; nodeId: string }
   | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
-  | { type: "REMOVE_OUTGOING_NODE"; nodeId: string };
+  | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
+  | { type: "SET_CUSTOM_ID"; value: string };
 
 export type TASK_TYPE = "SUM" | "DIVIDE" | "MEDIAN";
 
 interface TaskNodeContext {
-  customName?: string;
+  customId?: string;
   initialCoords: XYCoords;
   taskType: TASK_TYPE;
   incomingNodes: Array<string>;
@@ -28,7 +29,7 @@ interface TaskNodeContext {
 }
 
 const defaultContext: TaskNodeContext = {
-  customName: undefined,
+  customId: undefined,
   initialCoords: { x: 0, y: 0 },
   taskType: "SUM",
   incomingNodes: [],
@@ -81,6 +82,11 @@ export const createTaskNodeMachine = (
             context.outgoingNodes.filter(
               (outgoingNode: string) => outgoingNode !== event.nodeId
             ),
+        }),
+      },
+      SET_CUSTOM_ID: {
+        actions: assign({
+          customId: (context, event) => event.value,
         }),
       },
     },

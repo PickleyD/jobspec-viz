@@ -52,13 +52,14 @@ export const Flow = ({ className }: FlowProps) => {
       type: "",
       data: {
         label: <>{taskType}</>,
+        machine: node.ref,
       },
       position: initialCoords,
     };
 
     switch (nodeType) {
       case "taskNode":
-        flowElement.type = "default";
+        flowElement.type = "task";
         break;
     }
 
@@ -163,7 +164,7 @@ export const Flow = ({ className }: FlowProps) => {
     globalServices.workspaceService.send("NEW_TASK_NODE.ADD", {
       options: {
         initialCoords,
-        taskType,
+        taskType
       },
     });
   };
@@ -192,7 +193,7 @@ export const Flow = ({ className }: FlowProps) => {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          // nodeTypes={nodeTypes}
+          nodeTypes={nodeTypes}
           snapToGrid={true}
           snapGrid={[15, 15]}
           onInit={setReactFlowInstance}

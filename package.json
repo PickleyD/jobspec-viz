@@ -18,7 +18,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.0.0",
-    "react-flow-renderer": "^10.1.2",
+    "react-flow-renderer": "^10.2.0",
     "xstate": "^4.31.0"
   },
   "devDependencies": {

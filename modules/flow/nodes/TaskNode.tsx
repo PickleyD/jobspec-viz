@@ -1,10 +1,37 @@
 import { Handle, NodeProps, Position } from "react-flow-renderer";
+import React, { memo } from "react";
+import { useSelector } from "@xstate/react";
 
-export const TaskNode = ({ id }: NodeProps) => {
+const customIdSelector = (state: any) => state.context.customId;
+
+export const TaskNode = memo(({ id, data }: NodeProps) => {
+  const { machine } = data;
+
+  const customId = useSelector(machine, customIdSelector);
+
+  const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value;
+
+    machine.send("SET_CUSTOM_ID", { value: newValue });
+  };
+
   return (
-    <div className="bg-indigo-900 p-4 rounded-sm">
-      <Handle type="target" position={Position.Left} />
-      <div>{id}</div>
+    <div className="bg-blue-500 p-4 rounded-sm">
+      <Handle type="target" position={Position.Top} />
+      <Handle type="source" position={Position.Bottom} />
+      <div className="text-xl font-bold">{data.label}</div>
+      <div className="form-control w-full max-w-xs">
+        <label className="label">
+          <span className="label-text">Task ID</span>
+        </label>
+        <input
+          value={customId}
+          onChange={handleCustomIdChange}
+          type="text"
+          placeholder="Type here"
+          className="input input-bordered w-full max-w-xs"
+        />
+      </div>
     </div>
   );
-};
+});
