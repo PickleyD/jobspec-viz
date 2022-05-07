@@ -13,9 +13,6 @@ export interface CodegenProps {
 const nodesSelector = (state: any) => state.context.nodes;
 const edgesSelector = (state: any) => state.context.edges;
 
-const incomingNodesSelector = (state: any) => state.context.incomingNodes;
-const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
-
 export const Codegen = ({ className = "" }: CodegenProps) => {
   const globalServices = useContext(GlobalStateContext);
   const nodesFromMachine = useSelector(
@@ -62,9 +59,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
       </label>
 
       <motion.div
-        className={`overflow-hidden relative z-0
-
-     bg-base-300 rounded rounded-tr-3xl`}
+        className={`overflow-hidden relative z-0 bg-base-300 rounded rounded-tr-3xl`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",
@@ -72,11 +67,31 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
         }}
         initial={false}
       >
-        <div className="p-2">
-          <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
-            Code
-          </div>
-          <div className="h-60 w-60">Content</div>
+        <div className="mockup-code bg-base-300">
+          <pre data-prefix=">">
+            <code>type = "cron"</code>
+          </pre>
+          <pre data-prefix=">">
+            <code>schemaVersion = 1</code>
+          </pre>
+          <pre data-prefix=">">
+            <code>schedule = "CRON_TZ=UTC 0 0 1 1 *"</code>
+          </pre>
+          <pre data-prefix=">">
+            <code>observationSource = """</code>
+          </pre>
+          {nodesFromMachine.tasks.map((taskNode: any) => {
+            const { customId } = taskNode.ref.state.context;
+
+            return (
+              <pre data-prefix=">" className="text-success">
+                <code>{`${customId} [type="sum"] values<[]>`}</code>
+              </pre>
+            );
+          })}
+          <pre data-prefix=">">
+            <code>"""</code>
+          </pre>
         </div>
       </motion.div>
     </div>
