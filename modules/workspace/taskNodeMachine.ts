@@ -26,6 +26,7 @@ interface TaskNodeContext {
   taskType: TASK_TYPE;
   incomingNodes: Array<string>;
   outgoingNodes: Array<string>;
+  toml: string;
 }
 
 const defaultContext: TaskNodeContext = {
@@ -34,6 +35,32 @@ const defaultContext: TaskNodeContext = {
   taskType: "SUM",
   incomingNodes: [],
   outgoingNodes: [],
+  toml: "",
+};
+
+const generateToml = (context: TaskNodeContext) => {
+  let result = "";
+
+  switch (context.taskType) {
+    case "SUM": {
+      result = `${
+        context.customId
+      } [type="sum"] values<[ ${context.incomingNodes.join(", ")} ]>`;
+      break;
+    }
+    case "DIVIDE": {
+      result = `${context.customId} [type="divide"] input="$(${context.incomingNodes[0]})" divisor="3" precision="2"`;
+      break;
+    }
+    case "MEDIAN": {
+      result = `${
+        context.customId
+      } [type="median"] values<[ ${context.incomingNodes.join(", ")} ]>`;
+      break;
+    }
+  }
+
+  return result;
 };
 
 export const createTaskNodeMachine = (
@@ -44,51 +71,78 @@ export const createTaskNodeMachine = (
     ...initialContext,
   };
 
-  return createMachine<TaskNodeContext, TaskNodeEvent>({
-    id: "taskNode",
-    context: fullInitialContext,
-    initial: "idle",
-    states: {
-      idle: {},
-    },
-    on: {
-      ADD_INCOMING_NODE: {
-        actions: assign({
-          incomingNodes: (context, event) => [
-            ...context.incomingNodes,
-            event.nodeId,
+  return createMachine<TaskNodeContext, TaskNodeEvent>(
+    {
+      id: "taskNode",
+      context: {
+        ...fullInitialContext,
+        toml: generateToml(fullInitialContext),
+      },
+      initial: "idle",
+      states: {
+        idle: {},
+      },
+      on: {
+        ADD_INCOMING_NODE: {
+          actions: [
+            assign({
+              incomingNodes: (context, event) => [
+                ...context.incomingNodes,
+                event.nodeId,
+              ],
+            }),
+            "regenerateToml",
           ],
-        }),
-      },
-      ADD_OUTGOING_NODE: {
-        actions: assign({
-          outgoingNodes: (context, event) => [
-            ...context.outgoingNodes,
-            event.nodeId,
+        },
+        ADD_OUTGOING_NODE: {
+          actions: [
+            assign({
+              outgoingNodes: (context, event) => [
+                ...context.outgoingNodes,
+                event.nodeId,
+              ],
+            }),
+            "regenerateToml",
           ],
-        }),
-      },
-      REMOVE_INCOMING_NODE: {
-        actions: assign({
-          incomingNodes: (context, event) =>
-            context.incomingNodes.filter(
-              (incomingNode: string) => incomingNode !== event.nodeId
-            ),
-        }),
-      },
-      REMOVE_OUTGOING_NODE: {
-        actions: assign({
-          outgoingNodes: (context, event) =>
-            context.outgoingNodes.filter(
-              (outgoingNode: string) => outgoingNode !== event.nodeId
-            ),
-        }),
-      },
-      SET_CUSTOM_ID: {
-        actions: assign({
-          customId: (context, event) => event.value,
-        }),
+        },
+        REMOVE_INCOMING_NODE: {
+          actions: [
+            assign({
+              incomingNodes: (context, event) =>
+                context.incomingNodes.filter(
+                  (incomingNode: string) => incomingNode !== event.nodeId
+                ),
+            }),
+            "regenerateToml",
+          ],
+        },
+        REMOVE_OUTGOING_NODE: {
+          actions: [
+            assign({
+              outgoingNodes: (context, event) =>
+                context.outgoingNodes.filter(
+                  (outgoingNode: string) => outgoingNode !== event.nodeId
+                ),
+            }),
+            "regenerateToml",
+          ],
+        },
+        SET_CUSTOM_ID: {
+          actions: [
+            assign({
+              customId: (context, event) => event.value,
+            }),
+            "regenerateToml",
+          ],
+        },
       },
     },
-  });
+    {
+      actions: {
+        regenerateToml: assign({
+          toml: (context, event) => generateToml(context),
+        }),
+      },
+    }
+  );
 };

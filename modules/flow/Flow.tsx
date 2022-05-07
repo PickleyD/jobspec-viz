@@ -92,11 +92,11 @@ export const Flow = ({ className }: FlowProps) => {
 
     if (sourceTaskNode && targetTaskNode) {
       sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
-        nodeId: targetTaskNode.ref.id,
+        nodeId: targetTaskNode.ref.state.context.customId,
       });
 
       targetTaskNode.ref.send("ADD_INCOMING_NODE", {
-        nodeId: sourceTaskNode.ref.id,
+        nodeId: sourceTaskNode.ref.state.context.customId,
       });
     }
 

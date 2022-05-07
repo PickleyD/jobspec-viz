@@ -5,6 +5,7 @@ import { Edge } from "react-flow-renderer";
 import { CodeIcon, XIcon } from "@heroicons/react/solid";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { ObservationSrcLine } from "./ObservationSrcLine";
 
 export interface CodegenProps {
   className?: string;
@@ -80,15 +81,9 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           <pre data-prefix=">">
             <code>observationSource = """</code>
           </pre>
-          {nodesFromMachine.tasks.map((taskNode: any) => {
-            const { customId } = taskNode.ref.state.context;
-
-            return (
-              <pre data-prefix=">" className="text-success">
-                <code>{`${customId} [type="sum"] values<[]>`}</code>
-              </pre>
-            );
-          })}
+          {nodesFromMachine.tasks.map((taskNode: any) => (
+            <ObservationSrcLine taskNode={taskNode.ref} />
+          ))}
           <pre data-prefix=">">
             <code>"""</code>
           </pre>
