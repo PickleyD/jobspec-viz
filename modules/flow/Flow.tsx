@@ -19,7 +19,7 @@ const Background = dynamic<BackgroundProps>(
     | Loader<{}>,
   { ssr: false }
 ); // disable ssr
-import { TaskNode } from "./nodes";
+import { TaskNode, HttpTaskNode } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
@@ -57,8 +57,11 @@ export const Flow = ({ className }: FlowProps) => {
       position: initialCoords,
     };
 
-    switch (nodeType) {
-      case "taskNode":
+    switch (taskType) {
+      case "HTTP":
+        flowElement.type = "httpTask";
+        break;
+      default:
         flowElement.type = "task";
         break;
     }
@@ -185,7 +188,7 @@ export const Flow = ({ className }: FlowProps) => {
     [reactFlowInstance]
   );
 
-  const nodeTypes = useMemo(() => ({ task: TaskNode }), []);
+  const nodeTypes = useMemo(() => ({ task: TaskNode, httpTask: HttpTaskNode }), []);
 
   return (
     <ReactFlowProvider>

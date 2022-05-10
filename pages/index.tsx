@@ -23,11 +23,11 @@ const Home: NextPage = () => {
             <Flow />
           </div>
           <div className="w-full h-full fixed z-10 pointer-events-none">
-            <div className="p-8 absolute right-0 flex flex-col gap-2">
+            <div className="p-8 absolute right-0 flex flex-col items-end gap-2">
               <LayoutGroup>
-                <Palette className="pointer-events-auto" />
-                <Configurator className="pointer-events-auto" />
-                <Codegen className="pointer-events-auto" />
+                <Palette className="pointer-events-none w-fit" />
+                <Configurator className="pointer-events-none w-fit" />
+                <Codegen className="pointer-events-none w-fit" />
               </LayoutGroup>
             </div>
           </div>

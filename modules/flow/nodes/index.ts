@@ -1,1 +1,2 @@
-export { TaskNode } from "./TaskNode"
+export * from "./TaskNode"
+export * from "./HttpTaskNode"

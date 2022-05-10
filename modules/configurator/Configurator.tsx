@@ -26,7 +26,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${
+        className={`pointer-events-auto absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${
           isOpen ? "swap-active" : ""
         }`}
       >
@@ -35,9 +35,9 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
       </label>
 
       <motion.div
-        className={`overflow-hidden relative z-0
-
-     bg-base-300 rounded rounded-tr-3xl`}
+        className={`${
+          isOpen ? "pointer-events-auto" : "pointer-events-none"
+        } overflow-hidden relative z-0 bg-base-300 rounded rounded-tr-3xl`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",

@@ -51,7 +51,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${
+        className={`pointer-events-auto absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${
           isOpen ? "swap-active" : ""
         }`}
       >
@@ -60,7 +60,9 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
       </label>
 
       <motion.div
-        className={`overflow-hidden relative z-0 bg-base-300 rounded rounded-tr-3xl`}
+        className={`${
+          isOpen ? "pointer-events-auto" : "pointer-events-none"
+        } overflow-hidden relative z-0 bg-base-300 rounded rounded-tr-3xl`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",
@@ -81,8 +83,8 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           <pre data-prefix=">">
             <code>observationSource = """</code>
           </pre>
-          {nodesFromMachine.tasks.map((taskNode: any) => (
-            <ObservationSrcLine taskNode={taskNode.ref} />
+          {nodesFromMachine.tasks.map((taskNode: any, index: number) => (
+            <ObservationSrcLine key={index} taskNode={taskNode.ref} />
           ))}
           <pre data-prefix=">">
             <code>"""</code>

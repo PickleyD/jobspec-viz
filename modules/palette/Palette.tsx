@@ -16,7 +16,7 @@ export const Palette = ({ className }: PaletteProps) => {
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${
+        className={`pointer-events-auto absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${
           isOpen ? "swap-active" : ""
         }`}
       >
@@ -25,9 +25,8 @@ export const Palette = ({ className }: PaletteProps) => {
       </label>
 
       <motion.div
-        className={`overflow-hidden relative z-0
-
-         bg-base-300 rounded rounded-tr-3xl`}
+        className={`${isOpen ? "pointer-events-auto" : "pointer-events-none"}
+        overflow-hidden relative z-0 bg-base-300 rounded rounded-tr-3xl`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",
@@ -40,6 +39,15 @@ export const Palette = ({ className }: PaletteProps) => {
             Tasks
           </div>
           <ul className="py-2 flex flex-col gap-1">
+            <li>
+              <DraggableItem
+                itemProps={{
+                  taskType: "HTTP",
+                }}
+              >
+                <TaskChip name="HTTP" />
+              </DraggableItem>
+            </li>
             <li>
               <DraggableItem
                 itemProps={{

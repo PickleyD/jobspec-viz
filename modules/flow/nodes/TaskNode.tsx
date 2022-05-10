@@ -1,10 +1,20 @@
 import { Handle, NodeProps, Position } from "react-flow-renderer";
-import React, { memo } from "react";
+import React from "react";
 import { useSelector } from "@xstate/react";
 
 const customIdSelector = (state: any) => state.context.customId;
 
-export const TaskNode = memo(({ id, data }: NodeProps) => {
+type TaskNodeProps = NodeProps & {
+  useDefaultHandles?: boolean;
+  children?: React.ReactNode;
+};
+
+export const TaskNode = ({
+  id,
+  data,
+  useDefaultHandles = true,
+  children,
+}: TaskNodeProps) => {
   const { machine } = data;
 
   const customId = useSelector(machine, customIdSelector);
@@ -17,8 +27,12 @@ export const TaskNode = memo(({ id, data }: NodeProps) => {
 
   return (
     <div className="bg-blue-500 p-4 rounded-sm">
-      <Handle type="target" position={Position.Top} />
-      <Handle type="source" position={Position.Bottom} />
+      {useDefaultHandles && (
+        <>
+          <Handle type="target" position={Position.Top} />
+          <Handle type="source" position={Position.Bottom} />
+        </>
+      )}
       <div className="text-xl font-bold">{data.label}</div>
       <div className="form-control w-full max-w-xs">
         <label className="label">
@@ -32,6 +46,7 @@ export const TaskNode = memo(({ id, data }: NodeProps) => {
           className="input input-bordered w-full max-w-xs"
         />
       </div>
+      {children}
     </div>
   );
-});
+};

@@ -16,9 +16,10 @@ type TaskNodeEvent =
   | { type: "ADD_OUTGOING_NODE"; nodeId: string }
   | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
   | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
-  | { type: "SET_CUSTOM_ID"; value: string };
+  | { type: "SET_CUSTOM_ID"; value: string }
+  | { type: "SET_TASK_SPECIFIC_PROPS"; value: object };
 
-export type TASK_TYPE = "SUM" | "DIVIDE" | "MEDIAN";
+export type TASK_TYPE = "HTTP" | "SUM" | "DIVIDE" | "MEDIAN";
 
 interface TaskNodeContext {
   customId?: string;
@@ -27,6 +28,7 @@ interface TaskNodeContext {
   incomingNodes: Array<string>;
   outgoingNodes: Array<string>;
   toml: string;
+  taskSpecific: any;
 }
 
 const defaultContext: TaskNodeContext = {
@@ -36,12 +38,17 @@ const defaultContext: TaskNodeContext = {
   incomingNodes: [],
   outgoingNodes: [],
   toml: "",
+  taskSpecific: {},
 };
 
 const generateToml = (context: TaskNodeContext) => {
   let result = "";
 
   switch (context.taskType) {
+    case "HTTP": {
+      result = `${context.customId} [type="http"] method=${context.taskSpecific.method || "GET"} url="http://chain.link" requestData="{\\"foo\\": $(foo), \\"bar\\": $(bar), \\"jobID\\": 123}"`;
+      break;
+    }
     case "SUM": {
       result = `${
         context.customId
@@ -131,6 +138,17 @@ export const createTaskNodeMachine = (
           actions: [
             assign({
               customId: (context, event) => event.value,
+            }),
+            "regenerateToml",
+          ],
+        },
+        SET_TASK_SPECIFIC_PROPS: {
+          actions: [
+            assign({
+              taskSpecific: (context, event) => ({
+                ...context.taskSpecific,
+                ...event.value,
+              }),
             }),
             "regenerateToml",
           ],
