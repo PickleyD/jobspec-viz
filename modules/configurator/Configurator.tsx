@@ -47,7 +47,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
             Config
           </div>
-          <div className="h-60 w-60">
+          <div className="py-2">
             <div className="form-control w-full max-w-xs">
               <label className="label">
                 <span className="label-text text-xs">Job Type</span>
