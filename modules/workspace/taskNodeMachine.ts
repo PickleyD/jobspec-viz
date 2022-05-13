@@ -27,7 +27,7 @@ interface TaskNodeContext {
   taskType: TASK_TYPE;
   incomingNodes: Array<string>;
   outgoingNodes: Array<string>;
-  toml: string;
+  toml: Array<string>;
   taskSpecific: any;
 }
 
@@ -37,32 +37,46 @@ const defaultContext: TaskNodeContext = {
   taskType: "SUM",
   incomingNodes: [],
   outgoingNodes: [],
-  toml: "",
+  toml: [],
   taskSpecific: {},
 };
 
 const generateToml = (context: TaskNodeContext) => {
-  let result = "";
+  let result = [];
+
+  const spacer = new Array(context.customId ? context.customId.length + 1 : 0).join(" ")
 
   switch (context.taskType) {
     case "HTTP": {
-      result = `${context.customId} [type="http"] method=${context.taskSpecific.method || "GET"} url="http://chain.link" requestData="{\\"foo\\": $(foo), \\"bar\\": $(bar), \\"jobID\\": 123}"`;
+      result = [
+        `${context.customId} [type="http"`,
+        `${spacer}  method=${context.taskSpecific.method || "GET"}`,
+        `${spacer}  url="http://chain.link"`,
+        `${spacer}  requestData="{\\"foo\\": $(foo), \\"bar\\": $(bar), \\"jobID\\": 123}]"`
+      ];
       break;
     }
     case "SUM": {
-      result = `${
-        context.customId
-      } [type="sum"] values<[ ${context.incomingNodes.join(", ")} ]>`;
+      result = [
+        `${context.customId} [type="sum"`,
+        `${spacer}  values<[ ${context.incomingNodes.join(", ")} ]>]`
+      ];
       break;
     }
     case "DIVIDE": {
-      result = `${context.customId} [type="divide"] input="$(${context.incomingNodes[0]})" divisor="3" precision="2"`;
+      result = [
+        `${context.customId} [type="divide"`,
+        `${spacer}  input="$(${context.incomingNodes[0]})"`,
+        `${spacer}  divisor="3"`,
+        `${spacer}  precision="2"]`
+      ];
       break;
     }
     case "MEDIAN": {
-      result = `${
-        context.customId
-      } [type="median"] values<[ ${context.incomingNodes.join(", ")} ]>`;
+      result = [
+        `${context.customId} [type="median"`,
+        `${spacer}  values<[ ${context.incomingNodes.join(", ")} ]>]`
+      ];
       break;
     }
   }
