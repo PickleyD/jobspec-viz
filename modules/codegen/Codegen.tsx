@@ -15,6 +15,7 @@ export interface CodegenProps {
 
 const nodesSelector = (state: any) => state.context.nodes;
 const edgesSelector = (state: any) => state.context.edges;
+const jobTypeSelector = (state: any) => state.context.type
 
 export const Codegen = ({ className = "" }: CodegenProps) => {
   const globalServices = useContext(GlobalStateContext);
@@ -26,6 +27,10 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     globalServices.workspaceService,
     edgesSelector
   );
+  const jobType = useSelector(
+    globalServices.workspaceService,
+    jobTypeSelector
+  )
 
   const tasks = [
     ...Array.from(
@@ -106,7 +111,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
       >
         <div className="mockup-code text-sm bg-base-300">
           <pre data-prefix=">">
-            <code>type = "cron"</code>
+            <code>type = "{jobType}"</code>
           </pre>
           <pre data-prefix=">">
             <code>schemaVersion = 1</code>

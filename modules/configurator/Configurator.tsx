@@ -10,14 +10,15 @@ export interface ConfiguratorProps {
   className?: string;
 }
 
-const nodesSelector = (state: any) => state.context.nodes;
-const edgesSelector = (state: any) => state.context.edges;
-
-const incomingNodesSelector = (state: any) => state.context.incomingNodes;
-const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
+const jobTypeSelector = (state: any) => state.context.type;
 
 export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const globalServices = useContext(GlobalStateContext);
+
+  const jobType = useSelector(
+    globalServices.workspaceService,
+    jobTypeSelector
+  )
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -52,13 +53,17 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
               <label className="label">
                 <span className="label-text text-xs">Job Type</span>
               </label>
-              <select className="select select-bordered select-sm">
-                <option>CRON</option>
-                <option>Direct Request</option>
-                <option disabled>Flux Monitor</option>
-                <option disabled>Keeper</option>
-                <option disabled>Off-chain Reporting</option>
-                <option disabled>Webhook</option>
+              <select
+                className="select select-bordered select-sm"
+                value={jobType}
+                onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
+              >
+                <option value="cron">CRON</option>
+                <option value="directrequest">Direct Request</option>
+                <option value="fluxmonitor" disabled>Flux Monitor</option>
+                <option value="keeper" disabled>Keeper</option>
+                <option value="offchainreporting" disabled>Off-chain Reporting</option>
+                <option value="webhook" disabled>Webhook</option>
               </select>
             </div>
 

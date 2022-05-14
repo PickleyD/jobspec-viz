@@ -4,9 +4,11 @@ import { Edge } from "react-flow-renderer"
 
 type WorkspaceEvent =
   | { type: "NEW_TASK_NODE.ADD"; options: TaskNodeOptions }
-  | { type: "SET_EDGES"; newEdges: Edge<any>[] };
+  | { type: "SET_EDGES"; newEdges: Edge<any>[] }
+  | { type: "SET_JOB_TYPE"; value: JOB_TYPE };
 
 interface WorkspaceContext {
+  type: JOB_TYPE;
   edges: Edge<any>[];
   nodes: Nodes;
 }
@@ -14,6 +16,8 @@ interface WorkspaceContext {
 type Nodes = {
   tasks: Array<any>;
 };
+
+type JOB_TYPE = "cron" | "directrequest"
 
 export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
   {
@@ -23,6 +27,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       idle: {},
     },
     context: {
+      type: "cron",
       edges: [],
       nodes: {
         tasks: [],
@@ -54,6 +59,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: assign({
           edges: (context, event) => event.newEdges,
         }),
+      },
+      "SET_JOB_TYPE": {
+        actions: assign({
+          type: (context, event) => event.value
+        })
       }
     },
   }
