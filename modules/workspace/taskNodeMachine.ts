@@ -51,8 +51,8 @@ const generateToml = (context: TaskNodeContext) => {
       result = [
         `${context.customId} [type="http"`,
         `${spacer}  method=${context.taskSpecific.method || "GET"}`,
-        `${spacer}  url="http://chain.link"`,
-        `${spacer}  requestData="{\\"foo\\": $(foo), \\"bar\\": $(bar), \\"jobID\\": 123}]"`
+        `${spacer}  url="${context.taskSpecific.url || ""}"`,
+        `${spacer}  requestData="${context.taskSpecific.requestData || ""}"]`
       ];
       break;
     }
