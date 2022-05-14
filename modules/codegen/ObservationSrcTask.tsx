@@ -8,7 +8,7 @@ export const ObservationSrcTask = ({ taskNode }: any) => {
   return (
     <>
       {
-        toml.map((line: string) => <pre data-prefix=">" className="text-success">
+        toml.map((line: string, index: number) => <pre key={index} data-prefix=">" className="text-success">
           <code>{line}</code>
         </pre>)
       }
