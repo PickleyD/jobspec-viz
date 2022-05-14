@@ -16,6 +16,8 @@ export interface CodegenProps {
 const nodesSelector = (state: any) => state.context.nodes;
 const edgesSelector = (state: any) => state.context.edges;
 const jobTypeSelector = (state: any) => state.context.type
+const nameSelector = (state: any) => state.context.name
+const externalJobIdSelector = (state: any) => state.context.externalJobId
 
 export const Codegen = ({ className = "" }: CodegenProps) => {
   const globalServices = useContext(GlobalStateContext);
@@ -30,6 +32,14 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
   const jobType = useSelector(
     globalServices.workspaceService,
     jobTypeSelector
+  )
+  const name = useSelector(
+    globalServices.workspaceService,
+    nameSelector
+  )
+  const externalJobId = useSelector(
+    globalServices.workspaceService,
+    externalJobIdSelector
   )
 
   const tasks = [
@@ -116,6 +126,12 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           <pre data-prefix=">">
             <code>schemaVersion = 1</code>
           </pre>
+          {name && <pre data-prefix=">">
+            <code>name = {name}</code>
+          </pre>}
+          {externalJobId && <pre data-prefix=">">
+            <code>externalJobId = {externalJobId}</code>
+          </pre>}
           <pre data-prefix=">">
             <code>schedule = "CRON_TZ=UTC 0 0 1 1 *"</code>
           </pre>

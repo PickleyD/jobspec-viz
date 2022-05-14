@@ -11,6 +11,8 @@ export interface ConfiguratorProps {
 }
 
 const jobTypeSelector = (state: any) => state.context.type;
+const nameSelector = (state: any) => state.context.name;
+const externalJobIdSelector = (state: any) => state.context.externalJobId;
 
 export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const globalServices = useContext(GlobalStateContext);
@@ -18,6 +20,14 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const jobType = useSelector(
     globalServices.workspaceService,
     jobTypeSelector
+  )  
+  const name = useSelector(
+    globalServices.workspaceService,
+    nameSelector
+  )
+  const externalJobId = useSelector(
+    globalServices.workspaceService,
+    externalJobIdSelector
   )
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -72,7 +82,13 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
                 <span className="label-text text-xs">Name</span>
                 <span className="label-text-alt text-xs">(optional)</span>
               </label>
-              <input type="text" placeholder="Type here" className="input input-bordered input-sm w-full max-w-xs" />
+              <input
+                type="text"
+                placeholder="Type here"
+                className="input input-bordered input-sm w-full max-w-xs"
+                value={name}
+                onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
+              />
             </div>
 
             <div className="form-control w-full max-w-xs">
@@ -80,7 +96,13 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
                 <span className="label-text text-xs">External Job ID</span>
                 <span className="label-text-alt text-xs">(optional)</span>
               </label>
-              <input type="text" placeholder="Type here" className="input input-bordered input-sm w-full max-w-xs" />
+              <input
+                type="text"
+                placeholder="Type here"
+                className="input input-bordered input-sm w-full max-w-xs"
+                value={externalJobId}
+                onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
+              />
             </div>
           </div>
         </div>
