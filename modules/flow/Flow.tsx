@@ -55,6 +55,7 @@ export const Flow = ({ className }: FlowProps) => {
         machine: node.ref,
       },
       position: initialCoords,
+      dragHandle: '.custom-drag-handle'
     };
 
     switch (taskType) {
