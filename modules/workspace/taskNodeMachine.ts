@@ -154,7 +154,8 @@ export const createTaskNodeMachine = (
             assign({
               incomingNodes: (context, event) =>
                 context.incomingNodes.map(incomingNode => incomingNode === event.prevNodeId ? event.nodeId : incomingNode)
-            })
+            }),
+            "regenerateToml"
           ]
         },
         SET_CUSTOM_ID: {

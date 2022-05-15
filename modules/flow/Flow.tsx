@@ -111,17 +111,14 @@ export const Flow = ({ className }: FlowProps) => {
 
   const [prevEdgesLength, setPrevEdgesLength] = useState(0);
   useEffect(() => {
+    console.log("edges change")
+    console.log(edges)
     if (edges.length > 0 && edges.length !== prevEdgesLength) {
       setPrevEdgesLength(edges.length);
-      console.log("store edges:");
-      console.log(edges);
 
       globalServices.workspaceService.send("SET_EDGES", {
         newEdges: edges,
       });
-
-      console.log("getOutgoers");
-      console.log(getOutgoers(nodes[0], nodes, edges));
     }
   }, [edges]);
 
@@ -133,7 +130,7 @@ export const Flow = ({ className }: FlowProps) => {
   //   console.log(changes);
   //   setNodes((ns) => applyNodeChanges(changes, ns));
   // }, []);
-  // const onEdgesChange = useCallback((changes: any) => {
+  // const handleEdgesChange = useCallback((changes: any) => {
   //   console.log("onEdgesChange");
   //   console.log(changes);
   //   return setEdges((es) => applyEdgeChanges(changes, es));

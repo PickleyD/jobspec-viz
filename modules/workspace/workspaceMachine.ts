@@ -1,10 +1,11 @@
 import { createMachine, spawn, assign } from "xstate";
 import { createTaskNodeMachine, TaskNodeOptions } from "./taskNodeMachine";
-import { Edge } from "react-flow-renderer"
+import { Edge, useEdges } from "react-flow-renderer"
 
 type WorkspaceEvent =
   | { type: "NEW_TASK_NODE.ADD"; options: TaskNodeOptions }
   | { type: "SET_EDGES"; newEdges: Edge<any>[] }
+  | { type: "UPDATE_EDGES_WITH_NODE_ID"; nodeId: string; prevNodeId: string;}
   | { type: "SET_JOB_TYPE"; value: JOB_TYPE }
   | { type: "SET_NAME"; value: string }
   | { type: "SET_EXTERNAL_JOB_ID"; value: string };
@@ -65,6 +66,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: assign({
           edges: (context, event) => event.newEdges,
         }),
+      },
+      "UPDATE_EDGES_WITH_NODE_ID": {
+        actions: assign({
+          edges: (context, event) => context.edges.map(edge => ({
+            ...edge,
+            source: edge.source === event.prevNodeId ? event.nodeId : edge.source,
+            target: edge.target === event.prevNodeId ? event.nodeId : edge.target
+          }))
+        })
       },
       "SET_JOB_TYPE": {
         actions: assign({

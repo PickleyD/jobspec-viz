@@ -55,8 +55,17 @@ export const TaskNode = ({
     })
   };
 
+  const updateStoredEdges = () => {
+    globalServices.workspaceService.send("UPDATE_EDGES_WITH_NODE_ID", {
+      nodeId: customId,
+      prevNodeId: prevCustomId
+    })
+  }
+
   useEffect(() => {
+    // TODO: Think we need to check the ID is unique before making these changes?
     updateExistingConnections()
+    updateStoredEdges()
   }, [customId])
 
   return (
