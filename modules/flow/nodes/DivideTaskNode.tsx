@@ -23,19 +23,19 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
             <PowerTextField
                 label="Input"
                 value={input}
-                onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { input: event.target.value } })}
+                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { input: newValue } })}
                 incomingNodes={incomingNodes}
             />
             <PowerTextField
                 label="Divisor"
                 value={divisor}
-                onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { divisor: event.target.value } })}
+                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { divisor: newValue } })}
                 incomingNodes={incomingNodes}
             />
             <PowerTextField
                 label="Precision"
                 value={precision}
-                onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { precision: event.target.value } })}
+                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { precision: newValue } })}
                 incomingNodes={incomingNodes}
             />
         </TaskNode>

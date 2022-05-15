@@ -3,7 +3,7 @@ import React from "react";
 export interface PowerTextFieldProps {
     label: string;
     value: string;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange: (newValue: string) => void;
     incomingNodes: Array<string>;
 }
 
@@ -14,6 +14,14 @@ export const PowerTextField = ({
     incomingNodes
 }: PowerTextFieldProps) => {
 
+    const handleIncomingNodeSelected = (incomingNode: string) => {
+        onChange(`${value}$(${incomingNode})`)
+    }
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(event.target.value)
+    }
+
     return <div className="form-control w-full max-w-xs">
         <label className="label pb-0">
             <span className="label-text">{label}</span>
@@ -21,9 +29,8 @@ export const PowerTextField = ({
         <div className="flex items-center gap-1">
             <input
                 value={value}
-                onChange={onChange}
+                onChange={handleChange}
                 type="text"
-                placeholder="Type here"
                 className="input input-bordered w-full max-w-xs"
             />
             <div className="dropdown">
@@ -37,7 +44,7 @@ export const PowerTextField = ({
                 <ul tabIndex={0} className="border dropdown-content menu p-2 shadow bg-base-100 rounded w-52">
                     {
                         incomingNodes && incomingNodes.length > 0 ?
-                            incomingNodes.map((incomingNode: string) => <li className="text-xs"><a>{incomingNode}</a></li>)
+                            incomingNodes.map((incomingNode: string) => <li className="text-xs"><a onClick={() => handleIncomingNodeSelected(incomingNode)}>{incomingNode}</a></li>)
                             :
                             <li className="text-xs">No incoming tasks connected</li>
                     }
