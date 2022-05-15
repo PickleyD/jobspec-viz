@@ -15,8 +15,8 @@ import ReactFlow, {
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
   import("react-flow-renderer").then((mod) => mod.Background) as
-    | DynamicOptions<{}>
-    | Loader<{}>,
+  | DynamicOptions<{}>
+  | Loader<{}>,
   { ssr: false }
 ); // disable ssr
 import { TaskNode, HttpTaskNode } from "./nodes";
@@ -26,6 +26,7 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
+import { DivideTaskNode } from "./nodes/DivideTaskNode";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -62,6 +63,9 @@ export const Flow = ({ className }: FlowProps) => {
       case "HTTP":
         flowElement.type = "httpTask";
         break;
+      case "DIVIDE":
+        flowElement.type = "divideTask";
+        break;
       default:
         flowElement.type = "task";
         break;
@@ -87,8 +91,6 @@ export const Flow = ({ className }: FlowProps) => {
     nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.id === nodeId);
 
   const handleNewConnection = (newConnection: Connection) => {
-    console.log("new edge");
-    console.log(newConnection);
 
     const sourceTaskNode = getTaskNodeById(newConnection.source || "");
 
@@ -189,7 +191,7 @@ export const Flow = ({ className }: FlowProps) => {
     [reactFlowInstance]
   );
 
-  const nodeTypes = useMemo(() => ({ task: TaskNode, httpTask: HttpTaskNode }), []);
+  const nodeTypes = useMemo(() => ({ task: TaskNode, httpTask: HttpTaskNode, divideTask: DivideTaskNode }), []);
 
   return (
     <ReactFlowProvider>

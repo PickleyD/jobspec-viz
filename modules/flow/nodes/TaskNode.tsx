@@ -1,8 +1,12 @@
 import { Handle, NodeProps, Position } from "react-flow-renderer";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
+import { GlobalStateContext } from "../../../context/GlobalStateContext";
+
+const nodesSelector = (state: any) => state.context.nodes;
 
 const customIdSelector = (state: any) => state.context.customId;
+const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
 
 type TaskNodeProps = NodeProps & {
   useDefaultHandles?: boolean;
@@ -17,13 +21,43 @@ export const TaskNode = ({
 }: TaskNodeProps) => {
   const { machine } = data;
 
+  const [prevCustomId, setPrevCustomId] = useState<string>()
   const customId = useSelector(machine, customIdSelector);
+  const outgoingNodeIds = useSelector(machine, outgoingNodesSelector);
+
+  const globalServices = useContext(GlobalStateContext);
+  const nodesFromMachine = useSelector(
+    globalServices.workspaceService,
+    nodesSelector
+  );
 
   const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
 
+    // cache prev custom ID so we know which to update on outgoing nodes
+    setPrevCustomId(customId)
+
     machine.send("SET_CUSTOM_ID", { value: newValue });
   };
+
+  const getTaskNodeById = (nodeId: string) =>
+    nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.id === nodeId);
+
+  const updateExistingConnections = () => {
+
+    const outgoingNodes = outgoingNodeIds.map((nodeId: string) => getTaskNodeById(nodeId))
+
+    outgoingNodes.map((outgoingNode: any) => {
+      outgoingNode.ref.send("UPDATE_INCOMING_NODE", {
+        nodeId: customId,
+        prevNodeId: prevCustomId
+      })
+    })
+  };
+
+  useEffect(() => {
+    updateExistingConnections()
+  }, [customId])
 
   return (
     <div className="bg-blue-500 p-4 rounded-sm relative cursor-default">

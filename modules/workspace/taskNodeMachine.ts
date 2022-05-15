@@ -14,6 +14,7 @@ export type TaskNodeOptions = {
 type TaskNodeEvent =
   | { type: "ADD_INCOMING_NODE"; nodeId: string }
   | { type: "ADD_OUTGOING_NODE"; nodeId: string }
+  | { type: "UPDATE_INCOMING_NODE"; nodeId: string; prevNodeId: string; }
   | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
   | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
   | { type: "SET_CUSTOM_ID"; value: string }
@@ -66,9 +67,9 @@ const generateToml = (context: TaskNodeContext) => {
     case "DIVIDE": {
       result = [
         `${context.customId} [type="divide"`,
-        `${spacer}  input="$(${context.incomingNodes[0]})"`,
-        `${spacer}  divisor="3"`,
-        `${spacer}  precision="2"]`
+        `${spacer}  input="${context.taskSpecific.input || ""}"`,
+        `${spacer}  divisor="${context.taskSpecific.divisor || ""}"`,
+        `${spacer}  precision="${context.taskSpecific.precision || ""}"]`
       ];
       break;
     }
@@ -147,6 +148,14 @@ export const createTaskNodeMachine = (
             }),
             "regenerateToml",
           ],
+        },
+        UPDATE_INCOMING_NODE: {
+          actions: [
+            assign({
+              incomingNodes: (context, event) =>
+                context.incomingNodes.map(incomingNode => incomingNode === event.prevNodeId ? event.nodeId : incomingNode)
+            })
+          ]
         },
         SET_CUSTOM_ID: {
           actions: [
