@@ -15,7 +15,7 @@ export const PowerTextField = ({
 }: PowerTextFieldProps) => {
 
     const handleIncomingNodeSelected = (incomingNode: string) => {
-        onChange(`${value}$(${incomingNode})`)
+        onChange(`${value || ""}$(${incomingNode})`)
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
