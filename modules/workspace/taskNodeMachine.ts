@@ -30,6 +30,7 @@ interface TaskNodeContext {
   outgoingNodes: Array<string>;
   toml: Array<string>;
   taskSpecific: any;
+  isValid: boolean;
 }
 
 const defaultContext: TaskNodeContext = {
@@ -40,6 +41,7 @@ const defaultContext: TaskNodeContext = {
   outgoingNodes: [],
   toml: [],
   taskSpecific: {},
+  isValid: false
 };
 
 const generateToml = (context: TaskNodeContext) => {
@@ -85,6 +87,39 @@ const generateToml = (context: TaskNodeContext) => {
   return result;
 };
 
+const validateTask = (context: TaskNodeContext) => {
+  let result = false;
+
+  switch (context.taskType) {
+    case "HTTP": {
+      result = context.taskSpecific.url
+        && context.taskSpecific.url.length > 0
+        && context.taskSpecific.requestData
+        && context.taskSpecific.requestData.length > 0
+      break;
+    }
+    case "SUM": {
+      result = context.incomingNodes.length > 0
+      break;
+    }
+    case "DIVIDE": {
+      result = context.taskSpecific.input
+        && context.taskSpecific.input.length > 0
+        && context.taskSpecific.divisor
+        && context.taskSpecific.divisor.length > 0
+        && context.taskSpecific.precision
+        && context.taskSpecific.precision.length > 0
+      break;
+    }
+    case "MEDIAN": {
+      result = context.incomingNodes.length > 0
+      break;
+    }
+  }
+
+  return result;
+};
+
 export const createTaskNodeMachine = (
   initialContext: Partial<TaskNodeContext>
 ) => {
@@ -114,6 +149,7 @@ export const createTaskNodeMachine = (
               ],
             }),
             "regenerateToml",
+            "revalidateTask"
           ],
         },
         ADD_OUTGOING_NODE: {
@@ -124,7 +160,7 @@ export const createTaskNodeMachine = (
                 event.nodeId,
               ],
             }),
-            "regenerateToml",
+            "regenerateToml"
           ],
         },
         REMOVE_INCOMING_NODE: {
@@ -136,6 +172,7 @@ export const createTaskNodeMachine = (
                 ),
             }),
             "regenerateToml",
+            "revalidateTask"
           ],
         },
         REMOVE_OUTGOING_NODE: {
@@ -155,7 +192,8 @@ export const createTaskNodeMachine = (
               incomingNodes: (context, event) =>
                 context.incomingNodes.map(incomingNode => incomingNode === event.prevNodeId ? event.nodeId : incomingNode)
             }),
-            "regenerateToml"
+            "regenerateToml",
+            "revalidateTask"
           ]
         },
         SET_CUSTOM_ID: {
@@ -164,6 +202,7 @@ export const createTaskNodeMachine = (
               customId: (context, event) => event.value,
             }),
             "regenerateToml",
+            "revalidateTask"
           ],
         },
         SET_TASK_SPECIFIC_PROPS: {
@@ -175,6 +214,7 @@ export const createTaskNodeMachine = (
               }),
             }),
             "regenerateToml",
+            "revalidateTask"
           ],
         },
       },
@@ -184,6 +224,9 @@ export const createTaskNodeMachine = (
         regenerateToml: assign({
           toml: (context, event) => generateToml(context),
         }),
+        revalidateTask: assign({
+          isValid: (context, event) => validateTask(context)
+        })
       },
     }
   );
