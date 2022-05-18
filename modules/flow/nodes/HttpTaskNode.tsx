@@ -2,7 +2,9 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
+import { PowerTextField, PowerTextArea } from "./fields";
 
+const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const methodSelector = (state: any) => state.context.taskSpecific.method;
 const urlSelector = (state: any) => state.context.taskSpecific.url;
 const requestDataSelector = (state: any) => state.context.taskSpecific.requestData;
@@ -13,6 +15,8 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
   const method = useSelector(machine, methodSelector);
   const url = useSelector(machine, urlSelector);
   const requestData = useSelector(machine, requestDataSelector);
+
+  const incomingNodes = useSelector(machine, incomingNodesSelector);
 
   return (
     <TaskNode {...nodeProps}>
@@ -32,31 +36,19 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
           <option value="DELETE">DELETE</option>
         </select>
       </div>
-      <div className="form-control w-full max-w-xs">
-        <label className="label">
-          <span className="label-text">URL</span>
-        </label>
-        <input
-          value={url}
-          onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { url: event.target.value } })}
-          type="text"
-          placeholder="Type here"
-          className="input input-bordered w-full max-w-xs"
-        />
-      </div>
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Request Data</span>
-          <span className="label-text-alt">(optional)</span>
-        </label>
-        <textarea
-          className="textarea textarea-bordered h-24"
-          placeholder="Type request data in JSON format"
-          value={requestData}
-          onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { requestData: event.target.value } })}
-        >
-        </textarea>
-      </div>
+      <PowerTextField
+        label="URL"
+        value={url}
+        onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { url: newValue } })}
+        incomingNodes={incomingNodes}
+      />
+      <PowerTextArea
+        label="Request Data"
+        optional
+        value={requestData}
+        onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { requestData: newValue } })}
+        incomingNodes={incomingNodes}
+      />
     </TaskNode>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 
-export interface PowerTextFieldProps {
+export interface PowerTextAreaProps {
     label: string;
     value: string;
     onChange: (newValue: string) => void;
@@ -8,19 +8,19 @@ export interface PowerTextFieldProps {
     optional?: boolean;
 }
 
-export const PowerTextField = ({
+export const PowerTextArea = ({
     label,
     value,
     onChange,
     incomingNodes,
     optional = false
-}: PowerTextFieldProps) => {
+}: PowerTextAreaProps) => {
 
     const handleIncomingNodeSelected = (incomingNode: string) => {
         onChange(`${value || ""}$(${incomingNode})`)
     }
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         onChange(event.target.value)
     }
 
@@ -32,11 +32,11 @@ export const PowerTextField = ({
             }
         </label>
         <div className="flex items-center gap-1">
-            <input
-                value={value}
+            <textarea
                 onChange={handleChange}
-                type="text"
-                className="input input-bordered w-full max-w-xs"
+                placeholder="Type request data in JSON format"
+                value={value}
+                className="textarea textarea-bordered h-24"
             />
             <div className="dropdown">
                 <label tabIndex={0} className=" m-1">
