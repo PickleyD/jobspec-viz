@@ -6,8 +6,6 @@ import { CodeIcon, XIcon } from "@heroicons/react/solid";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ObservationSrcTask } from "./ObservationSrcTask";
-// @ts-ignore
-import toDot from "jgf-dot"
 
 export interface CodegenProps {
   className?: string;
@@ -61,41 +59,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     ),
   ];
 
-  // Start nodes are any where the node only appears in an edge 'source' and not a 'target'
-  // const getStartNodes = (edges: Array<Edge>) => {
-  //   return edges.map(edge => edge.source).filter(edge => !edges.map(edge => edge.target).includes(edge))
-  // }
-
-  // const getEdgesWithSource = (sourceToFilter: string, edges: Array<Edge>) => {
-  //   return edges.filter(edge => edge.source === sourceToFilter)
-  // }
-
-  // const getStartChains = (edges: Array<Edge>) => {
-  //   const startNodes = getStartNodes(edges)
-
-  //   const startChains = startNodes.map(startNode => {
-  //     let chain = [startNode]
-  //     let current = startNode
-
-  //     const edgesWithSource = getEdgesWithSource(startNode, edges)
-
-  //     console.log("edgesWithSource")
-  //     console.log(edgesWithSource)
-  //   })
-
-  //   console.log("startChains")
-  //   console.log(startChains)
-  // }
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  // const asDot = toDot({
-  //   graph: {
-  //     directed: true,
-  //     nodes: nodesFromMachine.tasks ? nodesFromMachine.tasks.map((task: any) => ({ id: task.ref.id })) : [],
-  //     edges: edgesFromMachine ? edgesFromMachine.map((edge: any) => ({ source: edge.source, target: edge.target })) : []
-  //   }
-  // })
 
   return (
     <div className={`${className} relative transition-all ${isOpen ? "" : ""}`}>

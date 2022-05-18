@@ -81,7 +81,6 @@ export const TaskNode = ({
   }
 
   useEffect(() => {
-    // TODO: Think we need to check the ID is unique before making these changes?
     updateExistingConnections()
     updateStoredEdges()
   }, [customId])

@@ -111,8 +111,6 @@ export const Flow = ({ className }: FlowProps) => {
 
   const [prevEdgesLength, setPrevEdgesLength] = useState(0);
   useEffect(() => {
-    console.log("edges change")
-    console.log(edges)
     if (edges.length > 0 && edges.length !== prevEdgesLength) {
       setPrevEdgesLength(edges.length);
 
@@ -122,32 +120,11 @@ export const Flow = ({ className }: FlowProps) => {
     }
   }, [edges]);
 
-  // const [nodes, setNodes] = useState(elements);
-  // const [edges, setEdges] = useState<Edge<any>[]>([]);
-
-  // const onNodesChange = useCallback((changes: any) => {
-  //   console.log("onNodesChange");
-  //   console.log(changes);
-  //   setNodes((ns) => applyNodeChanges(changes, ns));
-  // }, []);
-  // const handleEdgesChange = useCallback((changes: any) => {
-  //   console.log("onEdgesChange");
-  //   console.log(changes);
-  //   return setEdges((es) => applyEdgeChanges(changes, es));
-  // }, []);
-
   const onConnect = useCallback(
     (connection: any) =>
       setEdges((eds) => addEdge({ ...connection, animated: true }, eds)),
     []
   );
-
-  // const demoNodes: Node[] = [
-  //   { id: "1", data: { label: "Node 1" }, position: { x: 5, y: 5 } },
-  //   { id: "2", data: { label: "Node 2" }, position: { x: 5, y: 100 } },
-  // ];
-
-  // const edges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }];
 
   /**
    * Handle drop event. This will mean a new node from
