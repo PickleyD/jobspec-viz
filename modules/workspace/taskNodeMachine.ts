@@ -96,8 +96,6 @@ const validateTask = (context: TaskNodeContext) => {
     case "HTTP": {
       result = context.taskSpecific.url
         && context.taskSpecific.url.length > 0
-        && context.taskSpecific.requestData
-        && context.taskSpecific.requestData.length > 0
       break;
     }
     case "SUM": {
