@@ -42,7 +42,7 @@ const Home: NextPage = () => {
               <XIcon className="swap-on fill-current h-5 w-5 text-blue-500" />
             </label>
             <div className="flex items-center gap-2">
-              <Image src="/logo.png" width={80} height={80} />
+              <Image alt="logo" src="/logo.png" width={80} height={80} />
               <h1 className="font-bold underline text-xl">
                 Chainlink Job Spec Viz
               </h1>
@@ -51,7 +51,7 @@ const Home: NextPage = () => {
               <p>
                 Drag, drop and connect tasks to visually program your Chainlink
                 job spec. Copy the generated code to your Chainlink node and
-                you're good to go!
+                you&apos;re good to go!
               </p>
               <p>Here are the steps to follow:</p>
               <ul className="list-decimal pl-8">
