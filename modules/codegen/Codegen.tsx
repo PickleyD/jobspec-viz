@@ -6,6 +6,7 @@ import { CodeIcon, XIcon } from "@heroicons/react/solid";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ObservationSrcTask } from "./ObservationSrcTask";
+import { CronFields } from "./jobTypes/CronFields";
 
 export interface CodegenProps {
   className?: string;
@@ -61,6 +62,15 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
+  const renderJobTypeSpecifics = () => {
+    switch (jobType) {
+      case "cron":
+        return <CronFields />
+      default:
+        return <></>
+    }
+  }
+
   return (
     <div className={`${className} relative transition-all ${isOpen ? "" : ""}`}>
       <label
@@ -96,9 +106,9 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           {externalJobId && <pre data-prefix=">">
             <code>externalJobId = {externalJobId}</code>
           </pre>}
-          <pre data-prefix=">">
-            <code>schedule = "CRON_TZ=UTC 0 0 1 1 *"</code>
-          </pre>
+          {
+            renderJobTypeSpecifics()
+          }
           <pre data-prefix=">">
             <code>observationSource = """</code>
           </pre>

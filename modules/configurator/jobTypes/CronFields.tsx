@@ -3,7 +3,7 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { useState, useEffect, useContext } from "react"
 
-const cronSelector = (state: any) => state.context.jobTypeSpecific.cron.schedule;
+const cronValueSelector = (state: any) => state.context.jobTypeSpecific.cron.schedule.value;
 
 export interface CronFieldsProps {
   className?: string;
@@ -15,35 +15,42 @@ export const CronFields = ({ className = "" }) => {
 
   const cron = useSelector(
     globalServices.workspaceService,
-    cronSelector
+    cronValueSelector
   )
 
   const [friendlyCron, setFriendlyCron] = useState<string>("")
 
   useEffect(() => {
 
-    const cronLength = cron.trim().split(/\s+/)
+    const cronAsArray = cron.trim().split(/\s+/)
 
-    if (cronLength.length < 7) {
-      return setFriendlyCron("Too few terms")
+    if (cronAsArray.length < 6) {
+      setFriendlyCron("Too few terms")
+      setCronValidity(false)
+      return
     }
 
-    if (cronLength.length > 7) {
-      return setFriendlyCron("Too many terms")
+    if (cronAsArray.length > 6) {
+      setFriendlyCron("Too many terms")
+      setCronValidity(false)
+      return
     }
 
     try {
       setFriendlyCron(cronstrue.toString(cron, { verbose: true}))
+      setCronValidity(true)
     }
     catch (err) {
       setFriendlyCron("Invalid CRON expression")
+      setCronValidity(false)
     }
   }, [cron])
+
+  const setCronValidity = (isValid: boolean) => globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "cron", prop: "schedule", valid: isValid })
 
   return <div className={`${className} form-control w-full max-w-xs`}>
     <label className="label">
       <span className="label-text text-xs">CRON Schedule</span>
-      <span className="label-text-alt text-xs">(with seconds)</span>
     </label>
     <input
       type="text"

@@ -9,7 +9,7 @@ type WorkspaceEvent =
   | { type: "SET_JOB_TYPE"; value: JOB_TYPE }
   | { type: "SET_NAME"; value: string }
   | { type: "SET_EXTERNAL_JOB_ID"; value: string }
-  | { type: "SET_JOB_TYPE_SPECIFIC_PROPS"; jobType: string; prop: string; value: string };
+  | { type: "SET_JOB_TYPE_SPECIFIC_PROPS"; jobType: string; prop: string; value?: string; valid?: boolean };
 
 interface WorkspaceContext {
   type: JOB_TYPE;
@@ -43,7 +43,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       },
       jobTypeSpecific: {
         cron: {
-          schedule: "0 0 18 1/1 * ? *"
+          schedule: {
+            value: "0 0 18 * * *",
+            valid: true
+          }
         },
         directrequest: {}
       }
@@ -105,8 +108,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
             let current = { ...context.jobTypeSpecific }
 
-            current[event.jobType][event.prop] = event.value
+console.log(event)
+            
+           if (event.value !== undefined) current[event.jobType][event.prop].value = event.value
 
+           if (event.valid !== undefined) current[event.jobType][event.prop].valid = event.valid
+
+           console.log(current)
             return current
           },
         }),
