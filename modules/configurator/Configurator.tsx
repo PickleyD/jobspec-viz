@@ -1,9 +1,9 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CogIcon, XIcon } from "@heroicons/react/solid";
-import { useState } from "react";
 import { motion } from "framer-motion";
+import { CronFields } from "./jobTypes"
 
 export interface ConfiguratorProps {
   className?: string;
@@ -19,7 +19,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const jobType = useSelector(
     globalServices.workspaceService,
     jobTypeSelector
-  )  
+  )
   const name = useSelector(
     globalServices.workspaceService,
     nameSelector
@@ -57,52 +57,57 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
             Config
           </div>
-          <div className="py-2">
-            <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text text-xs">Job Type</span>
-              </label>
-              <select
-                className="select select-bordered select-sm"
-                value={jobType}
-                onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
-              >
-                <option value="cron">CRON</option>
-                <option value="directrequest">Direct Request</option>
-                <option value="fluxmonitor" disabled>Flux Monitor</option>
-                <option value="keeper" disabled>Keeper</option>
-                <option value="offchainreporting" disabled>Off-chain Reporting</option>
-                <option value="webhook" disabled>Webhook</option>
-              </select>
-            </div>
+          <div className="flex gap-2">
+            <div className="py-2">
+              <div className="form-control w-full max-w-xs">
+                <label className="label">
+                  <span className="label-text text-xs">Job Type</span>
+                </label>
+                <select
+                  className="select select-bordered select-sm"
+                  value={jobType}
+                  onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
+                >
+                  <option value="cron">CRON</option>
+                  <option value="directrequest">Direct Request</option>
+                  <option value="fluxmonitor" disabled>Flux Monitor</option>
+                  <option value="keeper" disabled>Keeper</option>
+                  <option value="offchainreporting" disabled>Off-chain Reporting</option>
+                  <option value="webhook" disabled>Webhook</option>
+                </select>
+              </div>
 
-            <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text text-xs">Name</span>
-                <span className="label-text-alt text-xs">(optional)</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Type here"
-                className="input input-bordered input-sm w-full max-w-xs"
-                value={name}
-                onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
-              />
-            </div>
+              <div className="form-control w-full max-w-xs">
+                <label className="label">
+                  <span className="label-text text-xs">Name</span>
+                  <span className="label-text-alt text-xs">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-bordered input-sm w-full max-w-xs"
+                  value={name}
+                  onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
+                />
+              </div>
 
-            <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text text-xs">External Job ID</span>
-                <span className="label-text-alt text-xs">(optional)</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Type here"
-                className="input input-bordered input-sm w-full max-w-xs"
-                value={externalJobId}
-                onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
-              />
+              <div className="form-control w-full max-w-xs">
+                <label className="label">
+                  <span className="label-text text-xs">External Job ID</span>
+                  <span className="label-text-alt text-xs">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-bordered input-sm w-full max-w-xs"
+                  value={externalJobId}
+                  onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
+                />
+              </div>
             </div>
+            {
+              jobType === "cron" && <CronFields className="py-2" />
+            }
           </div>
         </div>
       </motion.div>

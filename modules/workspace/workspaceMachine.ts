@@ -5,10 +5,11 @@ import { Edge, useEdges } from "react-flow-renderer"
 type WorkspaceEvent =
   | { type: "NEW_TASK_NODE.ADD"; options: TaskNodeOptions }
   | { type: "SET_EDGES"; newEdges: Edge<any>[] }
-  | { type: "UPDATE_EDGES_WITH_NODE_ID"; nodeId: string; prevNodeId: string;}
+  | { type: "UPDATE_EDGES_WITH_NODE_ID"; nodeId: string; prevNodeId: string; }
   | { type: "SET_JOB_TYPE"; value: JOB_TYPE }
   | { type: "SET_NAME"; value: string }
-  | { type: "SET_EXTERNAL_JOB_ID"; value: string };
+  | { type: "SET_EXTERNAL_JOB_ID"; value: string }
+  | { type: "SET_JOB_TYPE_SPECIFIC_PROPS"; jobType: string; prop: string; value: string };
 
 interface WorkspaceContext {
   type: JOB_TYPE;
@@ -16,6 +17,7 @@ interface WorkspaceContext {
   externalJobId: string;
   edges: Edge<any>[];
   nodes: Nodes;
+  jobTypeSpecific: any;
 }
 
 type Nodes = {
@@ -39,6 +41,12 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       nodes: {
         tasks: [],
       },
+      jobTypeSpecific: {
+        cron: {
+          schedule: "0 0 18 1/1 * ? *"
+        },
+        directrequest: {}
+      }
     },
     on: {
       "NEW_TASK_NODE.ADD": {
@@ -90,6 +98,18 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: assign({
           externalJobId: (context, event) => event.value
         })
+      },
+      "SET_JOB_TYPE_SPECIFIC_PROPS": {
+        actions: assign({
+          jobTypeSpecific: (context, event) => {
+
+            let current = { ...context.jobTypeSpecific }
+
+            current[event.jobType][event.prop] = event.value
+
+            return current
+          },
+        }),
       }
     },
   }

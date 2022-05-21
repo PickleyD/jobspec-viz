@@ -534,6 +534,11 @@ core-js-pure@^3.20.2:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.22.2.tgz#c10bffdc3028d25c2aae505819a05543db61544f"
   integrity sha512-Lb+/XT4WC4PaCWWtZpNPaXmjiNDUe5CJuUtbkMrIM1kb1T/jJoAIp+bkVP/r5lHzMr+ZAAF8XHp7+my6Ol0ysQ==
 
+cronstrue@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-2.7.0.tgz#6304b0d063b6b84c84c89a4c05c5379f13fc08fd"
+  integrity sha512-L/rml71SHNvUIkTVXe+DmirLJpNQK3G25+nYp+0MDiepjhGAepgu1+E63BlKlyXaGgOotpNrWncQRTSQlltlTA==
+
 cross-spawn@^7.0.2:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
