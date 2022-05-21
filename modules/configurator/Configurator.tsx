@@ -1,7 +1,6 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext } from "react";
-import { Edge } from "react-flow-renderer";
 import { CogIcon, XIcon } from "@heroicons/react/solid";
 import { useState } from "react";
 import { motion } from "framer-motion";
