@@ -46,16 +46,18 @@ const defaultContext: TaskNodeContext = {
 
 const generateToml = (context: TaskNodeContext) => {
   let result = [];
-
+  
   const spacer = new Array(context.customId ? context.customId.length + 1 : 0).join(" ")
 
   switch (context.taskType) {
     case "HTTP": {
+      const processedRequestData = context.taskSpecific.requestData ? context.taskSpecific.requestData.replace(/\s/g, "").replace(/"/g, '\\\\"') : ""
+
       result = [
         `${context.customId} [type="http"`,
         `${spacer}  method=${context.taskSpecific.method || "GET"}`,
         `${spacer}  url="${context.taskSpecific.url || ""}"`,
-        `${spacer}  requestData="${context.taskSpecific.requestData || ""}"]`
+        `${spacer}  requestData="${processedRequestData}"]`
       ];
       break;
     }
