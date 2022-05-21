@@ -108,13 +108,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
             let current = { ...context.jobTypeSpecific }
 
-console.log(event)
+            if (event.value !== undefined) current[event.jobType][event.prop].value = event.value
+
+            if (event.valid !== undefined) current[event.jobType][event.prop].valid = event.valid
             
-           if (event.value !== undefined) current[event.jobType][event.prop].value = event.value
-
-           if (event.valid !== undefined) current[event.jobType][event.prop].valid = event.valid
-
-           console.log(current)
             return current
           },
         }),
