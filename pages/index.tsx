@@ -34,13 +34,13 @@ const Home: NextPage = () => {
             </label>
             <h1 className="font-bold underline">Chainlink Job Spec Generator</h1>
             <div className="text-xs max-w-sm flex flex-col gap-2">
-              <p>Drag and drop tasks to build up you Chainlink job spec. Copy the generated code to your Chainlink node config and you're good to go!</p>
+              <p>Drag and drop tasks to build up your Chainlink job spec. Copy the generated code to your Chainlink node and you're good to go!</p>
               <p>Here are the steps to follow:</p>
               <ul className="list-decimal pl-8">
-                <li className="py-1">Select your job type from the config panel (<CogIcon className="inline fill-current h-3 w-3 text-blue-500" />) in the top right</li>
-                <li className="py-1">Drag some tasks from the palette panel (<PlusIcon className="inline fill-current h-3 w-3 text-blue-500" />) down into the workspace area</li>
-                <li className="py-1">Connect the tasks together and fill in any required config fields</li>
-                <li className="py-1">Your generated job spec (in TOML format) will be ready for you in the codegen panel (<CodeIcon className="inline fill-current h-3 w-3 text-blue-500" />)</li>
+                <li className="py-1">Select your job type from the config panel (<CogIcon className="inline fill-current h-3 w-3 text-blue-500" />) in the top right.</li>
+                <li className="py-1">Drag some tasks from the palette panel (<PlusIcon className="inline fill-current h-3 w-3 text-blue-500" />) down into the workspace area.</li>
+                <li className="py-1">Connect the task nodes together and fill in any config fields.</li>
+                <li className="py-1">Your generated job spec (in TOML format) will be ready for you in the code panel (<CodeIcon className="inline fill-current h-3 w-3 text-blue-500" />). Any tasks highlighted in red here indicate some extra configuration is required on the task node.</li>
               </ul>
             </div>
           </div>
