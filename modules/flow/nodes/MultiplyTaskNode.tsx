@@ -6,15 +6,13 @@ import { PowerTextField } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const inputSelector = (state: any) => state.context.taskSpecific.input;
-const divisorSelector = (state: any) => state.context.taskSpecific.divisor;
-const precisionSelector = (state: any) => state.context.taskSpecific.precision;
+const timesSelector = (state: any) => state.context.taskSpecific.times;
 
-export const DivideTaskNode = (nodeProps: NodeProps) => {
+export const MultiplyTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
 
     const input = useSelector(machine, inputSelector);
-    const divisor = useSelector(machine, divisorSelector);
-    const precision = useSelector(machine, precisionSelector);
+    const times = useSelector(machine, timesSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
 
@@ -27,15 +25,9 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
                 incomingNodes={incomingNodes}
             />
             <PowerTextField
-                label="Divisor"
-                value={divisor}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { divisor: newValue } })}
-                incomingNodes={incomingNodes}
-            />
-            <PowerTextField
-                label="Precision"
-                value={precision}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { precision: newValue } })}
+                label="Times"
+                value={times}
+                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { times: newValue } })}
                 incomingNodes={incomingNodes}
             />
         </TaskNode>

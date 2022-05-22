@@ -60,6 +60,15 @@ export const Palette = ({ className }: PaletteProps) => {
             <li>
               <DraggableItem
                 itemProps={{
+                  taskType: "MULTIPLY",
+                }}
+              >
+                <TaskChip name="Multiply" />
+              </DraggableItem>
+            </li>
+            <li>
+              <DraggableItem
+                itemProps={{
                   taskType: "SUM",
                 }}
               >
@@ -69,10 +78,37 @@ export const Palette = ({ className }: PaletteProps) => {
             <li>
               <DraggableItem
                 itemProps={{
+                  taskType: "ANY",
+                }}
+              >
+                <TaskChip name="Any" />
+              </DraggableItem>
+            </li>
+            <li>
+              <DraggableItem
+                itemProps={{
                   taskType: "MEDIAN",
                 }}
               >
                 <TaskChip name="Median" />
+              </DraggableItem>
+            </li>
+            <li>
+              <DraggableItem
+                itemProps={{
+                  taskType: "MODE",
+                }}
+              >
+                <TaskChip name="Mode" />
+              </DraggableItem>
+            </li>
+            <li>
+              <DraggableItem
+                itemProps={{
+                  taskType: "MEAN",
+                }}
+              >
+                <TaskChip name="Mean" />
               </DraggableItem>
             </li>
           </ul>

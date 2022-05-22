@@ -15,14 +15,13 @@ const Background = dynamic<BackgroundProps>(
   | Loader<{}>,
   { ssr: false }
 ); // disable ssr
-import { TaskNode, HttpTaskNode } from "./nodes";
+import { TaskNode, HttpTaskNode, DivideTaskNode, MultiplyTaskNode, MeanTaskNode } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
-import { DivideTaskNode } from "./nodes/DivideTaskNode";
 
 const nodesSelector = (state: any) => state.context.nodes;
 const taskNodesSelector = (state: any) => state.context.nodes.tasks;
@@ -67,6 +66,12 @@ export const Flow = ({ className }: FlowProps) => {
         break;
       case "DIVIDE":
         flowElement.type = "divideTask";
+        break;
+      case "MULTIPLY":
+        flowElement.type = "multiplyTask";
+        break;
+      case "MEAN":
+        flowElement.type = "meanTask";
         break;
       default:
         flowElement.type = "task";
@@ -124,23 +129,18 @@ export const Flow = ({ className }: FlowProps) => {
     onConnect(newConnection);
   };
 
-  const [prevEdgesLength, setPrevEdgesLength] = useState(0);
   useEffect(() => {
-    if (edges.length > 0) {
-      // setPrevEdgesLength(edges.length);
+    const withCustomIds = [
+      ...edges.map(edge => ({
+        ...edge,
+        sourceCustomId: getTaskNodeById(edge.source).ref.state.context.customId,
+        targetCustomId: getTaskNodeById(edge.target).ref.state.context.customId
+      }))
+    ]
 
-      const withCustomIds = [
-        ...edges.map(edge => ({
-          ...edge,
-          sourceCustomId: getTaskNodeById(edge.source).ref.state.context.customId,
-          targetCustomId: getTaskNodeById(edge.target).ref.state.context.customId
-        }))
-      ]
-
-      globalServices.workspaceService.send("SET_EDGES", {
-        newEdges: withCustomIds,
-      });
-    }
+    globalServices.workspaceService.send("SET_EDGES", {
+      newEdges: withCustomIds,
+    });
   }, [edges]);
 
   const onConnect = useCallback(
@@ -189,7 +189,7 @@ export const Flow = ({ className }: FlowProps) => {
     [reactFlowInstance]
   );
 
-  const nodeTypes = useMemo(() => ({ task: TaskNode, httpTask: HttpTaskNode, divideTask: DivideTaskNode }), []);
+  const nodeTypes = useMemo(() => ({ task: TaskNode, httpTask: HttpTaskNode, divideTask: DivideTaskNode, multiplyTask: MultiplyTaskNode, meanTask: MeanTaskNode }), []);
 
   return (
     <ReactFlowProvider>

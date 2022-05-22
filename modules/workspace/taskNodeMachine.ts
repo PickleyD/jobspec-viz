@@ -20,7 +20,7 @@ type TaskNodeEvent =
   | { type: "SET_CUSTOM_ID"; value: string }
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object };
 
-export type TASK_TYPE = "HTTP" | "SUM" | "DIVIDE" | "MEDIAN";
+export type TASK_TYPE = "HTTP" | "SUM" | "DIVIDE" | "MULTIPLY" | "ANY" | "MODE" | "MEAN" | "MEDIAN";
 
 interface TaskNodeContext {
   customId?: string;
@@ -46,7 +46,7 @@ const defaultContext: TaskNodeContext = {
 
 const generateToml = (context: TaskNodeContext) => {
   let result = [];
-  
+
   const spacer = new Array(context.customId ? context.customId.length + 1 : 0).join(" ")
 
   switch (context.taskType) {
@@ -64,7 +64,15 @@ const generateToml = (context: TaskNodeContext) => {
     case "SUM": {
       result = [
         `${context.customId} [type="sum"`,
-        `${spacer}  values<[ ${context.incomingNodes.join(", ")} ]>]`
+        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>]`
+      ];
+      break;
+    }
+    case "MULTIPLY": {
+      result = [
+        `${context.customId} [type="multiply"`,
+        `${spacer}  input="${context.taskSpecific.input || ""}"`,
+        `${spacer}  times="${context.taskSpecific.times || ""}"]`,
       ];
       break;
     }
@@ -77,10 +85,31 @@ const generateToml = (context: TaskNodeContext) => {
       ];
       break;
     }
+    case "ANY": {
+      result = [
+        `${context.customId} [type="any"]`
+      ];
+      break;
+    }
+    case "MEAN": {
+      result = [
+        `${context.customId} [type="mean"`,
+        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>`,
+        `${spacer}  precision=${context.taskSpecific.precision || 2}]`
+      ];
+      break;
+    }
+    case "MODE": {
+      result = [
+        `${context.customId} [type="mode"`,
+        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>]`
+      ];
+      break;
+    }
     case "MEDIAN": {
       result = [
         `${context.customId} [type="median"`,
-        `${spacer}  values<[ ${context.incomingNodes.join(", ")} ]>]`
+        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>]`
       ];
       break;
     }
@@ -102,11 +131,32 @@ const validateTask = (context: TaskNodeContext) => {
       result = context.incomingNodes.length > 0
       break;
     }
+    case "MULTIPLY": {
+      result = context.taskSpecific.input
+        && context.taskSpecific.input.length > 0
+        && context.taskSpecific.times
+        && context.taskSpecific.times.length > 0
+      break;
+    }
     case "DIVIDE": {
       result = context.taskSpecific.input
         && context.taskSpecific.input.length > 0
         && context.taskSpecific.divisor
         && context.taskSpecific.divisor.length > 0
+        && context.taskSpecific.precision
+        && context.taskSpecific.precision.length > 0
+      break;
+    }
+    case "ANY": {
+      result = context.incomingNodes.length > 0
+      break;
+    }
+    case "MODE": {
+      result = context.incomingNodes.length > 0
+      break;
+    }
+    case "MEAN": {
+      result = context.incomingNodes.length > 0
         && context.taskSpecific.precision
         && context.taskSpecific.precision.length > 0
       break;
