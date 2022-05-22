@@ -41,24 +41,24 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     externalJobIdSelector
   )
 
-  const tasks = [
-    ...Array.from(
-      new Set([
-        ...edgesFromMachine
-          .map((edge: Edge) => edge.source)
-          .filter(
-            (value: string, index: number, self: Array<string>) =>
-              self.indexOf(value) === index
-          ),
-        ...edgesFromMachine
-          .map((edge: Edge) => edge.target)
-          .filter(
-            (value: string, index: number, self: Array<string>) =>
-              self.indexOf(value) === index
-          ),
-      ])
-    ),
-  ];
+  // const tasks = [
+  //   ...Array.from(
+  //     new Set([
+  //       ...edgesFromMachine
+  //         .map((edge: Edge) => edge.source)
+  //         .filter(
+  //           (value: string, index: number, self: Array<string>) =>
+  //             self.indexOf(value) === index
+  //         ),
+  //       ...edgesFromMachine
+  //         .map((edge: Edge) => edge.target)
+  //         .filter(
+  //           (value: string, index: number, self: Array<string>) =>
+  //             self.indexOf(value) === index
+  //         ),
+  //     ])
+  //   ),
+  // ];
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -125,7 +125,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           }
           {
             edgesFromMachine.map((edge: any, index: number) => <pre key={index} data-prefix=">">
-              <code>{`${edge.source} -> ${edge.target}`}</code>
+              <code>{`${edge.sourceCustomId} -> ${edge.targetCustomId}`}</code>
             </pre>)
           }
         </div>

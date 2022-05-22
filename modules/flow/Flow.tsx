@@ -6,10 +6,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  applyEdgeChanges,
-  applyNodeChanges,
-  Edge,
-  getOutgoers,
   Connection,
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
@@ -29,6 +25,7 @@ import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
 import { DivideTaskNode } from "./nodes/DivideTaskNode";
 
 const nodesSelector = (state: any) => state.context.nodes;
+const taskNodesSelector = (state: any) => state.context.nodes.tasks;
 
 export interface FlowProps {
   className?: string;
@@ -41,6 +38,11 @@ export const Flow = ({ className }: FlowProps) => {
   const nodesFromMachine = useSelector(
     globalServices.workspaceService,
     nodesSelector
+  );
+
+  const taskNodesFromMachine = useSelector(
+    globalServices.workspaceService,
+    taskNodesSelector
   );
 
   const nodeToFlowElement = (node: any) => {
@@ -74,13 +76,23 @@ export const Flow = ({ className }: FlowProps) => {
     return flowElement;
   };
 
-  const elements = [...nodesFromMachine.tasks.map(nodeToFlowElement)];
+  const elements = [...taskNodesFromMachine.map(nodeToFlowElement)];
 
   const [prevElementsLength, setPrevElementsLength] = useState(0);
   useEffect(() => {
-    if (elements.length > 0 && elements.length !== prevElementsLength) {
+    if (elements.length !== prevElementsLength) {
       setPrevElementsLength(elements.length);
-      setNodes((nds) => nds.concat(elements[elements.length - 1]));
+
+      const elementIds = elements.map(element => element.id)
+
+      // Sync up flow nodes with our machine state
+      setNodes((nds) => nds
+        .filter(node => elementIds.includes(node.id))
+        .concat(elements.filter(element => !nds.map(node => node.id).includes(element.id)))
+      );
+
+      // Remove any edges which don't link between two active nodes
+      setEdges(edges => edges.filter(edge => elementIds.includes(edge.source) && elementIds.includes(edge.target)))
     }
   }, [elements]);
 
@@ -88,7 +100,7 @@ export const Flow = ({ className }: FlowProps) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const getTaskNodeById = (nodeId: string) =>
-    nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.id === nodeId);
+    taskNodesFromMachine.find((taskNode: any) => taskNode.ref.id === nodeId);
 
   const handleNewConnection = (newConnection: Connection) => {
 
@@ -96,13 +108,16 @@ export const Flow = ({ className }: FlowProps) => {
 
     const targetTaskNode = getTaskNodeById(newConnection.target || "");
 
+    const sourceTaskCustomId = sourceTaskNode.ref.state.context.customId
+    const targetTaskCustomId = targetTaskNode.ref.state.context.customId
+
     if (sourceTaskNode && targetTaskNode) {
       sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
-        nodeId: targetTaskNode.ref.state.context.customId,
+        nodeId: targetTaskCustomId,
       });
 
       targetTaskNode.ref.send("ADD_INCOMING_NODE", {
-        nodeId: sourceTaskNode.ref.state.context.customId,
+        nodeId: sourceTaskCustomId,
       });
     }
 
@@ -111,18 +126,27 @@ export const Flow = ({ className }: FlowProps) => {
 
   const [prevEdgesLength, setPrevEdgesLength] = useState(0);
   useEffect(() => {
-    if (edges.length > 0 && edges.length !== prevEdgesLength) {
-      setPrevEdgesLength(edges.length);
+    if (edges.length > 0) {
+      // setPrevEdgesLength(edges.length);
+
+      const withCustomIds = [
+        ...edges.map(edge => ({
+          ...edge,
+          sourceCustomId: getTaskNodeById(edge.source).ref.state.context.customId,
+          targetCustomId: getTaskNodeById(edge.target).ref.state.context.customId
+        }))
+      ]
 
       globalServices.workspaceService.send("SET_EDGES", {
-        newEdges: edges,
+        newEdges: withCustomIds,
       });
     }
   }, [edges]);
 
   const onConnect = useCallback(
-    (connection: any) =>
-      setEdges((eds) => addEdge({ ...connection, animated: true }, eds)),
+    (connection: any) => {
+      return setEdges((eds) => addEdge({ ...connection, animated: true }, eds))
+    },
     []
   );
 
