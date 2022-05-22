@@ -67,7 +67,7 @@ export const TaskNode = ({
 
   const updateExistingConnections = () => {
 
-    const outgoingNodes = outgoingNodeIds.map((nodeId: string) => getTaskNodeByCustomId(nodeId))
+    const outgoingNodes = outgoingNodeIds.map((nodeId: string) => getTaskNodeById(nodeId))
 
     outgoingNodes.map((outgoingNode: any) => {
       outgoingNode.ref.send("UPDATE_INCOMING_NODE", {
