@@ -1,0 +1,23 @@
+{
+    "cron": [
+        "jobSpec.databaseID",
+        "jobSpec.externalJobID",
+        "jobSpec.name",
+        "jobRun.meta"
+    ],
+    "directrequest": [
+        "jobSpec.databaseID",
+        "jobSpec.externalJobID",
+        "jobSpec.name",
+        "jobRun.meta",
+        "jobRun.logBlockHash",
+        "jobRun.logBlockNumber",
+        "jobRun.logTxHash",
+        "jobRun.logAddress",
+        "jobRun.logTopics",
+        "jobRun.logData",
+        "jobRun.blockReceiptsRoot",
+        "jobRun.blockTransactionsRoot",
+        "jobRun.blockStateRoot"
+    ]
+}

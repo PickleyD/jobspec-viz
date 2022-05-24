@@ -1,4 +1,9 @@
+import { useSelector } from "@xstate/react";
 import React from "react";
+import { GlobalStateContext } from "../../../../context/GlobalStateContext";
+import { useContext } from "react";
+import pipelineVarsData from "../../../../data/jobTypeSpecificPipelineVars.json"
+import { JOB_TYPE } from "../../../workspace/workspaceMachine";
 
 export interface PowerTextFieldProps {
     label: string;
@@ -8,6 +13,8 @@ export interface PowerTextFieldProps {
     optional?: boolean;
 }
 
+const jobTypeSelector = (state: any) => state.context.type
+
 export const PowerTextField = ({
     label,
     value,
@@ -16,13 +23,27 @@ export const PowerTextField = ({
     optional = false
 }: PowerTextFieldProps) => {
 
-    const handleIncomingNodeSelected = (incomingNode: string) => {
-        onChange(`${value || ""}$(${incomingNode})`)
+    const globalServices = useContext(GlobalStateContext);
+
+    const jobType: JOB_TYPE = useSelector(
+        globalServices.workspaceService,
+        jobTypeSelector
+    )
+
+    const jobTypeSpecificPipelineVars = pipelineVarsData[jobType]
+
+    const handleItemSelected = (item: string) => {
+        onChange(`${value || ""}$(${item})`)
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.target.value)
     }
+
+    const items = [
+        ...jobTypeSpecificPipelineVars,
+        ...(incomingNodes ?? [])
+    ]
 
     return <div className="form-control w-full max-w-xs">
         <label className="label pb-0">
@@ -48,10 +69,10 @@ export const PowerTextField = ({
                 </label>
                 <ul tabIndex={0} className="border dropdown-content menu p-2 shadow bg-base-100 rounded w-52">
                     {
-                        incomingNodes && incomingNodes.length > 0 ?
-                            incomingNodes.map((incomingNode: string, index: number) => <li key={index} className="text-xs"><a onClick={() => handleIncomingNodeSelected(incomingNode)}>{incomingNode}</a></li>)
+                        items && items.length > 0 ?
+                        items.map((item: string, index: number) => <li key={index} className="text-xs"><a onClick={() => handleItemSelected(item)}>{item}</a></li>)
                             :
-                            <li className="text-xs">No incoming tasks connected</li>
+                            <li className="text-xs">No incoming tasks connected or job type specific pipeline variables available</li>
                     }
                 </ul>
             </div>

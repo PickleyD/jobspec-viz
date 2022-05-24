@@ -38,7 +38,7 @@ export const Palette = ({ className }: PaletteProps) => {
           <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
             Tasks
           </div>
-          <ul className="py-2 flex flex-col gap-1">
+          <ul className="py-2 grid grid-rows-4 grid-flow-col gap-1">
             <li>
               <DraggableItem
                 itemProps={{
