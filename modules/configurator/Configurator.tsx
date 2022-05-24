@@ -3,7 +3,8 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useState } from "react";
 import { CogIcon, XIcon } from "@heroicons/react/solid";
 import { motion } from "framer-motion";
-import { CronFields } from "./jobTypes"
+import { CronFields, DirectRequestFields } from "./jobTypes"
+import { JOB_TYPE } from "../workspace/workspaceMachine"
 
 export interface ConfiguratorProps {
   className?: string;
@@ -12,6 +13,17 @@ export interface ConfiguratorProps {
 const jobTypeSelector = (state: any) => state.context.type;
 const nameSelector = (state: any) => state.context.name;
 const externalJobIdSelector = (state: any) => state.context.externalJobId;
+
+const renderJobTypeSpecificFields = (jobType: JOB_TYPE) => {
+  switch (jobType) {
+    case "cron":
+      return <CronFields />
+    case "directrequest":
+      return <DirectRequestFields />
+    default:
+      return null
+  }
+}
 
 export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const globalServices = useContext(GlobalStateContext);
@@ -105,9 +117,11 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
                 />
               </div>
             </div>
-            {
-              jobType === "cron" && <CronFields className="py-2" />
-            }
+            <div className="py-2">
+              {
+                renderJobTypeSpecificFields(jobType)
+              }
+            </div>
           </div>
         </div>
       </motion.div>

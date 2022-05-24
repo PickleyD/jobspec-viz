@@ -1,12 +1,11 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext } from "react";
-import { Edge } from "react-flow-renderer";
 import { CodeIcon, XIcon } from "@heroicons/react/solid";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ObservationSrcTask } from "./ObservationSrcTask";
-import { CronFields } from "./jobTypes/CronFields";
+import { CronFields, DirectRequestFields } from "./jobTypes";
 
 export interface CodegenProps {
   className?: string;
@@ -66,6 +65,8 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     switch (jobType) {
       case "cron":
         return <CronFields />
+      case "directrequest":
+        return <DirectRequestFields />
       default:
         return <></>
     }

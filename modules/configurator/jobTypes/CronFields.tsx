@@ -20,6 +20,7 @@ export const CronFields = ({ className = "" }) => {
 
   const [friendlyCron, setFriendlyCron] = useState<string>("")
 
+  // This validity check should be in state machine
   useEffect(() => {
 
     const cronAsArray = cron.trim().split(/\s+/)

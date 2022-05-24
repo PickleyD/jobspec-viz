@@ -1,6 +1,7 @@
 import { createMachine, spawn, assign } from "xstate";
 import { createTaskNodeMachine, TaskNodeOptions } from "./taskNodeMachine";
 import { Edge, useEdges } from "react-flow-renderer"
+import { isAddress } from "ethers/lib/utils"
 
 type WorkspaceEvent =
   | { type: "NEW_TASK_NODE.ADD"; options: TaskNodeOptions }
@@ -28,7 +29,7 @@ type Nodes = {
   tasks: Array<any>;
 };
 
-type JOB_TYPE = "cron" | "directrequest"
+export type JOB_TYPE = "cron" | "directrequest"
 
 const getNextUniqueTaskId = (tasks: Array<any>) => {
   const tasksCustomIdsWithDefaultFormat = tasks
@@ -37,11 +38,28 @@ const getNextUniqueTaskId = (tasks: Array<any>) => {
 
   let id = 0
 
-  while(tasksCustomIdsWithDefaultFormat.includes(`task-${id.toString()}`)) {
+  while (tasksCustomIdsWithDefaultFormat.includes(`task-${id.toString()}`)) {
     id++
   }
 
   return id.toString()
+}
+
+const validateAddress = (input: string) => isAddress(input)
+
+const validateJobTypeSpecifics = (jobTypeSpecifics: any, event: any) => {
+  const { jobType, prop, value } = event
+
+  let validatedJobTypeSpecifics = { ...jobTypeSpecifics }
+
+  switch(jobType) {
+    case "cron":
+      break;
+    case "directRequest":
+      validatedJobTypeSpecifics.directRequest.contractAddress.valid = validateAddress(validatedJobTypeSpecifics.directRequest.contractAddress.value)
+  }
+
+  return validatedJobTypeSpecifics
 }
 
 export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
@@ -67,7 +85,12 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             valid: true
           }
         },
-        directrequest: {}
+        directRequest: {
+          contractAddress: {
+            value: "",
+            valid: false
+          }
+        }
       }
     },
     on: {
@@ -134,19 +157,29 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         })
       },
       "SET_JOB_TYPE_SPECIFIC_PROPS": {
-        actions: assign({
-          jobTypeSpecific: (context, event) => {
+        actions: [
+          assign({
+            jobTypeSpecific: (context, event) => {
 
-            let current = { ...context.jobTypeSpecific }
+              let current = { ...context.jobTypeSpecific }
 
-            if (event.value !== undefined) current[event.jobType][event.prop].value = event.value
+              if (event.value !== undefined) current[event.jobType][event.prop].value = event.value
 
-            if (event.valid !== undefined) current[event.jobType][event.prop].valid = event.valid
+              if (event.valid !== undefined) current[event.jobType][event.prop].valid = event.valid
 
-            return current
-          },
-        }),
+              return current
+            },
+          }),
+          "validateJobTypeSpecificProps"
+        ]
       }
+    },
+  },
+  {
+    actions: {
+      validateJobTypeSpecificProps: assign({
+        jobTypeSpecific: (context, event) => validateJobTypeSpecifics(context.jobTypeSpecific, event),
+      })
     },
   }
 );
