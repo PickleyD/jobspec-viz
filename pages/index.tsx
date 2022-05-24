@@ -72,8 +72,8 @@ const Home: NextPage = () => {
                   Your generated job spec (in TOML format) will be ready for you
                   in the code panel (
                   <CodeIcon className="inline fill-current h-3 w-3 text-blue-500" />
-                  ). Any tasks highlighted in red here indicate some extra
-                  configuration is required on the task node.
+                  ). Any code highlighted in red here indicates missing or
+                  invalid configuration.
                 </li>
               </ul>
             </div>
