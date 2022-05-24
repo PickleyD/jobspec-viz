@@ -102,10 +102,10 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             <code>schemaVersion = 1</code>
           </pre>
           {name && <pre data-prefix=">">
-            <code>name = {name}</code>
+            <code>name = "{name}"</code>
           </pre>}
           {externalJobId && <pre data-prefix=">">
-            <code>externalJobId = {externalJobId}</code>
+            <code>externalJobId = "{externalJobId}"</code>
           </pre>}
           {
             renderJobTypeSpecifics()

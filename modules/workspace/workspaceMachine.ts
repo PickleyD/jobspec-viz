@@ -52,11 +52,15 @@ const validateJobTypeSpecifics = (jobTypeSpecifics: any, event: any) => {
 
   let validatedJobTypeSpecifics = { ...jobTypeSpecifics }
 
-  switch(jobType) {
+  switch (jobType) {
     case "cron":
       break;
     case "directRequest":
       validatedJobTypeSpecifics.directRequest.contractAddress.valid = validateAddress(validatedJobTypeSpecifics.directRequest.contractAddress.value)
+      validatedJobTypeSpecifics.directRequest.minContractPaymentLinkJuels.valid = validatedJobTypeSpecifics.directRequest.minContractPaymentLinkJuels.value !== ""
+        && validatedJobTypeSpecifics.directRequest.minContractPaymentLinkJuels.value >= 0
+      validatedJobTypeSpecifics.directRequest.minIncomingConfirmations.valid = validatedJobTypeSpecifics.directRequest.minIncomingConfirmations.value !== ""
+        && validatedJobTypeSpecifics.directRequest.minIncomingConfirmations.value >= 1
   }
 
   return validatedJobTypeSpecifics
@@ -89,6 +93,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           contractAddress: {
             value: "",
             valid: false
+          },
+          minContractPaymentLinkJuels: {
+            value: "",
+            valid: true
+          },
+          minIncomingConfirmations: {
+            value: "",
+            valid: true
           }
         }
       }
