@@ -14,6 +14,7 @@ import {
   PlusIcon,
   CodeIcon,
   QuestionMarkCircleIcon,
+  BookOpenIcon
 } from "@heroicons/react/solid";
 import Image from "next/image";
 
@@ -95,6 +96,14 @@ const Home: NextPage = () => {
               >
                 <QuestionMarkCircleIcon className="fill-current h-5 w-5 text-blue-500" />
               </label>
+              <a href="https://docs.chain.link/docs/jobs/" target="_blank" rel="noopener noreferrer">
+                <label
+                  tabIndex={0}
+                  className={`pointer-events-auto btn btn-circle`}
+                >
+                  <BookOpenIcon className="fill-current h-5 w-5 text-blue-500" />
+                </label>
+              </a>
             </div>
             <div className="p-8 absolute right-0 flex flex-col items-end gap-2">
               <LayoutGroup>
