@@ -94,7 +94,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
         }}
         initial={false}
       >
-        <div className="mockup-code text-xs bg-base-300">
+        <div className="mockup-code text-xs bg-base-300 max-h-80 overflow-y-auto">
           <pre data-prefix=">">
             <code>type = "{jobType}"</code>
           </pre>
