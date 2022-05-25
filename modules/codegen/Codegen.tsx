@@ -1,7 +1,8 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { CodeIcon, XIcon } from "@heroicons/react/solid";
+import { DuplicateIcon, CheckIcon } from "@heroicons/react/outline";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ObservationSrcTask } from "./ObservationSrcTask";
@@ -72,6 +73,33 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     }
   }
 
+  const codeRef = useRef<HTMLDivElement>(null)
+
+  const [showCheckIcon, setShowCheckIcon] = useState<boolean>(false)
+
+  const handleCopyToClipboard = () => {
+    const selection = selectElementText(codeRef.current)
+
+    // Deprecated command but does the job
+    document.execCommand("copy")
+
+    setShowCheckIcon(true)
+    setTimeout(() => setShowCheckIcon(false), 1000)
+  }
+
+  const selectElementText = (el: any) => {
+    let doc = window.document, sel, range;
+    if (window.getSelection && doc.createRange) {
+      sel = window.getSelection();
+      range = doc.createRange();
+      range.selectNodeContents(el);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    }
+
+    return sel
+  }
+
   return (
     <div className={`${className} relative transition-all ${isOpen ? "" : ""}`}>
       <label
@@ -94,7 +122,15 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
         }}
         initial={false}
       >
-        <div className="mockup-code text-xs bg-base-300 max-h-80 overflow-y-auto">
+        <div className="mockup-code text-xs bg-base-300 max-h-80 overflow-y-auto relative" ref={codeRef}>
+          <label
+            onClick={handleCopyToClipboard}
+            tabIndex={0}
+            className={`${showCheckIcon ? "swap-active" : ""} swap swap-rotate pointer-events-auto btn btn-circle btn-sm absolute top-2.5 left-20 hover:border hover:border-white`}
+          >
+            <DuplicateIcon className="h-5 w-5 swap-off" />
+            <CheckIcon className="h-5 w-5 swap-on" />
+          </label>
           <pre data-prefix=">">
             <code>type = "{jobType}"</code>
           </pre>
