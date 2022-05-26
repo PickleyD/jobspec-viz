@@ -10,6 +10,7 @@ export interface PowerTextAreaProps {
     value: string;
     onChange: (newValue: string) => void;
     incomingNodes: Array<string>;
+    placeholder?: string;
     optional?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const PowerTextArea = ({
     value,
     onChange,
     incomingNodes,
+    placeholder = "",
     optional = false
 }: PowerTextAreaProps) => {
 
@@ -55,7 +57,7 @@ export const PowerTextArea = ({
         <div className="flex items-center gap-1">
             <textarea
                 onChange={handleChange}
-                placeholder="Type request data in JSON format"
+                placeholder={placeholder}
                 value={value}
                 className="textarea textarea-bordered h-24"
             />

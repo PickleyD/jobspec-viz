@@ -51,6 +51,24 @@ export const Palette = ({ className }: PaletteProps) => {
             <li>
               <DraggableItem
                 itemProps={{
+                  taskType: "JSONPARSE",
+                }}
+              >
+                <TaskChip name="JSON Parse" />
+              </DraggableItem>
+            </li>
+            <li>
+              <DraggableItem
+                itemProps={{
+                  taskType: "ETHTX",
+                }}
+              >
+                <TaskChip name="ETH Tx" />
+              </DraggableItem>
+            </li>
+            <li>
+              <DraggableItem
+                itemProps={{
                   taskType: "DIVIDE",
                 }}
               >

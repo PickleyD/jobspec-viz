@@ -1,3 +1,4 @@
+import { isAddress } from "ethers/lib/utils";
 import { createMachine, assign } from "xstate";
 
 export type XYCoords = {
@@ -20,7 +21,7 @@ type TaskNodeEvent =
   | { type: "SET_CUSTOM_ID"; value: string }
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object };
 
-export type TASK_TYPE = "HTTP" | "SUM" | "DIVIDE" | "MULTIPLY" | "ANY" | "MODE" | "MEAN" | "MEDIAN";
+export type TASK_TYPE = "HTTP" | "JSONPARSE" | "ETHTX" | "SUM" | "DIVIDE" | "MULTIPLY" | "ANY" | "MODE" | "MEAN" | "MEDIAN";
 
 interface TaskNodeContext {
   customId?: string;
@@ -58,6 +59,22 @@ const generateToml = (context: TaskNodeContext) => {
         `${spacer}  method=${context.taskSpecific.method || "GET"}`,
         `${spacer}  url="${context.taskSpecific.url || ""}"`,
         `${spacer}  requestData="${processedRequestData}"]`
+      ];
+      break;
+    }
+    case "JSONPARSE": {
+      result = [
+        `${context.customId} [type="jsonparse"`,
+        `${spacer}  data="${context.taskSpecific.data || ""}"`,
+        `${spacer}  path="${context.taskSpecific.path || ""}"]`,
+      ];
+      break;
+    }
+    case "ETHTX": {
+      result = [
+        `${context.customId} [type="ethtx"`,
+        `${spacer}  to="${context.taskSpecific.to || ""}"`,
+        `${spacer}  data="${context.taskSpecific.data || ""}"]`,
       ];
       break;
     }
@@ -118,6 +135,8 @@ const generateToml = (context: TaskNodeContext) => {
   return result;
 };
 
+const validateAddress = (input: string) => isAddress(input)
+
 const validateTask = (context: TaskNodeContext) => {
   let result = false;
 
@@ -125,6 +144,21 @@ const validateTask = (context: TaskNodeContext) => {
     case "HTTP": {
       result = context.taskSpecific.url
         && context.taskSpecific.url.length > 0
+      break;
+    }
+    case "JSONPARSE": {
+      result = context.taskSpecific.data
+        && context.taskSpecific.data.length > 0
+        && context.taskSpecific.path
+        && context.taskSpecific.path.length > 0
+      break;
+    }
+    case "ETHTX": {
+      result = context.taskSpecific.to
+        && context.taskSpecific.to.length > 0
+        && validateAddress(context.taskSpecific.to)
+        && context.taskSpecific.data
+        && context.taskSpecific.data.length > 0
       break;
     }
     case "SUM": {

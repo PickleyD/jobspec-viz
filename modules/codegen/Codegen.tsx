@@ -122,7 +122,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
         }}
         initial={false}
       >
-        <div className="mockup-code text-xs bg-base-300 max-h-80 overflow-y-auto relative" ref={codeRef}>
+        <div className="mockup-code text-sm bg-base-300 max-h-80 overflow-y-auto relative" ref={codeRef}>
           <label
             onClick={handleCopyToClipboard}
             tabIndex={0}

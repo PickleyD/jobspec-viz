@@ -15,7 +15,15 @@ const Background = dynamic<BackgroundProps>(
   | Loader<{}>,
   { ssr: false }
 ); // disable ssr
-import { TaskNode, HttpTaskNode, DivideTaskNode, MultiplyTaskNode, MeanTaskNode } from "./nodes";
+import { 
+  TaskNode, 
+  HttpTaskNode,
+  JsonParseTaskNode,
+  EthTxTaskNode, 
+  DivideTaskNode, 
+  MultiplyTaskNode, 
+  MeanTaskNode 
+} from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
@@ -63,6 +71,12 @@ export const Flow = ({ className }: FlowProps) => {
     switch (taskType) {
       case "HTTP":
         flowElement.type = "httpTask";
+        break;
+      case "JSONPARSE":
+        flowElement.type = "jsonParseTask";
+        break;
+      case "ETHTX":
+        flowElement.type = "ethTxTask";
         break;
       case "DIVIDE":
         flowElement.type = "divideTask";
@@ -189,7 +203,15 @@ export const Flow = ({ className }: FlowProps) => {
     [reactFlowInstance]
   );
 
-  const nodeTypes = useMemo(() => ({ task: TaskNode, httpTask: HttpTaskNode, divideTask: DivideTaskNode, multiplyTask: MultiplyTaskNode, meanTask: MeanTaskNode }), []);
+  const nodeTypes = useMemo(() => ({ 
+    task: TaskNode, 
+    httpTask: HttpTaskNode, 
+    jsonParseTask: JsonParseTaskNode,
+    ethTxTask: EthTxTaskNode,
+    divideTask: DivideTaskNode, 
+    multiplyTask: MultiplyTaskNode, 
+    meanTask: MeanTaskNode,
+  }), []);
 
   return (
     <ReactFlowProvider>

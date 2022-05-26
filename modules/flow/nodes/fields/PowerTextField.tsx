@@ -10,6 +10,7 @@ export interface PowerTextFieldProps {
     value: string;
     onChange: (newValue: string) => void;
     incomingNodes: Array<string>;
+    placeholder?: string;
     optional?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const PowerTextField = ({
     value,
     onChange,
     incomingNodes,
+    placeholder = "",
     optional = false
 }: PowerTextFieldProps) => {
 
@@ -58,6 +60,7 @@ export const PowerTextField = ({
                 onChange={handleChange}
                 type="text"
                 className="input input-bordered w-full max-w-xs"
+                placeholder={placeholder}
             />
             <div className="dropdown">
                 <label tabIndex={0} className=" m-1">

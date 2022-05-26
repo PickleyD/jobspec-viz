@@ -45,6 +45,7 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
       <PowerTextArea
         label="Request Data"
         optional
+        placeholder="Type request data in JSON format"
         value={requestData}
         onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { requestData: newValue } })}
         incomingNodes={incomingNodes}
