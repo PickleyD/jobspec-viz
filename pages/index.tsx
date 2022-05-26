@@ -14,7 +14,7 @@ import {
   PlusIcon,
   CodeIcon,
   QuestionMarkCircleIcon,
-  BookOpenIcon
+  BookOpenIcon,
 } from "@heroicons/react/solid";
 import Image from "next/image";
 
@@ -33,7 +33,7 @@ const Home: NextPage = () => {
       </Head>
 
       {helpMsgDisplayed && (
-        <div className="fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
+        <div className="invisible md:visible fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
           <div className="rounded rounded-tr-3xl bg-gray-700 p-4 flex flex-col gap-4 relative pointer-events-auto">
             <label
               tabIndex={0}
@@ -87,7 +87,23 @@ const Home: NextPage = () => {
           <div className="w-full h-full fixed z-0">
             <Flow />
           </div>
-          <div className="w-full h-full fixed z-10 pointer-events-none">
+          <div className="visible md:invisible fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
+            <div className="rounded bg-gray-700 p-4 flex flex-col gap-4 relative pointer-events-auto w-80">
+              <div className="flex flex-col items-center gap-2">
+                <Image alt="logo" src="/logo.png" width={40} height={40} />
+                <h1 className="font-bold underline text-xl">
+                  Chainlink Job Spec Viz
+                </h1>
+              </div>
+              <div className="text-xs max-w-sm flex flex-col gap-2">
+                <p>
+                  Mobile support is not implemented. Please use the app on a
+                  larger device. Sorry!
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
             <div className="p-8 absolute left-0 flex flex-col items-end gap-2">
               <label
                 tabIndex={0}
@@ -96,7 +112,11 @@ const Home: NextPage = () => {
               >
                 <QuestionMarkCircleIcon className="fill-current h-5 w-5 text-blue-500" />
               </label>
-              <a href="https://docs.chain.link/docs/jobs/" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://docs.chain.link/docs/jobs/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <label
                   tabIndex={0}
                   className={`pointer-events-auto btn btn-circle`}
