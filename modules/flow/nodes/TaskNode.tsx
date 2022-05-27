@@ -89,7 +89,19 @@ export const TaskNode = ({
     updateStoredEdges()
   }, [customId])
 
+  const notifyExistingConnectionsOfDeletion = () => {
+
+    const outgoingNodes = outgoingNodeIds.map((nodeId: string) => getTaskNodeById(nodeId))
+
+    outgoingNodes.map((outgoingNode: any) => {
+      outgoingNode.ref.send("REMOVE_INCOMING_NODE", {
+        nodeId: customId
+      })
+    })
+  };
+
   const handleDeleteNode = () => {
+    notifyExistingConnectionsOfDeletion()
     globalServices.workspaceService.send("DELETE_TASK_NODE", {
       nodeId: machine.state.context.customId
     })
