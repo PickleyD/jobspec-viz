@@ -5,15 +5,195 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"strings"
+	"testing"
 
 	"github.com/golang/gddo/httputil/header"
+
+	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/guregu/null.v4"
+
+	"github.com/pickleyd/chainlink/core/cltest"
+	"github.com/pickleyd/chainlink/core/logger"
+	"github.com/pickleyd/chainlink/core/services/pg"
+	"github.com/pickleyd/chainlink/core/services/pipeline"
+	"github.com/pickleyd/chainlink/core/services/pipeline/mocks"
+	"github.com/pickleyd/chainlink/core/testutils"
+	"github.com/pickleyd/chainlink/core/testutils/configtest"
+	"github.com/pickleyd/chainlink/core/testutils/evmtest"
+	clhttptest "github.com/pickleyd/chainlink/core/testutils/httptest"
+	"github.com/pickleyd/chainlink/core/testutils/pgtest"
+	"github.com/pickleyd/chainlink/core/utils"
+
+	"github.com/smartcontractkit/sqlx"
 )
 
 type Task struct {
 	Name string
+}
+
+func newRunner(t testing.TB, db *sqlx.DB, cfg *configtest.TestGeneralConfig) (pipeline.Runner, *mocks.ORM) {
+	cc := evmtest.NewChainSet(t, evmtest.TestChainOpts{DB: db, GeneralConfig: cfg})
+	orm := mocks.NewORM(t)
+	q := pg.NewQ(db, logger.TestLogger(t), cfg)
+
+	orm.On("GetQ").Return(q).Maybe()
+	ethKeyStore := cltest.NewKeyStore(t, db, cfg).Eth()
+	c := clhttptest.NewTestLocalOnlyHTTPClient()
+	r := pipeline.NewRunner(orm, cfg, cc, ethKeyStore, nil, logger.TestLogger(t), c, c)
+	return r, orm
+}
+
+func Test_PipelineRunner_ExecuteTaskRuns(t *testing.T) {
+	db := pgtest.NewSqlxDB(t)
+	cfg := cltest.NewTestGeneralConfig(t)
+
+	btcUSDPairing := utils.MustUnmarshalToMap(`{"data":{"coin":"BTC","market":"USD"}}`)
+
+	// 1. Setup bridge
+	s1 := httptest.NewServer(fakePriceResponder(t, btcUSDPairing, decimal.NewFromInt(9700), "", nil))
+	defer s1.Close()
+
+	bridgeFeedURL, err := url.ParseRequestURI(s1.URL)
+	require.NoError(t, err)
+
+	bt, _ := cltest.MustCreateBridge(t, db, cltest.BridgeOpts{URL: bridgeFeedURL.String()}, cfg)
+
+	// 2. Setup success HTTP
+	s2 := httptest.NewServer(fakePriceResponder(t, btcUSDPairing, decimal.NewFromInt(9600), "", nil))
+	defer s2.Close()
+
+	s4 := httptest.NewServer(fakeStringResponder(t, "foo-index-1"))
+	defer s4.Close()
+	s5 := httptest.NewServer(fakeStringResponder(t, "bar-index-2"))
+	defer s5.Close()
+
+	r, _ := newRunner(t, db, cfg)
+
+	s := fmt.Sprintf(`
+ds1 [type=bridge name="%s" timeout=0 requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
+ds1_parse [type=jsonparse lax=false  path="data,result"]
+ds1_multiply [type=multiply times=1000000000000000000]
+
+ds2 [type=http method="GET" url="%s" requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
+ds2_parse [type=jsonparse lax=false  path="data,result"]
+ds2_multiply [type=multiply times=1000000000000000000]
+
+ds3 [type=http method="GET" url="blah://test.invalid" requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
+ds3_parse [type=jsonparse lax=false  path="data,result"]
+ds3_multiply [type=multiply times=1000000000000000000]
+
+ds1->ds1_parse->ds1_multiply->median;
+ds2->ds2_parse->ds2_multiply->median;
+ds3->ds3_parse->ds3_multiply->median;
+
+median [type=median index=0]
+ds4 [type=http method="GET" url="%s" index=1]
+ds5 [type=http method="GET" url="%s" index=2]
+`, bt.Name.String(), s2.URL, s4.URL, s5.URL)
+	d, err := pipeline.Parse(s)
+	require.NoError(t, err)
+
+	spec := pipeline.Spec{DotDagSource: s}
+	vars := pipeline.NewVarsFrom(nil)
+
+	lggr := logger.TestLogger(t)
+	_, trrs, err := r.ExecuteRun(testutils.Context(t), spec, vars, lggr)
+	require.NoError(t, err)
+	require.Len(t, trrs, len(d.Tasks))
+
+	finalResults := trrs.FinalResult(lggr)
+	require.Len(t, finalResults.Values, 3)
+	require.Len(t, finalResults.AllErrors, 12)
+	require.Len(t, finalResults.FatalErrors, 3)
+	assert.Equal(t, "9650000000000000000000", finalResults.Values[0].(decimal.Decimal).String())
+	assert.Nil(t, finalResults.FatalErrors[0])
+	assert.Equal(t, "foo-index-1", finalResults.Values[1].(string))
+	assert.Nil(t, finalResults.FatalErrors[1])
+	assert.Equal(t, "bar-index-2", finalResults.Values[2].(string))
+	assert.Nil(t, finalResults.FatalErrors[2])
+
+	var errorResults []pipeline.TaskRunResult
+	for _, trr := range trrs {
+		if trr.Result.Error != nil && !trr.IsTerminal() {
+			errorResults = append(errorResults, trr)
+		}
+	}
+	// There are three tasks in the erroring pipeline
+	require.Len(t, errorResults, 3)
+}
+
+type adapterRequest struct {
+	ID          string            `json:"id"`
+	Data        pipeline.MapParam `json:"data"`
+	Meta        pipeline.MapParam `json:"meta"`
+	ResponseURL string            `json:"responseURL"`
+}
+
+type adapterResponseData struct {
+	Result *decimal.Decimal `json:"result"`
+}
+
+// adapterResponse is the HTTP response as defined by the external adapter:
+// https://github.com/smartcontractkit/bnc-adapter
+type adapterResponse struct {
+	Data         adapterResponseData `json:"data"`
+	ErrorMessage null.String         `json:"errorMessage"`
+}
+
+func dataWithResult(t *testing.T, result decimal.Decimal) adapterResponseData {
+	t.Helper()
+	var data adapterResponseData
+	body := []byte(fmt.Sprintf(`{"result":%v}`, result))
+	require.NoError(t, json.Unmarshal(body, &data))
+	return data
+}
+
+func fakePriceResponder(t *testing.T, requestData map[string]interface{}, result decimal.Decimal, inputKey string, expectedInput interface{}) http.Handler {
+	t.Helper()
+
+	body, err := json.Marshal(requestData)
+	require.NoError(t, err)
+	var expectedRequest adapterRequest
+	err = json.Unmarshal(body, &expectedRequest)
+	require.NoError(t, err)
+	response := adapterResponse{Data: dataWithResult(t, result)}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var reqBody adapterRequest
+		payload, err := ioutil.ReadAll(r.Body)
+		require.NoError(t, err)
+		defer r.Body.Close()
+		err = json.Unmarshal(payload, &reqBody)
+		require.NoError(t, err)
+		require.Equal(t, expectedRequest.Data, reqBody.Data)
+		w.Header().Set("Content-Type", "application/json")
+		require.NoError(t, json.NewEncoder(w).Encode(response))
+
+		if inputKey != "" {
+			m := utils.MustUnmarshalToMap(string(payload))
+			if expectedInput != nil {
+				require.Equal(t, expectedInput, m[inputKey])
+			} else {
+				require.Nil(t, m[inputKey])
+			}
+		}
+	})
+}
+
+func fakeStringResponder(t *testing.T, s string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, err := w.Write([]byte(s))
+		require.NoError(t, err)
+	})
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +225,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	var t Task
-	err := dec.Decode(&t)
+	var task Task
+	err := dec.Decode(&task)
 
 	if err != nil {
 		var syntaxError *json.SyntaxError
@@ -119,5 +299,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Task: %+v", t)
+	fmt.Fprintf(w, "Task: %+v", task)
+
+	// Execute test
+
+	// fmt.Fprintf(w, "Error results: %+v", errorResults)
 }
