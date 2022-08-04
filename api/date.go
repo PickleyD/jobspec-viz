@@ -8,8 +8,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
+	"reflect"
+	"time"
+
 	"strings"
 	"testing"
 
@@ -25,13 +26,14 @@ import (
 	"github.com/pickleyd/chainlink/core/services/pg"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
 	"github.com/pickleyd/chainlink/core/services/pipeline/mocks"
+
 	"github.com/pickleyd/chainlink/core/testutils"
 	"github.com/pickleyd/chainlink/core/testutils/configtest"
 	"github.com/pickleyd/chainlink/core/testutils/evmtest"
 	clhttptest "github.com/pickleyd/chainlink/core/testutils/httptest"
+
 	"github.com/pickleyd/chainlink/core/testutils/pgtest"
 	"github.com/pickleyd/chainlink/core/utils"
-
 	"github.com/smartcontractkit/sqlx"
 )
 
@@ -51,84 +53,113 @@ func newRunner(t testing.TB, db *sqlx.DB, cfg *configtest.TestGeneralConfig) (pi
 	return r, orm
 }
 
-func Test_PipelineRunner_ExecuteTaskRuns(t *testing.T) {
+func Test_PipelineRunner_Base64DecodeOutputs(t *testing.T) {
 	db := pgtest.NewSqlxDB(t)
 	cfg := cltest.NewTestGeneralConfig(t)
-
-	btcUSDPairing := utils.MustUnmarshalToMap(`{"data":{"coin":"BTC","market":"USD"}}`)
-
-	// 1. Setup bridge
-	s1 := httptest.NewServer(fakePriceResponder(t, btcUSDPairing, decimal.NewFromInt(9700), "", nil))
-	defer s1.Close()
-
-	bridgeFeedURL, err := url.ParseRequestURI(s1.URL)
-	require.NoError(t, err)
-
-	bt, _ := cltest.MustCreateBridge(t, db, cltest.BridgeOpts{URL: bridgeFeedURL.String()}, cfg)
-
-	// 2. Setup success HTTP
-	s2 := httptest.NewServer(fakePriceResponder(t, btcUSDPairing, decimal.NewFromInt(9600), "", nil))
-	defer s2.Close()
-
-	s4 := httptest.NewServer(fakeStringResponder(t, "foo-index-1"))
-	defer s4.Close()
-	s5 := httptest.NewServer(fakeStringResponder(t, "bar-index-2"))
-	defer s5.Close()
-
 	r, _ := newRunner(t, db, cfg)
-
-	s := fmt.Sprintf(`
-ds1 [type=bridge name="%s" timeout=0 requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
-ds1_parse [type=jsonparse lax=false  path="data,result"]
-ds1_multiply [type=multiply times=1000000000000000000]
-
-ds2 [type=http method="GET" url="%s" requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
-ds2_parse [type=jsonparse lax=false  path="data,result"]
-ds2_multiply [type=multiply times=1000000000000000000]
-
-ds3 [type=http method="GET" url="blah://test.invalid" requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
-ds3_parse [type=jsonparse lax=false  path="data,result"]
-ds3_multiply [type=multiply times=1000000000000000000]
-
-ds1->ds1_parse->ds1_multiply->median;
-ds2->ds2_parse->ds2_multiply->median;
-ds3->ds3_parse->ds3_multiply->median;
-
-median [type=median index=0]
-ds4 [type=http method="GET" url="%s" index=1]
-ds5 [type=http method="GET" url="%s" index=2]
-`, bt.Name.String(), s2.URL, s4.URL, s5.URL)
-	d, err := pipeline.Parse(s)
-	require.NoError(t, err)
-
-	spec := pipeline.Spec{DotDagSource: s}
-	vars := pipeline.NewVarsFrom(nil)
-
-	lggr := logger.TestLogger(t)
-	_, trrs, err := r.ExecuteRun(testutils.Context(t), spec, vars, lggr)
-	require.NoError(t, err)
-	require.Len(t, trrs, len(d.Tasks))
-
-	finalResults := trrs.FinalResult(lggr)
-	require.Len(t, finalResults.Values, 3)
-	require.Len(t, finalResults.AllErrors, 12)
-	require.Len(t, finalResults.FatalErrors, 3)
-	assert.Equal(t, "9650000000000000000000", finalResults.Values[0].(decimal.Decimal).String())
-	assert.Nil(t, finalResults.FatalErrors[0])
-	assert.Equal(t, "foo-index-1", finalResults.Values[1].(string))
-	assert.Nil(t, finalResults.FatalErrors[1])
-	assert.Equal(t, "bar-index-2", finalResults.Values[2].(string))
-	assert.Nil(t, finalResults.FatalErrors[2])
-
-	var errorResults []pipeline.TaskRunResult
-	for _, trr := range trrs {
-		if trr.Result.Error != nil && !trr.IsTerminal() {
-			errorResults = append(errorResults, trr)
-		}
+	input := map[string]interface{}{
+		"astring": "SGVsbG8sIHBsYXlncm91bmQ=",
 	}
-	// There are three tasks in the erroring pipeline
-	require.Len(t, errorResults, 3)
+	lggr := logger.TestLogger(t)
+	_, trrs, err := r.ExecuteRun(testutils.Context(t), pipeline.Spec{
+		DotDagSource: `
+	a [type=base64decode input="$(astring)"]
+	`,
+	}, pipeline.NewVarsFrom(input), lggr)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(trrs))
+	assert.Equal(t, false, trrs.FinalResult(lggr).HasFatalErrors())
+
+	result, err := trrs.FinalResult(lggr).SingularResult()
+	require.NoError(t, err)
+	assert.Equal(t, []byte("Hello, playground"), result.Value)
 }
+
+func TestGood(t *testing.T) {
+}
+
+func TestBad(t *testing.T) {
+	t.Error("This is a mocked failed test")
+}
+
+// func Test_PipelineRunner_ExecuteTaskRuns(t *testing.T) {
+// 	db := pgtest.NewSqlxDB(t)
+// 	cfg := cltest.NewTestGeneralConfig(t)
+
+// 	btcUSDPairing := utils.MustUnmarshalToMap(`{"data":{"coin":"BTC","market":"USD"}}`)
+
+// 	// 1. Setup bridge
+// 	s1 := httptest.NewServer(fakePriceResponder(t, btcUSDPairing, decimal.NewFromInt(9700), "", nil))
+// 	defer s1.Close()
+
+// 	bridgeFeedURL, err := url.ParseRequestURI(s1.URL)
+// 	require.NoError(t, err)
+
+// 	bt, _ := cltest.MustCreateBridge(t, db, cltest.BridgeOpts{URL: bridgeFeedURL.String()}, cfg)
+
+// 	// 2. Setup success HTTP
+// 	s2 := httptest.NewServer(fakePriceResponder(t, btcUSDPairing, decimal.NewFromInt(9600), "", nil))
+// 	defer s2.Close()
+
+// 	s4 := httptest.NewServer(fakeStringResponder(t, "foo-index-1"))
+// 	defer s4.Close()
+// 	s5 := httptest.NewServer(fakeStringResponder(t, "bar-index-2"))
+// 	defer s5.Close()
+
+// 	r, _ := newRunner(t, db, cfg)
+
+// 	s := fmt.Sprintf(`
+// ds1 [type=bridge name="%s" timeout=0 requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
+// ds1_parse [type=jsonparse lax=false  path="data,result"]
+// ds1_multiply [type=multiply times=1000000000000000000]
+
+// ds2 [type=http method="GET" url="%s" requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
+// ds2_parse [type=jsonparse lax=false  path="data,result"]
+// ds2_multiply [type=multiply times=1000000000000000000]
+
+// ds3 [type=http method="GET" url="blah://test.invalid" requestData=<{"data": {"coin": "BTC", "market": "USD"}}>]
+// ds3_parse [type=jsonparse lax=false  path="data,result"]
+// ds3_multiply [type=multiply times=1000000000000000000]
+
+// ds1->ds1_parse->ds1_multiply->median;
+// ds2->ds2_parse->ds2_multiply->median;
+// ds3->ds3_parse->ds3_multiply->median;
+
+// median [type=median index=0]
+// ds4 [type=http method="GET" url="%s" index=1]
+// ds5 [type=http method="GET" url="%s" index=2]
+// `, bt.Name.String(), s2.URL, s4.URL, s5.URL)
+// 	d, err := pipeline.Parse(s)
+// 	require.NoError(t, err)
+
+// 	spec := pipeline.Spec{DotDagSource: s}
+// 	vars := pipeline.NewVarsFrom(nil)
+
+// 	lggr := logger.TestLogger(t)
+// 	_, trrs, err := r.ExecuteRun(testutils.Context(t), spec, vars, lggr)
+// 	require.NoError(t, err)
+// 	require.Len(t, trrs, len(d.Tasks))
+
+// 	finalResults := trrs.FinalResult(lggr)
+// 	require.Len(t, finalResults.Values, 3)
+// 	require.Len(t, finalResults.AllErrors, 12)
+// 	require.Len(t, finalResults.FatalErrors, 3)
+// 	assert.Equal(t, "9650000000000000000000", finalResults.Values[0].(decimal.Decimal).String())
+// 	assert.Nil(t, finalResults.FatalErrors[0])
+// 	assert.Equal(t, "foo-index-1", finalResults.Values[1].(string))
+// 	assert.Nil(t, finalResults.FatalErrors[1])
+// 	assert.Equal(t, "bar-index-2", finalResults.Values[2].(string))
+// 	assert.Nil(t, finalResults.FatalErrors[2])
+
+// 	var errorResults []pipeline.TaskRunResult
+// 	for _, trr := range trrs {
+// 		if trr.Result.Error != nil && !trr.IsTerminal() {
+// 			errorResults = append(errorResults, trr)
+// 		}
+// 	}
+// 	// There are three tasks in the erroring pipeline
+// 	require.Len(t, errorResults, 3)
+// }
 
 type adapterRequest struct {
 	ID          string            `json:"id"`
@@ -302,6 +333,46 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Task: %+v", task)
 
 	// Execute test
+	m := testing.MainStart(testDeps{},
+		[]testing.InternalTest{
+			{"Good", TestGood},
+			{"Bad", TestBad},
+		},
+		nil, nil, nil,
+	)
+
+	result := m.Run()
+	fmt.Fprintf(w, "Result: %+v", result)
 
 	// fmt.Fprintf(w, "Error results: %+v", errorResults)
+}
+
+type testDeps struct{}
+
+func (td testDeps) MatchString(pat, str string) (bool, error)   { return true, nil }
+func (td testDeps) StartCPUProfile(w io.Writer) error           { return nil }
+func (td testDeps) StopCPUProfile()                             {}
+func (td testDeps) WriteProfileTo(string, io.Writer, int) error { return nil }
+func (td testDeps) ImportPath() string                          { return "" }
+func (td testDeps) StartTestLog(io.Writer)                      {}
+func (td testDeps) StopTestLog() error                          { return nil }
+func (td testDeps) SetPanicOnExit0(bool)                        {}
+func (td testDeps) CoordinateFuzzing(time.Duration, int64, time.Duration, int64, int, []corpusEntry, []reflect.Type, string, string) error {
+	return nil
+}
+func (td testDeps) RunFuzzWorker(func(corpusEntry) error) error { return nil }
+func (td testDeps) ReadCorpus(string, []reflect.Type) ([]corpusEntry, error) {
+	return []corpusEntry{}, nil
+}
+func (td testDeps) CheckCorpus([]any, []reflect.Type) error { return nil }
+func (td testDeps) ResetCoverage()                          {}
+func (td testDeps) SnapshotCoverage()                       {}
+
+type corpusEntry = struct {
+	Parent     string
+	Path       string
+	Data       []byte
+	Values     []any
+	Generation int
+	IsSeed     bool
 }
