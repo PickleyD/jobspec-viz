@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,9 +16,10 @@ import (
 	"testing"
 
 	"github.com/golang/gddo/httputil/header"
+	"github.com/pressly/goose/v3"
+	"gotest.tools/assert"
 
 	"github.com/shopspring/decimal"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/guregu/null.v4"
 
@@ -26,15 +28,19 @@ import (
 	"github.com/pickleyd/chainlink/core/services/pg"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
 	"github.com/pickleyd/chainlink/core/services/pipeline/mocks"
-
 	"github.com/pickleyd/chainlink/core/testutils"
+
 	"github.com/pickleyd/chainlink/core/testutils/configtest"
 	"github.com/pickleyd/chainlink/core/testutils/evmtest"
 	clhttptest "github.com/pickleyd/chainlink/core/testutils/httptest"
 
-	"github.com/pickleyd/chainlink/core/testutils/pgtest"
 	"github.com/pickleyd/chainlink/core/utils"
 	"github.com/smartcontractkit/sqlx"
+
+	_ "github.com/proullon/ramsql/driver"
+
+	"github.com/pickleyd/jobspecviz/database"
+	_ "github.com/pickleyd/jobspecviz/database/migrations" // Invoke init() functions within migrations pkg.
 )
 
 type Task struct {
@@ -53,10 +59,97 @@ func newRunner(t testing.TB, db *sqlx.DB, cfg *configtest.TestGeneralConfig) (pi
 	return r, orm
 }
 
+func LoadUserAddresses(db *sqlx.DB, userID int64) ([]string, error) {
+	query := `SELECT address.street_number, address.street FROM address 
+							JOIN user_addresses ON address.id=user_addresses.address_id 
+							WHERE user_addresses.user_id = $1;`
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var addresses []string
+	for rows.Next() {
+		var number int
+		var street string
+		if err := rows.Scan(&number, &street); err != nil {
+			return nil, err
+		}
+		addresses = append(addresses, fmt.Sprintf("%d %s", number, street))
+	}
+
+	return addresses, nil
+}
+
+const MIGRATIONS_DIR string = "migrations"
+
 func Test_PipelineRunner_Base64DecodeOutputs(t *testing.T) {
-	db := pgtest.NewSqlxDB(t)
+	// db := pgtest.NewSqlxDB(t)
+
+	// batch := []string{
+	// 	`CREATE TABLE address (id BIGSERIAL PRIMARY KEY, street TEXT, street_number INT);`,
+	// 	`CREATE TABLE user_addresses (address_id INT, user_id INT);`,
+	// 	`INSERT INTO address (street, street_number) VALUES ('rue Victor Hugo', 32);`,
+	// 	`INSERT INTO address (street, street_number) VALUES ('boulevard de la République', 23);`,
+	// 	`INSERT INTO address (street, street_number) VALUES ('rue Charles Martel', 5);`,
+	// 	`INSERT INTO address (street, street_number) VALUES ('chemin du bout du monde ', 323);`,
+	// 	`INSERT INTO address (street, street_number) VALUES ('boulevard de la liberté', 2);`,
+	// 	`INSERT INTO address (street, street_number) VALUES ('avenue des champs', 12);`,
+	// 	`INSERT INTO user_addresses (address_id, user_id) VALUES (2, 1);`,
+	// 	`INSERT INTO user_addresses (address_id, user_id) VALUES (4, 1);`,
+	// 	`INSERT INTO user_addresses (address_id, user_id) VALUES (2, 2);`,
+	// 	`INSERT INTO user_addresses (address_id, user_id) VALUES (2, 3);`,
+	// 	`INSERT INTO user_addresses (address_id, user_id) VALUES (4, 4);`,
+	// 	`INSERT INTO user_addresses (address_id, user_id) VALUES (4, 5);`,
+	// 	`CREATE TABLE goose_db_version (id serial NOT NULL,	version_id bigint NOT NULL,	is_applied boolean NOT NULL, tstamp timestamp default now(), PRIMARY KEY(id));`,
+	// }
+
+	embedMigrations := database.GetMigrations()
+	goose.SetBaseFS(embedMigrations)
+
+	verbose := false
+	// verbose, _ := strconv.ParseBool(os.Getenv("LOG_SQL_MIGRATIONS"))
+	goose.SetVerbose(verbose)
+
+	db, err := sql.Open("ramsql", "TestLoadUserAddresses")
+
+	// for _, b := range batch {
+	// 	_, err = db.Exec(b)
+	// 	if err != nil {
+	// 		t.Fatalf("sql.Exec: Error: %s\n", err)
+	// 	}
+	// }
+
+	gooseUpErr := goose.Up(db, MIGRATIONS_DIR, goose.WithAllowMissing(), goose.WithNoVersioning())
+
+	fmt.Println("HERE")
+
+	fmt.Print(gooseUpErr)
+
+	// status := goose.Status(db, MIGRATIONS_DIR, goose.WithNoVersioning())
+
+	// fmt.Print(status)
+
+	sqlxDB := pg.WrapDbWithSqlx(db)
+
+	// if err != nil {
+	// 	t.Fatalf("sql.Open : Error : %s\n", err)
+	// }
+	// defer db.Close()
+
+	// addresses, err := LoadUserAddresses(sqlxDB, 1)
+	// if err != nil {
+	// 	t.Fatalf("Too bad! unexpected error: %s", err)
+	// }
+
+	// if len(addresses) != 2 {
+	// 	t.Fatalf("Expected 2 addresses, got %d", len(addresses))
+	// }
+
 	cfg := cltest.NewTestGeneralConfig(t)
-	r, _ := newRunner(t, db, cfg)
+
+	r, _ := newRunner(t, sqlxDB, cfg)
 	input := map[string]interface{}{
 		"astring": "SGVsbG8sIHBsYXlncm91bmQ=",
 	}
@@ -337,6 +430,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		[]testing.InternalTest{
 			{"Good", TestGood},
 			{"Bad", TestBad},
+			{"CL", Test_PipelineRunner_Base64DecodeOutputs},
 		},
 		nil, nil, nil,
 	)
