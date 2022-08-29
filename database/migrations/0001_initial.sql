@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 --
 -- PostgreSQL database dump
@@ -8,122 +8,21 @@
 -- Dumped from database version 11.6 (Debian 11.6-1.pgdg90+1)
 -- Dumped by pg_dump version 13.1
 
---
--- Name: eth_tx_attempts_state; Type: TYPE; Schema: public; Owner: postgres
---
-
-CREATE TYPE public.eth_tx_attempts_state AS ENUM (
-    'in_progress',
-    'insufficient_eth',
-    'broadcast'
-);
 
 
 
 
---
--- Name: eth_txes_state; Type: TYPE; Schema: public; Owner: postgres
---
-
-CREATE TYPE public.eth_txes_state AS ENUM (
-    'unstarted',
-    'in_progress',
-    'fatal_error',
-    'unconfirmed',
-    'confirmed_missing_receipt',
-    'confirmed'
-);
 
 
 
 
---
--- Name: run_status; Type: TYPE; Schema: public; Owner: postgres
---
-
-CREATE TYPE public.run_status AS ENUM (
-    'unstarted',
-    'in_progress',
-    'pending_incoming_confirmations',
-    'pending_outgoing_confirmations',
-    'pending_connection',
-    'pending_bridge',
-    'pending_sleep',
-    'errored',
-    'completed',
-    'cancelled'
-);
 
 
 
 
---
--- Name: notifyethtxinsertion(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.notifyethtxinsertion() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-        BEGIN
-		PERFORM pg_notify('insert_on_eth_txes'::text, NOW()::text);
-		RETURN NULL;
-        END
-        $$;
 
 
 
-
---
--- Name: notifyjobcreated(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.notifyjobcreated() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-        BEGIN
-            PERFORM pg_notify('insert_on_jobs', NEW.id::text);
-            RETURN NEW;
-        END
-        $$;
-
-
-
-
---
--- Name: notifyjobdeleted(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.notifyjobdeleted() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-	BEGIN
-		PERFORM pg_notify('delete_from_jobs', OLD.id::text);
-		RETURN OLD;
-	END
-	$$;
-
-
-
-
---
--- Name: notifypipelinerunstarted(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.notifypipelinerunstarted() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-	BEGIN
-		IF NEW.finished_at IS NULL THEN
-			PERFORM pg_notify('pipeline_run_started', NEW.id::text);
-		END IF;
-		RETURN NEW;
-	END
-	$$;
-
-
-
-
-SET default_tablespace = '';
 
 --
 -- Name: bridge_types; Type: TABLE; Schema: public; Owner: postgres
@@ -136,7 +35,7 @@ CREATE TABLE public.bridge_types (
     incoming_token_hash text NOT NULL,
     salt text NOT NULL,
     outgoing_token text NOT NULL,
-    minimum_contract_payment character varying(255),
+    minimum_contract_payment varchar(255),
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );
@@ -160,25 +59,6 @@ CREATE TABLE public.configurations (
 
 
 
---
--- Name: configurations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.configurations_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.configurations_id_seq OWNED BY public.configurations.id;
 
 
 --
@@ -190,9 +70,7 @@ CREATE TABLE public.direct_request_specs (
     contract_address bytea NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    on_chain_job_spec_id bytea NOT NULL,
-    CONSTRAINT direct_request_specs_on_chain_job_spec_id_check CHECK ((octet_length(on_chain_job_spec_id) = 32)),
-    CONSTRAINT eth_request_event_specs_contract_address_check CHECK ((octet_length(contract_address) = 20))
+    on_chain_job_spec_id bytea NOT NULL
 );
 
 
@@ -227,33 +105,14 @@ CREATE TABLE public.encrypted_p2p_keys (
     encrypted_priv_key jsonb NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    deleted_at timestamp with time zone,
-    CONSTRAINT chk_pub_key_length CHECK ((octet_length(pub_key) = 32))
+    deleted_at timestamp with time zone
 );
 
 
 
 
---
--- Name: encrypted_p2p_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.encrypted_p2p_keys_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: encrypted_p2p_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.encrypted_p2p_keys_id_seq OWNED BY public.encrypted_p2p_keys.id;
 
 
 --
@@ -261,7 +120,7 @@ ALTER SEQUENCE public.encrypted_p2p_keys_id_seq OWNED BY public.encrypted_p2p_ke
 --
 
 CREATE TABLE public.encrypted_vrf_keys (
-    public_key character varying(68) NOT NULL,
+    public_key varchar(68) NOT NULL,
     vrf_key text NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
@@ -277,7 +136,7 @@ CREATE TABLE public.encrypted_vrf_keys (
 
 CREATE TABLE public.encumbrances (
     id bigint NOT NULL,
-    payment numeric(78,0),
+    payment numeric,
     expiration bigint,
     end_at timestamp with time zone,
     oracles text,
@@ -291,26 +150,8 @@ CREATE TABLE public.encumbrances (
 
 
 
---
--- Name: encumbrances_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.encumbrances_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: encumbrances_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.encumbrances_id_seq OWNED BY public.encumbrances.id;
 
 
 --
@@ -325,53 +166,10 @@ CREATE TABLE public.eth_receipts (
     transaction_index bigint NOT NULL,
     receipt jsonb NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    CONSTRAINT chk_hash_length CHECK (((octet_length(tx_hash) = 32) AND (octet_length(block_hash) = 32)))
 );
 
 
 
-
---
--- Name: eth_receipts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.eth_receipts_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: eth_receipts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.eth_receipts_id_seq OWNED BY public.eth_receipts.id;
-
-
---
--- Name: eth_request_event_specs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.eth_request_event_specs_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: eth_request_event_specs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.eth_request_event_specs_id_seq OWNED BY public.direct_request_specs.id;
 
 
 --
@@ -399,34 +197,10 @@ CREATE TABLE public.eth_tx_attempts (
     broadcast_before_block_num bigint,
     state public.eth_tx_attempts_state NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    CONSTRAINT chk_cannot_broadcast_before_block_zero CHECK (((broadcast_before_block_num IS NULL) OR (broadcast_before_block_num > 0))),
-    CONSTRAINT chk_eth_tx_attempts_fsm CHECK ((((state = ANY (ARRAY['in_progress'::public.eth_tx_attempts_state, 'insufficient_eth'::public.eth_tx_attempts_state])) AND (broadcast_before_block_num IS NULL)) OR (state = 'broadcast'::public.eth_tx_attempts_state))),
-    CONSTRAINT chk_hash_length CHECK ((octet_length(hash) = 32)),
-    CONSTRAINT chk_signed_raw_tx_present CHECK ((octet_length(signed_raw_tx) > 0))
 );
 
 
 
-
---
--- Name: eth_tx_attempts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.eth_tx_attempts_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: eth_tx_attempts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.eth_tx_attempts_id_seq OWNED BY public.eth_tx_attempts.id;
 
 
 --
@@ -445,35 +219,11 @@ CREATE TABLE public.eth_txes (
     broadcast_at timestamp with time zone,
     created_at timestamp with time zone NOT NULL,
     state public.eth_txes_state DEFAULT 'unstarted'::public.eth_txes_state NOT NULL,
-    CONSTRAINT chk_broadcast_at_is_sane CHECK ((broadcast_at > '2019-01-01 00:00:00+00'::timestamp with time zone)),
-    CONSTRAINT chk_error_cannot_be_empty CHECK (((error IS NULL) OR (length(error) > 0))),
-    CONSTRAINT chk_eth_txes_fsm CHECK ((((state = 'unstarted'::public.eth_txes_state) AND (nonce IS NULL) AND (error IS NULL) AND (broadcast_at IS NULL)) OR ((state = 'in_progress'::public.eth_txes_state) AND (nonce IS NOT NULL) AND (error IS NULL) AND (broadcast_at IS NULL)) OR ((state = 'fatal_error'::public.eth_txes_state) AND (nonce IS NULL) AND (error IS NOT NULL) AND (broadcast_at IS NULL)) OR ((state = 'unconfirmed'::public.eth_txes_state) AND (nonce IS NOT NULL) AND (error IS NULL) AND (broadcast_at IS NOT NULL)) OR ((state = 'confirmed'::public.eth_txes_state) AND (nonce IS NOT NULL) AND (error IS NULL) AND (broadcast_at IS NOT NULL)) OR ((state = 'confirmed_missing_receipt'::public.eth_txes_state) AND (nonce IS NOT NULL) AND (error IS NULL) AND (broadcast_at IS NOT NULL)))),
-    CONSTRAINT chk_from_address_length CHECK ((octet_length(from_address) = 20)),
-    CONSTRAINT chk_to_address_length CHECK ((octet_length(to_address) = 20))
 );
 
 
 
 
---
--- Name: eth_txes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.eth_txes_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: eth_txes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.eth_txes_id_seq OWNED BY public.eth_txes.id;
 
 
 --
@@ -497,26 +247,7 @@ CREATE TABLE public.external_initiators (
 
 
 
---
--- Name: external_initiators_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
-CREATE SEQUENCE public.external_initiators_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: external_initiators_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.external_initiators_id_seq OWNED BY public.external_initiators.id;
 
 
 --
@@ -535,25 +266,8 @@ CREATE TABLE public.flux_monitor_round_stats (
 
 
 
---
--- Name: flux_monitor_round_stats_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.flux_monitor_round_stats_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: flux_monitor_round_stats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.flux_monitor_round_stats_id_seq OWNED BY public.flux_monitor_round_stats.id;
 
 
 --
@@ -572,34 +286,11 @@ CREATE TABLE public.flux_monitor_specs (
     idle_timer_disabled boolean,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    CONSTRAINT flux_monitor_specs_check CHECK ((poll_timer_disabled OR (poll_timer_period > 0))),
-    CONSTRAINT flux_monitor_specs_check1 CHECK ((idle_timer_disabled OR (idle_timer_period > 0))),
-    CONSTRAINT flux_monitor_specs_contract_address_check CHECK ((octet_length(contract_address) = 20))
 );
 
 
 
 
---
--- Name: flux_monitor_specs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.flux_monitor_specs_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: flux_monitor_specs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.flux_monitor_specs_id_seq OWNED BY public.flux_monitor_specs.id;
 
 
 --
@@ -613,32 +304,12 @@ CREATE TABLE public.heads (
     parent_hash bytea NOT NULL,
     created_at timestamp with time zone NOT NULL,
     "timestamp" timestamp with time zone NOT NULL,
-    CONSTRAINT chk_hash_size CHECK ((octet_length(hash) = 32)),
-    CONSTRAINT chk_parent_hash_size CHECK ((octet_length(parent_hash) = 32))
 );
 
 
 
 
---
--- Name: heads_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
-CREATE SEQUENCE public.heads_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: heads_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.heads_id_seq OWNED BY public.heads.id;
 
 
 --
@@ -656,7 +327,7 @@ CREATE TABLE public.initiators (
     ran boolean,
     address bytea,
     requesters text,
-    name character varying(255),
+    name varchar(255),
     params jsonb,
     from_block numeric(78,0),
     to_block numeric(78,0),
@@ -675,26 +346,6 @@ CREATE TABLE public.initiators (
 
 
 
---
--- Name: initiators_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.initiators_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: initiators_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.initiators_id_seq OWNED BY public.initiators.id;
 
 
 --
@@ -736,25 +387,7 @@ CREATE TABLE public.job_spec_errors (
 
 
 
---
--- Name: job_spec_errors_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
-CREATE SEQUENCE public.job_spec_errors_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: job_spec_errors_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.job_spec_errors_id_seq OWNED BY public.job_spec_errors.id;
 
 
 --
@@ -773,25 +406,6 @@ CREATE TABLE public.job_spec_errors_v2 (
 
 
 
---
--- Name: job_spec_errors_v2_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.job_spec_errors_v2_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: job_spec_errors_v2_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.job_spec_errors_v2_id_seq OWNED BY public.job_spec_errors_v2.id;
 
 
 --
@@ -803,10 +417,10 @@ CREATE TABLE public.job_specs (
     start_at timestamp with time zone,
     end_at timestamp with time zone,
     deleted_at timestamp with time zone,
-    min_payment character varying(255),
+    min_payment varchar(255),
     id uuid NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    name character varying(255)
+    name varchar(255)
 );
 
 
@@ -820,40 +434,19 @@ CREATE TABLE public.jobs (
     id integer NOT NULL,
     pipeline_spec_id integer,
     offchainreporting_oracle_spec_id integer,
-    name character varying(255),
+    name varchar(255),
     schema_version integer NOT NULL,
-    type character varying(255) NOT NULL,
+    type varchar(255) NOT NULL,
     max_task_duration bigint,
     direct_request_spec_id integer,
     flux_monitor_spec_id integer,
-    CONSTRAINT chk_only_one_spec CHECK ((num_nonnulls(offchainreporting_oracle_spec_id, direct_request_spec_id, flux_monitor_spec_id) = 1)),
-    CONSTRAINT chk_schema_version CHECK ((schema_version > 0)),
-    CONSTRAINT chk_type CHECK (((type)::text <> ''::text))
 );
 
 
 
 
---
--- Name: jobs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.jobs_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.jobs_id_seq OWNED BY public.jobs.id;
 
 
 --
@@ -870,32 +463,9 @@ CREATE TABLE public.keys (
     last_used timestamp with time zone,
     is_funding boolean DEFAULT false NOT NULL,
     deleted_at timestamp with time zone,
-    CONSTRAINT chk_address_length CHECK ((octet_length(address) = 20))
 );
 
 
-
-
---
--- Name: keys_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.keys_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.keys_id_seq OWNED BY public.keys.id;
 
 
 --
@@ -910,31 +480,13 @@ CREATE TABLE public.log_consumptions (
     created_at timestamp without time zone NOT NULL,
     block_number bigint,
     job_id_v2 integer,
-    CONSTRAINT chk_log_consumptions_exactly_one_job_id CHECK ((((job_id IS NOT NULL) AND (job_id_v2 IS NULL)) OR ((job_id_v2 IS NOT NULL) AND (job_id IS NULL))))
-);
+    );
 
 
 
 
---
--- Name: log_consumptions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.log_consumptions_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: log_consumptions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.log_consumptions_id_seq OWNED BY public.log_consumptions.id;
 
 
 
@@ -952,7 +504,6 @@ CREATE TABLE public.offchainreporting_contract_configs (
     encoded bytea,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    CONSTRAINT offchainreporting_contract_configs_config_digest_check CHECK ((octet_length(config_digest) = 16))
 );
 
 
@@ -978,32 +529,12 @@ CREATE TABLE public.offchainreporting_oracle_specs (
     contract_config_confirmations integer,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    CONSTRAINT chk_contract_address_length CHECK ((octet_length(contract_address) = 20))
 );
 
 
 
 
---
--- Name: offchainreporting_oracle_specs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
-CREATE SEQUENCE public.offchainreporting_oracle_specs_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: offchainreporting_oracle_specs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.offchainreporting_oracle_specs_id_seq OWNED BY public.offchainreporting_oracle_specs.id;
 
 
 --
@@ -1023,7 +554,6 @@ CREATE TABLE public.offchainreporting_pending_transmissions (
     vs bytea NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    CONSTRAINT offchainreporting_pending_transmissions_config_digest_check CHECK ((octet_length(config_digest) = 16))
 );
 
 
@@ -1041,7 +571,6 @@ CREATE TABLE public.offchainreporting_persistent_states (
     highest_received_epoch bigint[] NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    CONSTRAINT offchainreporting_persistent_states_config_digest_check CHECK ((octet_length(config_digest) = 16))
 );
 
 
@@ -1074,31 +603,10 @@ CREATE TABLE public.pipeline_runs (
     finished_at timestamp with time zone,
     errors jsonb,
     outputs jsonb,
-    CONSTRAINT pipeline_runs_check CHECK ((((outputs IS NULL) AND (errors IS NULL) AND (finished_at IS NULL)) OR ((outputs IS NOT NULL) AND (errors IS NOT NULL) AND (finished_at IS NOT NULL))))
 );
 
 
 
-
---
--- Name: pipeline_runs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.pipeline_runs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: pipeline_runs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.pipeline_runs_id_seq OWNED BY public.pipeline_runs.id;
 
 
 --
@@ -1115,26 +623,8 @@ CREATE TABLE public.pipeline_specs (
 
 
 
---
--- Name: pipeline_specs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.pipeline_specs_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: pipeline_specs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.pipeline_specs_id_seq OWNED BY public.pipeline_specs.id;
 
 
 --
@@ -1157,25 +647,7 @@ CREATE TABLE public.pipeline_task_runs (
 
 
 
---
--- Name: pipeline_task_runs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
-CREATE SEQUENCE public.pipeline_task_runs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: pipeline_task_runs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.pipeline_task_runs_id_seq OWNED BY public.pipeline_task_runs.id;
 
 
 --
@@ -1203,26 +675,8 @@ CREATE TABLE public.pipeline_task_specs (
 COMMENT ON COLUMN public.pipeline_task_specs.dot_id IS 'Dot ID is included to help in debugging';
 
 
---
--- Name: pipeline_task_specs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.pipeline_task_specs_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: pipeline_task_specs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.pipeline_task_specs_id_seq OWNED BY public.pipeline_task_specs.id;
 
 
 --
@@ -1243,26 +697,7 @@ CREATE TABLE public.run_requests (
 
 
 
---
--- Name: run_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
-CREATE SEQUENCE public.run_requests_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: run_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.run_requests_id_seq OWNED BY public.run_requests.id;
 
 
 --
@@ -1280,26 +715,6 @@ CREATE TABLE public.run_results (
 
 
 
---
--- Name: run_results_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.run_results_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: run_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.run_results_id_seq OWNED BY public.run_results.id;
 
 
 --
@@ -1311,7 +726,7 @@ CREATE TABLE public.service_agreements (
     created_at timestamp with time zone NOT NULL,
     encumbrance_id bigint,
     request_body text,
-    signature character varying(255),
+    signature varchar(255),
     job_spec_id uuid,
     updated_at timestamp with time zone NOT NULL
 );
@@ -1346,25 +761,8 @@ CREATE TABLE public.sync_events (
 
 
 
---
--- Name: sync_events_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.sync_events_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-
-
---
--- Name: sync_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.sync_events_id_seq OWNED BY public.sync_events.id;
 
 
 --
@@ -1404,26 +802,7 @@ CREATE TABLE public.task_specs (
 
 
 
---
--- Name: task_specs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
 
-CREATE SEQUENCE public.task_specs_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
-
---
--- Name: task_specs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.task_specs_id_seq OWNED BY public.task_specs.id;
 
 
 --
@@ -2996,7 +2375,7 @@ ALTER TABLE ONLY public.task_specs
 -- PostgreSQL database dump complete
 --
 
--- +goose StatementEnd
+
 
 -- +goose Down
 -- Note we cannot just drop schema since

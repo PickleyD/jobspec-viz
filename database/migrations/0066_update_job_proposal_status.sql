@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 -- We must remove the old contraint to add an enum value to support Postgres v11
 ALTER TABLE job_proposals
@@ -22,10 +22,10 @@ ADD CONSTRAINT chk_job_proposals_status_fsm CHECK (
 	(status = 'rejected' AND external_job_id IS NULL)
 );
 
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 
 -- We must remove the old contraint to remove an enum value
 ALTER TABLE job_proposals
@@ -51,4 +51,4 @@ ADD CONSTRAINT chk_job_proposals_status_fsm CHECK (
 	(status = 'rejected' AND external_job_id IS NULL)
 );
 
--- +goose StatementEnd
+

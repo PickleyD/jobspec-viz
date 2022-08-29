@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 CREATE TABLE offchainreporting2_oracle_specs (
      id SERIAL PRIMARY KEY,
      contract_address bytea NOT NULL,
@@ -139,11 +139,11 @@ CREATE INDEX idx_offchainreporting2_pending_transmissions_time ON offchainreport
 -- After moving to the unified keystore the encrypted_p2p_keys table is no longer used
 -- So we have to drop this FK to be able to uses the discoverer (v2) networking stack
 ALTER TABLE offchainreporting_discoverer_announcements DROP CONSTRAINT offchainreporting_discoverer_announcements_local_peer_id_fkey;
--- +goose StatementEnd
+
 
 
 -- +goose Down
--- +goose StatementBegin
+
 DROP TABLE offchainreporting2_pending_transmissions;
 DROP TABLE offchainreporting2_persistent_states;
 DROP TABLE offchainreporting2_latest_round_requested;
@@ -162,4 +162,4 @@ ALTER TABLE jobs DROP CONSTRAINT chk_only_one_spec,
 ALTER TABLE jobs DROP COLUMN offchainreporting2_oracle_spec_id;
 ALTER TABLE offchainreporting_discoverer_announcements ADD CONSTRAINT offchainreporting_discoverer_announcements_local_peer_id_fkey FOREIGN KEY (local_peer_id) REFERENCES encrypted_p2p_keys(peer_id) DEFERRABLE INITIALLY IMMEDIATE;
 DROP TABLE offchainreporting2_oracle_specs;
--- +goose StatementEnd
+

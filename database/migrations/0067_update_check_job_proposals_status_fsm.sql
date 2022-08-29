@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 ALTER TABLE job_proposals
 DROP CONSTRAINT chk_job_proposals_status_fsm;
@@ -12,10 +12,10 @@ ADD CONSTRAINT chk_job_proposals_status_fsm CHECK (
 	(status = 'cancelled' AND external_job_id IS NULL)
 );
 
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 
 ALTER TABLE job_proposals
 DROP CONSTRAINT chk_job_proposals_status_fsm;
@@ -27,4 +27,4 @@ ADD CONSTRAINT chk_job_proposals_status_fsm CHECK (
 	(status = 'rejected' AND external_job_id IS NULL)
 );
 
--- +goose StatementEnd
+

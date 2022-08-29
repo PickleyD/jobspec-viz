@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 CREATE TABLE bootstrap_specs
 (
@@ -34,10 +34,10 @@ ALTER TABLE jobs
 
 ALTER TABLE offchainreporting2_oracle_specs
     DROP COLUMN contract_config_tracker_subscribe_interval;
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 ALTER TABLE jobs
     DROP CONSTRAINT chk_only_one_spec,
     ADD CONSTRAINT chk_only_one_spec CHECK (
@@ -58,4 +58,4 @@ DROP TABLE IF EXISTS bootstrap_specs;
 
 ALTER TABLE offchainreporting2_oracle_specs
     ADD COLUMN contract_config_tracker_subscribe_interval bigint;
--- +goose StatementEnd
+

@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 ALTER TABLE upkeep_registrations ALTER COLUMN upkeep_id TYPE numeric(78,0);
 
@@ -72,10 +72,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 
 ALTER TABLE upkeep_registrations ALTER COLUMN upkeep_id TYPE bigint;
 
@@ -118,4 +118,4 @@ WHERE id IN (
 );
 
 
--- +goose StatementEnd
+

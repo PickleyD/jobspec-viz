@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 ALTER TABLE offchainreporting2_oracle_specs
     ADD COLUMN relay text NOT NULL,
     ADD COLUMN relay_config JSONB NOT NULL DEFAULT '{}',
@@ -13,10 +13,10 @@ ALTER TABLE offchainreporting2_oracle_specs
     RENAME COLUMN transmitter_address TO transmitter_id;
 ALTER TABLE offchainreporting2_oracle_specs
     RENAME COLUMN encrypted_ocr_key_bundle_id TO ocr_key_bundle_id;
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 ALTER TABLE  offchainreporting2_oracle_specs
     DROP COLUMN relay,
     DROP COLUMN relay_config,
@@ -27,4 +27,4 @@ ALTER TABLE offchainreporting2_oracle_specs
     RENAME COLUMN transmitter_id TO transmitter_address;
 ALTER TABLE offchainreporting2_oracle_specs
     RENAME COLUMN ocr_key_bundle_id TO encrypted_ocr_key_bundle_id;
--- +goose StatementEnd
+

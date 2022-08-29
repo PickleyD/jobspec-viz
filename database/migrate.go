@@ -4,7 +4,7 @@ import (
 	"embed"
 )
 
-//go:embed temp/*.sql
+//go:embed migrations/*.sql
 var embedMigrations embed.FS
 
 // GetMigrations - parse and get all migrations

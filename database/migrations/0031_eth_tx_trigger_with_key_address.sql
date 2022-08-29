@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 CREATE OR REPLACE FUNCTION public.notifyethtxinsertion() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -11,4 +11,4 @@ CREATE OR REPLACE FUNCTION public.notifyethtxinsertion() RETURNS trigger
 
 DROP TRIGGER IF EXISTS notify_eth_tx_insertion on public.eth_txes;
 CREATE TRIGGER notify_eth_tx_insertion AFTER INSERT ON public.eth_txes FOR EACH ROW EXECUTE PROCEDURE public.notifyethtxinsertion();
--- +goose StatementEnd
+

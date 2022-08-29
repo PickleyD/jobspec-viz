@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 CREATE TABLE starknet_chains (
                                id text PRIMARY KEY,
                                cfg jsonb NOT NULL DEFAULT '{}',
@@ -17,10 +17,10 @@ CREATE TABLE starknet_nodes (
 );
 CREATE INDEX idx_starknet_nodes_chain_id ON starknet_nodes (chain_id);
 CREATE UNIQUE INDEX idx_starknet_nodes_unique_name ON starknet_nodes (lower(name));
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 DROP TABLE starknet_nodes;
 DROP TABLE starknet_chains;
--- +goose StatementEnd
+

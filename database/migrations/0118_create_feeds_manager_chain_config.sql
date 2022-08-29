@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 CREATE TABLE feeds_manager_chain_configs (
     id SERIAL PRIMARY KEY,
     chain_id VARCHAR NOT NULL,
@@ -24,10 +24,10 @@ DROP COLUMN job_types,
 DROP COLUMN is_ocr_bootstrap_peer,
 DROP COLUMN ocr_bootstrap_peer_multiaddr;
 
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 ALTER TABLE feeds_managers
 ADD COLUMN job_types TEXT[],
 ADD COLUMN is_ocr_bootstrap_peer boolean NOT NULL DEFAULT false,
@@ -41,4 +41,4 @@ ADD CONSTRAINT chk_ocr_bootstrap_peer_multiaddr CHECK ( NOT (
 ));
 
 DROP TABLE feeds_manager_chain_configs;
--- +goose StatementEnd
+

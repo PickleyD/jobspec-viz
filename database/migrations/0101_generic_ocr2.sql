@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 ALTER TABLE offchainreporting2_oracle_specs
     ADD COLUMN plugin_config JSONB NOT NULL DEFAULT '{}',
@@ -70,11 +70,11 @@ ALTER TABLE offchainreporting_persistent_states
 ALTER TABLE ocr_persistent_states
     RENAME COLUMN offchainreporting_oracle_spec_id TO ocr_oracle_spec_id;
 
--- +goose StatementEnd
+
 
 
 -- +goose Down
--- +goose StatementBegin
+
 
 ALTER TABLE ocr2_oracle_specs
     ADD COLUMN juels_per_fee_coin_pipeline text NOT NULL default '';
@@ -142,4 +142,4 @@ ALTER TABLE ocr_persistent_states
 ALTER TABLE offchainreporting_persistent_states
     RENAME COLUMN ocr_oracle_spec_id TO offchainreporting_oracle_spec_id;
 
--- +goose StatementEnd
+

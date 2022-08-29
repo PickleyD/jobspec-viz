@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 -- Create a new enum type for the spec's status.
 CREATE TYPE job_proposal_spec_status AS ENUM('pending', 'approved', 'rejected', 'cancelled');
@@ -50,10 +50,10 @@ DROP COLUMN spec,
 DROP COLUMN proposed_at,
 ADD COLUMN pending_update BOOLEAN NOT NULL DEFAULT FALSE;
 
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 
 -- Add the columns back into the job proposals table and drop the pending update
 ALTER TABLE job_proposals
@@ -88,4 +88,4 @@ DROP TABLE job_proposal_specs;
 -- Drop the enum
 DROP TYPE job_proposal_spec_status
 
--- +goose StatementEnd
+

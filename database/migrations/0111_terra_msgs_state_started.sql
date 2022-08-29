@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 
 CREATE INDEX idx_terra_msgs_terra_chain_id_contract_id_state ON terra_msgs (terra_chain_id, contract_id, state);
 
@@ -20,10 +20,10 @@ RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
 
--- +goose StatementEnd
+
 
 -- +goose Down
--- +goose StatementBegin
+
 
 CREATE OR REPLACE FUNCTION check_terra_msg_state_transition() RETURNS TRIGGER AS $$
 DECLARE
@@ -43,4 +43,3 @@ $$ LANGUAGE plpgsql;
 
 DROP INDEX idx_terra_msgs_terra_chain_id_contract_id_state;
 
--- +goose StatementEnd

@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+
 CREATE TABLE bootstrap_contract_configs
 (
     bootstrap_spec_id       INTEGER PRIMARY KEY,
@@ -65,11 +65,11 @@ ALTER TABLE offchainreporting2_oracle_specs
     DROP COLUMN is_bootstrap_peer;
 ALTER TABLE bootstrap_specs
     DROP COLUMN job_id;
--- +goose StatementEnd
+
 
 
 -- +goose Down
--- +goose StatementBegin
+
 DROP TABLE bootstrap_contract_configs;
 
 -- create helper column
@@ -115,4 +115,3 @@ FROM bootstrap_specs;
 
 ALTER TABLE offchainreporting2_oracle_specs
     DROP COLUMN job_id;
--- +goose StatementEnd
