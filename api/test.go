@@ -19,7 +19,9 @@ import (
 )
 
 type Task struct {
-	Name string
+	Name    string
+	Input   string
+	Options map[string]interface{}
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +73,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// is an open issue regarding this at
 		// https://github.com/golang/go/issues/25956.
 		case errors.Is(err, io.ErrUnexpectedEOF):
-			msg := fmt.Sprintf("Request body contains badly-formed JSON")
+			msg := "Request body contains badly-formed JSON"
 			http.Error(w, msg, http.StatusBadRequest)
 
 		// Catch any type errors, like trying to assign a string in the
@@ -130,12 +132,160 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	vars := pipeline.NewVarsFrom(nil)
-	task := pipeline.DivideTask{
-		BaseTask:  pipeline.NewBaseTask(0, "task", nil, nil, 0),
-		Divisor:   "2.4",
-		Precision: "3",
+	task, taskErr := getTask(TaskType(t.Name), t.Options)
+
+	if taskErr != nil {
+		// TODO: Define and return different error types
+		msg := "Bad request"
+		http.Error(w, msg, http.StatusBadRequest)
 	}
+
 	result, _ := task.Run(ctx, nil, vars, []pipeline.Result{{Value: "10.23"}})
 
 	fmt.Fprint(w, result.Value.(decimal.Decimal).String())
+
+}
+
+type TaskType string
+
+func (t TaskType) String() string {
+	return string(t)
+}
+
+const (
+	// TaskTypeHTTP             TaskType = "http"
+	// TaskTypeBridge           TaskType = "bridge"
+	// TaskTypeMean             TaskType = "mean"
+	// TaskTypeMedian           TaskType = "median"
+	// TaskTypeMode             TaskType = "mode"
+	// TaskTypeSum              TaskType = "sum"
+	TaskTypeMultiply TaskType = "multiply"
+	TaskTypeDivide   TaskType = "divide"
+	// TaskTypeJSONParse        TaskType = "jsonparse"
+	// TaskTypeCBORParse        TaskType = "cborparse"
+	// TaskTypeAny              TaskType = "any"
+	// TaskTypeVRF              TaskType = "vrf"
+	// TaskTypeVRFV2            TaskType = "vrfv2"
+	// TaskTypeEstimateGasLimit TaskType = "estimategaslimit"
+	// TaskTypeETHCall          TaskType = "ethcall"
+	// TaskTypeETHTx            TaskType = "ethtx"
+	// TaskTypeETHABIEncode     TaskType = "ethabiencode"
+	// TaskTypeETHABIEncode2    TaskType = "ethabiencode2"
+	// TaskTypeETHABIDecode     TaskType = "ethabidecode"
+	// TaskTypeETHABIDecodeLog  TaskType = "ethabidecodelog"
+	// TaskTypeMerge            TaskType = "merge"
+	// TaskTypeLowercase        TaskType = "lowercase"
+	// TaskTypeUppercase        TaskType = "uppercase"
+	// TaskTypeConditional      TaskType = "conditional"
+	// TaskTypeHexDecode        TaskType = "hexdecode"
+	// TaskTypeBase64Decode     TaskType = "base64decode"
+
+	// // Testing only.
+	// TaskTypePanic TaskType = "panic"
+	// TaskTypeMemo  TaskType = "memo"
+	// TaskTypeFail  TaskType = "fail"
+)
+
+func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, error) {
+
+	for k, v := range options {
+		switch c := v.(type) {
+		case string:
+			fmt.Printf("Item %q is a string, containing %q\n", k, c)
+		case float64:
+			fmt.Printf("Looks like item %q is a number, specifically %f\n", k, c)
+		default:
+			fmt.Printf("Not sure what type item %q is, but I think it might be %T\n", k, c)
+		}
+	}
+
+	// convert map to json
+	jsonString, _ := json.Marshal(options)
+
+	// seeing as we're just running a single task with no context
+	// or pipeline variables we can just use an empty base task
+	baseTask := pipeline.NewBaseTask(0, "", nil, nil, 0)
+
+	var task pipeline.Task
+	switch taskType {
+	// case TaskTypePanic:
+	// 	task = &PanicTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeHTTP:
+	// 	task = &HTTPTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeBridge:
+	// 	task = &BridgeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeMean:
+	// 	task = &MeanTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeMedian:
+	// 	task = &MedianTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeMode:
+	// 	task = &ModeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeSum:
+	// 	task = &SumTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeAny:
+	// 	task = &AnyTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeJSONParse:
+	// 	task = &JSONParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeMemo:
+	// 	task = &MemoTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeMultiply:
+		var opts pipeline.MultiplyTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.MultiplyTask{
+			BaseTask: baseTask,
+			Times:    opts.Times,
+		}
+	case TaskTypeDivide:
+		var opts pipeline.DivideTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.DivideTask{
+			BaseTask:  baseTask,
+			Divisor:   opts.Divisor,
+			Precision: opts.Precision,
+		}
+	// case TaskTypeVRF:
+	// 	task = &VRFTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeVRFV2:
+	// 	task = &VRFTaskV2{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeEstimateGasLimit:
+	// 	task = &EstimateGasLimitTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeETHCall:
+	// 	task = &ETHCallTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeETHTx:
+	// 	task = &ETHTxTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeETHABIEncode:
+	// 	task = &ETHABIEncodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeETHABIEncode2:
+	// 	task = &ETHABIEncodeTask2{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeETHABIDecode:
+	// 	task = &ETHABIDecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeETHABIDecodeLog:
+	// 	task = &ETHABIDecodeLogTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeCBORParse:
+	// 	task = &CBORParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeFail:
+	// 	task = &FailTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeMerge:
+	// 	task = &MergeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeLowercase:
+	// 	task = &LowercaseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeUppercase:
+	// 	task = &UppercaseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeConditional:
+	// 	task = &ConditionalTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeHexDecode:
+	// 	task = &HexDecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	// case TaskTypeBase64Decode:
+	// 	task = &Base64DecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	default:
+		return nil, fmt.Errorf(`unknown task type: "%v"`, taskType)
+	}
+
+	return task, nil
 }
