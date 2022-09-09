@@ -10,8 +10,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/shopspring/decimal"
-
 	"github.com/golang/gddo/httputil/header"
 	// "github.com/pickleyd/chainlink/core/logger"
 	// "github.com/pickleyd/chainlink/core/testutils"
@@ -20,7 +18,7 @@ import (
 
 type Task struct {
 	Name    string
-	Input   string
+	Inputs  []string
 	Options map[string]interface{}
 }
 
@@ -127,8 +125,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Task: %+v", t)
-
 	ctx := context.Background()
 
 	vars := pipeline.NewVarsFrom(nil)
@@ -140,10 +136,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 	}
 
-	result, _ := task.Run(ctx, nil, vars, []pipeline.Result{{Value: "10.23"}})
+	results := make([]pipeline.Result, 0, len(t.Inputs))
+	for _, r := range t.Inputs {
+		results = append(results, pipeline.Result{Value: r})
+	}
 
-	fmt.Fprint(w, result.Value.(decimal.Decimal).String())
+	result, _ := task.Run(ctx, nil, vars, results)
 
+	fmt.Fprintf(w, "%v", result.Value)
 }
 
 type TaskType string
@@ -163,7 +163,7 @@ const (
 	TaskTypeDivide   TaskType = "divide"
 	// TaskTypeJSONParse        TaskType = "jsonparse"
 	// TaskTypeCBORParse        TaskType = "cborparse"
-	// TaskTypeAny              TaskType = "any"
+	TaskTypeAny TaskType = "any"
 	// TaskTypeVRF              TaskType = "vrf"
 	// TaskTypeVRFV2            TaskType = "vrfv2"
 	// TaskTypeEstimateGasLimit TaskType = "estimategaslimit"
@@ -222,8 +222,8 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	// 	task = &ModeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeSum:
 	// 	task = &SumTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeAny:
-	// 	task = &AnyTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeAny:
+		task = &pipeline.AnyTask{}
 	// case TaskTypeJSONParse:
 	// 	task = &JSONParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeMemo:
