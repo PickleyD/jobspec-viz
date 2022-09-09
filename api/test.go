@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/golang/gddo/httputil/header"
-	// "github.com/pickleyd/chainlink/core/logger"
-	// "github.com/pickleyd/chainlink/core/testutils"
+	"github.com/pickleyd/chainlink/core/config"
+	"github.com/pickleyd/chainlink/core/logger"
 	"github.com/pickleyd/jobspecviz/pipeline"
 )
 
@@ -141,7 +141,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		results = append(results, pipeline.Result{Value: r})
 	}
 
-	result, _ := task.Run(ctx, nil, vars, results)
+	result, _ := task.Run(ctx, logger.NullLogger, vars, results)
 
 	fmt.Fprintf(w, "%v", result.Value)
 }
@@ -153,7 +153,7 @@ func (t TaskType) String() string {
 }
 
 const (
-	// TaskTypeHTTP             TaskType = "http"
+	TaskTypeHTTP TaskType = "http"
 	// TaskTypeBridge           TaskType = "bridge"
 	// TaskTypeMean             TaskType = "mean"
 	// TaskTypeMedian           TaskType = "median"
@@ -210,8 +210,28 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	switch taskType {
 	// case TaskTypePanic:
 	// 	task = &PanicTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeHTTP:
-	// 	task = &HTTPTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeHTTP:
+		var opts pipeline.HTTPTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		httpTask := pipeline.HTTPTask{
+			BaseTask:                       baseTask,
+			Method:                         opts.Method,
+			URL:                            opts.URL,
+			RequestData:                    opts.RequestData,
+			AllowUnrestrictedNetworkAccess: opts.AllowUnrestrictedNetworkAccess,
+			Headers:                        opts.Headers,
+		}
+
+		config := config.NewGeneralConfig(logger.NullLogger)
+
+		c := http.DefaultClient
+		httpTask.HelperSetDependencies(config, c, c)
+
+		task = &httpTask
+
 	// case TaskTypeBridge:
 	// 	task = &BridgeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeMean:
