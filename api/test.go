@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/golang/gddo/httputil/header"
-	"github.com/pickleyd/chainlink/core/config"
-	"github.com/pickleyd/chainlink/core/logger"
-	"github.com/pickleyd/jobspecviz/pipeline"
+	// "github.com/pickleyd/chainlink/core/config"
+	"github.com/pickleyd/jobspecviz/golang/logger"
+	"github.com/pickleyd/jobspecviz/golang/pipeline"
 )
 
 type Task struct {
@@ -210,27 +210,27 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	switch taskType {
 	// case TaskTypePanic:
 	// 	task = &PanicTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeHTTP:
-		var opts pipeline.HTTPTask
-		if err := json.Unmarshal(jsonString, &opts); err != nil {
-			log.Fatal(err)
-		}
+	// case TaskTypeHTTP:
+	// 	var opts pipeline.HTTPTask
+	// 	if err := json.Unmarshal(jsonString, &opts); err != nil {
+	// 		log.Fatal(err)
+	// 	}
 
-		httpTask := pipeline.HTTPTask{
-			BaseTask:                       baseTask,
-			Method:                         opts.Method,
-			URL:                            opts.URL,
-			RequestData:                    opts.RequestData,
-			AllowUnrestrictedNetworkAccess: opts.AllowUnrestrictedNetworkAccess,
-			Headers:                        opts.Headers,
-		}
+	// 	httpTask := pipeline.HTTPTask{
+	// 		BaseTask:                       baseTask,
+	// 		Method:                         opts.Method,
+	// 		URL:                            opts.URL,
+	// 		RequestData:                    opts.RequestData,
+	// 		AllowUnrestrictedNetworkAccess: opts.AllowUnrestrictedNetworkAccess,
+	// 		Headers:                        opts.Headers,
+	// 	}
 
-		config := config.NewGeneralConfig(logger.NullLogger)
+	// 	config := config.NewGeneralConfig(logger.NullLogger)
 
-		c := http.DefaultClient
-		httpTask.HelperSetDependencies(config, c, c)
+	// 	c := http.DefaultClient
+	// 	httpTask.HelperSetDependencies(config, c, c)
 
-		task = &httpTask
+	// 	task = &httpTask
 
 	// case TaskTypeBridge:
 	// 	task = &BridgeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
