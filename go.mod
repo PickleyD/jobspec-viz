@@ -7,7 +7,7 @@ require (
 	github.com/golang/gddo v0.0.0-20210115222349-20d68f94ee1f
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/pickleyd/chainlink v1.6.1-0.20220804124505-25d02312c52b
+	github.com/pickleyd/chainlink v1.6.1-0.20220917225213-1df6d4139cbb
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.5.3
 	github.com/prometheus/client_golang v1.12.2
