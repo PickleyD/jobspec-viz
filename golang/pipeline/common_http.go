@@ -10,8 +10,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	clhttp "github.com/pickleyd/jobspecviz/golang/http"
 	"github.com/pickleyd/jobspecviz/golang/logger"
+	clhttp "github.com/pickleyd/jobspecviz/golang/utils/http"
 )
 
 func makeHTTPRequest(

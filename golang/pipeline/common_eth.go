@@ -14,7 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 
-	"github.com/pickleyd/chainlink/core/utils"
+	"github.com/pickleyd/jobspecviz/golang/utils"
 )
 
 var (

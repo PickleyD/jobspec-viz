@@ -12,8 +12,8 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/pickleyd/chainlink/core/assets"
-	"github.com/pickleyd/chainlink/core/utils"
+	"github.com/pickleyd/jobspecviz/golang/assets"
+	"github.com/pickleyd/jobspecviz/golang/utils"
 )
 
 func String(str string) (string, error) {

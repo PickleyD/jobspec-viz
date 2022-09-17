@@ -9,14 +9,14 @@ import (
 	"reflect"
 	"time"
 
-	ocrnetworking "github.com/smartcontractkit/libocr/networking"
+	// ocrnetworking "github.com/smartcontractkit/libocr/networking"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/pickleyd/chainlink/core/services/keystore/keys/p2pkey"
+	// "github.com/pickleyd/chainlink/core/services/keystore/keys/p2pkey"
 
-	"github.com/pickleyd/chainlink/core/assets"
-	"github.com/pickleyd/chainlink/core/store/models"
-	"github.com/pickleyd/chainlink/core/utils"
+	"github.com/pickleyd/jobspecviz/golang/assets"
+	"github.com/pickleyd/jobspecviz/golang/models"
+	"github.com/pickleyd/jobspecviz/golang/utils"
 )
 
 // ConfigSchema records the schema of configuration at the type level
@@ -243,9 +243,9 @@ type ConfigSchema struct {
 
 	// P2P Networking
 	// V1 and V2
-	P2PNetworkingStack           ocrnetworking.NetworkingStack `env:"P2P_NETWORKING_STACK" default:"V1"`
-	P2PIncomingMessageBufferSize int                           `env:"P2P_INCOMING_MESSAGE_BUFFER_SIZE" default:"10"` //nodoc
-	P2POutgoingMessageBufferSize int                           `env:"P2P_OUTGOING_MESSAGE_BUFFER_SIZE" default:"10"` //nodoc
+	// P2PNetworkingStack           ocrnetworking.NetworkingStack `env:"P2P_NETWORKING_STACK" default:"V1"`
+	P2PIncomingMessageBufferSize int `env:"P2P_INCOMING_MESSAGE_BUFFER_SIZE" default:"10"` //nodoc
+	P2POutgoingMessageBufferSize int `env:"P2P_OUTGOING_MESSAGE_BUFFER_SIZE" default:"10"` //nodoc
 	// V1 Only
 	P2PAnnounceIP                       net.IP        `env:"P2P_ANNOUNCE_IP"`
 	P2PAnnouncePort                     uint16        `env:"P2P_ANNOUNCE_PORT"`
@@ -256,8 +256,8 @@ type ConfigSchema struct {
 	P2PListenIP                         net.IP        `env:"P2P_LISTEN_IP" default:"0.0.0.0"`
 	P2PListenPort                       uint16        `env:"P2P_LISTEN_PORT"`
 	P2PNewStreamTimeout                 time.Duration `env:"P2P_NEW_STREAM_TIMEOUT" default:"10s"`
-	P2PPeerID                           p2pkey.PeerID `env:"P2P_PEER_ID"`
-	P2PPeerstoreWriteInterval           time.Duration `env:"P2P_PEERSTORE_WRITE_INTERVAL" default:"5m"` //nodoc
+	// P2PPeerID                           p2pkey.PeerID `env:"P2P_PEER_ID"`
+	P2PPeerstoreWriteInterval time.Duration `env:"P2P_PEERSTORE_WRITE_INTERVAL" default:"5m"` //nodoc
 	// V2 Only
 	P2PV2AnnounceAddresses []string        `env:"P2PV2_ANNOUNCE_ADDRESSES"`
 	P2PV2Bootstrappers     []string        `env:"P2PV2_BOOTSTRAPPERS"`

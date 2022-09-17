@@ -4,26 +4,24 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/json"
-	"math/big"
+
+	// "math/big"
 	"net/url"
 	"reflect"
 	"sort"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/guregu/null.v4"
 
-	"github.com/pickleyd/chainlink/core/chains/evm"
-	"github.com/pickleyd/chainlink/core/chains/evm/config"
-	cnull "github.com/pickleyd/chainlink/core/null"
-	"github.com/pickleyd/chainlink/core/store/models"
-	"github.com/pickleyd/chainlink/core/utils"
+	// "github.com/pickleyd/chainlink/core/chains/evm"
+	// "github.com/pickleyd/chainlink/core/chains/evm/config"
 	"github.com/pickleyd/jobspecviz/golang/logger"
+	"github.com/pickleyd/jobspecviz/golang/models"
+	cnull "github.com/pickleyd/jobspecviz/golang/null"
+	"github.com/pickleyd/jobspecviz/golang/utils"
 )
 
 const (
@@ -330,110 +328,6 @@ var (
 	nullUint32Type = reflect.TypeOf(cnull.Uint32{})
 )
 
-func UnmarshalTaskFromMap(taskType TaskType, taskMap interface{}, ID int, dotID string) (_ Task, err error) {
-	defer utils.WrapIfError(&err, "UnmarshalTaskFromMap")
-
-	switch taskMap.(type) {
-	default:
-		return nil, errors.Errorf("UnmarshalTaskFromMap only accepts a map[string]interface{} or a map[string]string. Got %v (%#v) of type %T", taskMap, taskMap, taskMap)
-	case map[string]interface{}, map[string]string:
-	}
-
-	taskType = TaskType(strings.ToLower(string(taskType)))
-
-	var task Task
-	switch taskType {
-	case TaskTypePanic:
-		task = &PanicTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeHTTP:
-		task = &HTTPTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeBridge:
-		task = &BridgeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeMean:
-		task = &MeanTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeMedian:
-		task = &MedianTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeMode:
-		task = &ModeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeSum:
-		task = &SumTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeAny:
-		task = &AnyTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeJSONParse:
-		task = &JSONParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeMemo:
-		task = &MemoTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeMultiply:
-		task = &MultiplyTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeDivide:
-		task = &DivideTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeVRF:
-		task = &VRFTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeVRFV2:
-		task = &VRFTaskV2{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeEstimateGasLimit:
-		task = &EstimateGasLimitTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeETHCall:
-		task = &ETHCallTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeETHTx:
-		task = &ETHTxTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeETHABIEncode:
-		task = &ETHABIEncodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeETHABIEncode2:
-		task = &ETHABIEncodeTask2{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeETHABIDecode:
-		task = &ETHABIDecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeETHABIDecodeLog:
-		task = &ETHABIDecodeLogTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeCBORParse:
-		task = &CBORParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeFail:
-		task = &FailTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeMerge:
-		task = &MergeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeLowercase:
-		task = &LowercaseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeUppercase:
-		task = &UppercaseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeConditional:
-		task = &ConditionalTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeHexDecode:
-		task = &HexDecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeBase64Decode:
-		task = &Base64DecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	default:
-		return nil, errors.Errorf(`unknown task type: "%v"`, taskType)
-	}
-
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Result:           task,
-		WeaklyTypedInput: true,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			mapstructure.StringToTimeDurationHookFunc(),
-			func(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
-				if from != stringType {
-					return data, nil
-				}
-				switch to {
-				case nullUint32Type:
-					i, err2 := strconv.ParseUint(data.(string), 10, 32)
-					return cnull.Uint32From(uint32(i)), err2
-				}
-				return data, nil
-			},
-		),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	err = decoder.Decode(taskMap)
-	if err != nil {
-		return nil, err
-	}
-	return task, nil
-}
-
 func CheckInputs(inputs []Result, minLen, maxLen, maxErrors int) ([]interface{}, error) {
 	if minLen >= 0 && len(inputs) < minLen {
 		return nil, errors.Wrapf(ErrWrongInputCardinality, "min: %v max: %v (got %v)", minLen, maxLen, len(inputs))
@@ -455,41 +349,41 @@ func CheckInputs(inputs []Result, minLen, maxLen, maxErrors int) ([]interface{},
 	return vals, nil
 }
 
-func getChainByString(chainSet evm.ChainSet, str string) (evm.Chain, error) {
-	if str == "" {
-		return chainSet.Default()
-	}
-	id, ok := new(big.Int).SetString(str, 10)
-	if !ok {
-		return nil, errors.Errorf("invalid EVM chain ID: %s", str)
-	}
-	return chainSet.Get(id)
-}
+// func getChainByString(chainSet evm.ChainSet, str string) (evm.Chain, error) {
+// 	if str == "" {
+// 		return chainSet.Default()
+// 	}
+// 	id, ok := new(big.Int).SetString(str, 10)
+// 	if !ok {
+// 		return nil, errors.Errorf("invalid EVM chain ID: %s", str)
+// 	}
+// 	return chainSet.Get(id)
+// }
 
-func SelectGasLimit(cfg config.ChainScopedConfig, jobType string, specGasLimit *uint32) uint64 {
-	if specGasLimit != nil {
-		return uint64(*specGasLimit)
-	}
+// func SelectGasLimit(cfg config.ChainScopedConfig, jobType string, specGasLimit *uint32) uint64 {
+// 	if specGasLimit != nil {
+// 		return uint64(*specGasLimit)
+// 	}
 
-	var jobTypeGasLimit *uint64
-	switch jobType {
-	case DirectRequestJobType:
-		jobTypeGasLimit = cfg.EvmGasLimitDRJobType()
-	case FluxMonitorJobType:
-		jobTypeGasLimit = cfg.EvmGasLimitFMJobType()
-	case OffchainReportingJobType:
-		jobTypeGasLimit = cfg.EvmGasLimitOCRJobType()
-	case KeeperJobType:
-		jobTypeGasLimit = cfg.EvmGasLimitKeeperJobType()
-	case VRFJobType:
-		jobTypeGasLimit = cfg.EvmGasLimitVRFJobType()
-	}
+// 	var jobTypeGasLimit *uint64
+// 	switch jobType {
+// 	case DirectRequestJobType:
+// 		jobTypeGasLimit = cfg.EvmGasLimitDRJobType()
+// 	case FluxMonitorJobType:
+// 		jobTypeGasLimit = cfg.EvmGasLimitFMJobType()
+// 	case OffchainReportingJobType:
+// 		jobTypeGasLimit = cfg.EvmGasLimitOCRJobType()
+// 	case KeeperJobType:
+// 		jobTypeGasLimit = cfg.EvmGasLimitKeeperJobType()
+// 	case VRFJobType:
+// 		jobTypeGasLimit = cfg.EvmGasLimitVRFJobType()
+// 	}
 
-	if jobTypeGasLimit != nil {
-		return *jobTypeGasLimit
-	}
-	return cfg.EvmGasLimitDefault()
-}
+// 	if jobTypeGasLimit != nil {
+// 		return *jobTypeGasLimit
+// 	}
+// 	return cfg.EvmGasLimitDefault()
+// }
 
 // replaceBytesWithHex replaces all []byte with hex-encoded strings
 func replaceBytesWithHex(val interface{}) interface{} {

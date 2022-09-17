@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/golang/gddo/httputil/header"
-	// "github.com/pickleyd/chainlink/core/config"
 	"github.com/pickleyd/jobspecviz/golang/logger"
 	"github.com/pickleyd/jobspecviz/golang/pipeline"
 )
@@ -200,11 +199,11 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	}
 
 	// convert map to json
-	jsonString, _ := json.Marshal(options)
+	// jsonString, _ := json.Marshal(options)
 
-	// seeing as we're just running a single task with no context
-	// or pipeline variables we can just use an empty base task
-	baseTask := pipeline.NewBaseTask(0, "", nil, nil, 0)
+	// // seeing as we're just running a single task with no context
+	// // or pipeline variables we can just use an empty base task
+	// baseTask := pipeline.NewBaseTask(0, "", nil, nil, 0)
 
 	var task pipeline.Task
 	switch taskType {
@@ -248,27 +247,27 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	// 	task = &JSONParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeMemo:
 	// 	task = &MemoTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	case TaskTypeMultiply:
-		var opts pipeline.MultiplyTask
-		if err := json.Unmarshal(jsonString, &opts); err != nil {
-			log.Fatal(err)
-		}
+	// case TaskTypeMultiply:
+	// 	var opts pipeline.MultiplyTask
+	// 	if err := json.Unmarshal(jsonString, &opts); err != nil {
+	// 		log.Fatal(err)
+	// 	}
 
-		task = &pipeline.MultiplyTask{
-			BaseTask: baseTask,
-			Times:    opts.Times,
-		}
-	case TaskTypeDivide:
-		var opts pipeline.DivideTask
-		if err := json.Unmarshal(jsonString, &opts); err != nil {
-			log.Fatal(err)
-		}
+	// 	task = &pipeline.MultiplyTask{
+	// 		BaseTask: baseTask,
+	// 		Times:    opts.Times,
+	// 	}
+	// case TaskTypeDivide:
+	// 	var opts pipeline.DivideTask
+	// 	if err := json.Unmarshal(jsonString, &opts); err != nil {
+	// 		log.Fatal(err)
+	// 	}
 
-		task = &pipeline.DivideTask{
-			BaseTask:  baseTask,
-			Divisor:   opts.Divisor,
-			Precision: opts.Precision,
-		}
+	// 	task = &pipeline.DivideTask{
+	// 		BaseTask:  baseTask,
+	// 		Divisor:   opts.Divisor,
+	// 		Precision: opts.Precision,
+	// 	}
 	// case TaskTypeVRF:
 	// 	task = &VRFTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeVRFV2:

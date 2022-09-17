@@ -5,7 +5,7 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/pickleyd/chainlink/core/null"
+	"github.com/pickleyd/jobspecviz/golang/null"
 )
 
 type BaseTask struct {

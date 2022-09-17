@@ -12,12 +12,11 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/pickleyd/chainlink/core/assets"
-	"github.com/pickleyd/chainlink/core/config/envvar"
-	"github.com/pickleyd/chainlink/core/logger"
-	"github.com/pickleyd/chainlink/core/store/dialects"
-	"github.com/pickleyd/chainlink/core/store/models"
-	"github.com/pickleyd/chainlink/core/utils"
+	"github.com/pickleyd/jobspecviz/golang/assets"
+	"github.com/pickleyd/jobspecviz/golang/config/envvar"
+	"github.com/pickleyd/jobspecviz/golang/logger"
+	"github.com/pickleyd/jobspecviz/golang/models"
+	"github.com/pickleyd/jobspecviz/golang/utils"
 )
 
 //go:generate mockery --name GeneralConfig --output ./mocks/ --case=underscore
@@ -116,7 +115,7 @@ type generalConfig struct {
 	viper            *viper.Viper
 	randomP2PPort    uint16
 	randomP2PPortMtx sync.RWMutex
-	dialect          dialects.DialectName
+	dialect          string
 	advisoryLockID   int64
 	logLevel         zapcore.Level
 	defaultLogLevel  zapcore.Level
@@ -131,7 +130,7 @@ type generalConfig struct {
 func NewGeneralConfig(lggr logger.Logger) GeneralConfig {
 	v := viper.New()
 	c := newGeneralConfigWithViper(v, lggr.Named("GeneralConfig"))
-	c.dialect = dialects.Postgres
+	c.dialect = "pgx"
 	return c
 }
 

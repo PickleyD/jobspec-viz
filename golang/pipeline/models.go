@@ -14,7 +14,7 @@ import (
 	"go.uber.org/multierr"
 	"gopkg.in/guregu/null.v4"
 
-	"github.com/pickleyd/chainlink/core/store/models"
+	"github.com/pickleyd/jobspecviz/golang/models"
 )
 
 type Spec struct {
@@ -28,10 +28,6 @@ type Spec struct {
 	JobID   int32  `json:"-"`
 	JobName string `json:"-"`
 	JobType string `json:"-"`
-}
-
-func (s Spec) Pipeline() (*Pipeline, error) {
-	return Parse(s.DotDagSource)
 }
 
 type Run struct {
