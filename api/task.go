@@ -1,4 +1,4 @@
-package test
+package task
 
 import (
 	"context"
@@ -155,10 +155,10 @@ func (t TaskType) String() string {
 const (
 	TaskTypeHTTP TaskType = "http"
 	// TaskTypeBridge           TaskType = "bridge"
-	// TaskTypeMean             TaskType = "mean"
-	// TaskTypeMedian           TaskType = "median"
-	// TaskTypeMode             TaskType = "mode"
-	// TaskTypeSum              TaskType = "sum"
+	TaskTypeMean     TaskType = "mean"
+	TaskTypeMedian   TaskType = "median"
+	TaskTypeMode     TaskType = "mode"
+	TaskTypeSum      TaskType = "sum"
 	TaskTypeMultiply TaskType = "multiply"
 	TaskTypeDivide   TaskType = "divide"
 	// TaskTypeJSONParse        TaskType = "jsonparse"
@@ -187,17 +187,6 @@ const (
 )
 
 func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, error) {
-
-	for k, v := range options {
-		switch c := v.(type) {
-		case string:
-			fmt.Printf("Item %q is a string, containing %q\n", k, c)
-		case float64:
-			fmt.Printf("Looks like item %q is a number, specifically %f\n", k, c)
-		default:
-			fmt.Printf("Not sure what type item %q is, but I think it might be %T\n", k, c)
-		}
-	}
 
 	// convert map to json
 	jsonString, _ := json.Marshal(options)
@@ -234,14 +223,51 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 
 	// case TaskTypeBridge:
 	// 	task = &BridgeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeMean:
-	// 	task = &MeanTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeMedian:
-	// 	task = &MedianTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeMode:
-	// 	task = &ModeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeSum:
-	// 	task = &SumTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeMean:
+		var opts pipeline.MeanTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.MeanTask{
+			BaseTask:      baseTask,
+			Values:        opts.Values,
+			AllowedFaults: opts.AllowedFaults,
+			Precision:     opts.Precision,
+		}
+	case TaskTypeMedian:
+		var opts pipeline.MedianTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.MedianTask{
+			BaseTask:      baseTask,
+			Values:        opts.Values,
+			AllowedFaults: opts.AllowedFaults,
+		}
+	case TaskTypeMode:
+		var opts pipeline.ModeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ModeTask{
+			BaseTask:      baseTask,
+			Values:        opts.Values,
+			AllowedFaults: opts.AllowedFaults,
+		}
+	case TaskTypeSum:
+		var opts pipeline.SumTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.SumTask{
+			BaseTask:      baseTask,
+			Values:        opts.Values,
+			AllowedFaults: opts.AllowedFaults,
+		}
 	case TaskTypeAny:
 		task = &pipeline.AnyTask{}
 	// case TaskTypeJSONParse:
