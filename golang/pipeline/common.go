@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 
 	// "math/big"
-	"net/url"
+	// "net/url"
 	"reflect"
 	"sort"
 	"time"
@@ -57,14 +57,14 @@ type (
 	}
 
 	Config interface {
-		BridgeResponseURL() *url.URL
-		DatabaseURL() url.URL
+		// BridgeResponseURL() *url.URL
+		// DatabaseURL() url.URL
 		DefaultHTTPLimit() int64
 		DefaultHTTPTimeout() models.Duration
-		TriggerFallbackDBPollInterval() time.Duration
-		JobPipelineMaxRunDuration() time.Duration
-		JobPipelineReaperInterval() time.Duration
-		JobPipelineReaperThreshold() time.Duration
+		// TriggerFallbackDBPollInterval() time.Duration
+		// JobPipelineMaxRunDuration() time.Duration
+		// JobPipelineReaperInterval() time.Duration
+		// JobPipelineReaperThreshold() time.Duration
 	}
 )
 
