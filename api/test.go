@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/golang/gddo/httputil/header"
-	"github.com/pickleyd/jobspecviz/golang/config"
-	"github.com/pickleyd/jobspecviz/golang/logger"
-	"github.com/pickleyd/jobspecviz/golang/pipeline"
+	"github.com/pickleyd/chainlink/core/config"
+	"github.com/pickleyd/chainlink/core/logger"
+	"github.com/pickleyd/chainlink/core/services/pipeline"
 )
 
 type Task struct {
