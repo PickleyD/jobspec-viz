@@ -20,6 +20,7 @@ type Task struct {
 	Name    string
 	Inputs  []string
 	Options map[string]interface{}
+	Vars    map[string]interface{}
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -127,7 +128,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 
-	vars := pipeline.NewVarsFrom(nil)
+	vars := pipeline.NewVarsFrom(t.Vars)
+
 	task, taskErr := getTask(TaskType(t.Name), t.Options)
 
 	if taskErr != nil {
@@ -143,7 +145,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	result, _ := task.Run(ctx, logger.NullLogger, vars, results)
 
-	fmt.Fprintf(w, "%v", result.Value)
+	_, ok := result.Value.(map[string]interface{})
+	if ok {
+		out, err := json.Marshal(result.Value)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Fprint(w, string(out))
+	} else {
+		fmt.Fprintf(w, "%v", result.Value)
+	}
 }
 
 type TaskType string
@@ -155,15 +166,15 @@ func (t TaskType) String() string {
 const (
 	TaskTypeHTTP TaskType = "http"
 	// TaskTypeBridge           TaskType = "bridge"
-	TaskTypeMean     TaskType = "mean"
-	TaskTypeMedian   TaskType = "median"
-	TaskTypeMode     TaskType = "mode"
-	TaskTypeSum      TaskType = "sum"
-	TaskTypeMultiply TaskType = "multiply"
-	TaskTypeDivide   TaskType = "divide"
-	// TaskTypeJSONParse        TaskType = "jsonparse"
-	// TaskTypeCBORParse        TaskType = "cborparse"
-	TaskTypeAny TaskType = "any"
+	TaskTypeMean      TaskType = "mean"
+	TaskTypeMedian    TaskType = "median"
+	TaskTypeMode      TaskType = "mode"
+	TaskTypeSum       TaskType = "sum"
+	TaskTypeMultiply  TaskType = "multiply"
+	TaskTypeDivide    TaskType = "divide"
+	TaskTypeJSONParse TaskType = "jsonparse"
+	TaskTypeCBORParse TaskType = "cborparse"
+	TaskTypeAny       TaskType = "any"
 	// TaskTypeVRF              TaskType = "vrf"
 	// TaskTypeVRFV2            TaskType = "vrfv2"
 	// TaskTypeEstimateGasLimit TaskType = "estimategaslimit"
@@ -270,8 +281,19 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 		}
 	case TaskTypeAny:
 		task = &pipeline.AnyTask{}
-	// case TaskTypeJSONParse:
-	// 	task = &JSONParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeJSONParse:
+		var opts pipeline.JSONParseTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.JSONParseTask{
+			BaseTask:  baseTask,
+			Path:      opts.Path,
+			Separator: opts.Separator,
+			Data:      opts.Data,
+			Lax:       opts.Lax,
+		}
 	// case TaskTypeMemo:
 	// 	task = &MemoTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	case TaskTypeMultiply:
@@ -313,8 +335,17 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	// 	task = &ETHABIDecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeETHABIDecodeLog:
 	// 	task = &ETHABIDecodeLogTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeCBORParse:
-	// 	task = &CBORParseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeCBORParse:
+		var opts pipeline.CBORParseTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.CBORParseTask{
+			BaseTask: baseTask,
+			Data:     opts.Data,
+			Mode:     opts.Mode,
+		}
 	// case TaskTypeFail:
 	// 	task = &FailTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeMerge:
