@@ -1,26 +1,67 @@
 package task
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/gddo/httputil/header"
 	"github.com/pickleyd/chainlink/core/config"
 	"github.com/pickleyd/chainlink/core/logger"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
 )
 
+type Var struct {
+	Value string
+	Type  string
+}
+
 type Task struct {
 	Name    string
 	Inputs  []string
 	Options map[string]interface{}
-	Vars    map[string]interface{}
+	Vars    map[string]Var
+}
+
+type SX map[string]interface{}
+
+// go binary encoder
+func ToGOB64(m SX) string {
+	b := bytes.Buffer{}
+	e := gob.NewEncoder(&b)
+	err := e.Encode(m)
+	if err != nil {
+		fmt.Println(`failed gob Encode`, err)
+	}
+	return base64.StdEncoding.EncodeToString(b.Bytes())
+}
+
+// go binary decoder
+func FromGOB64(str string) SX {
+	m := SX{}
+	by, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		fmt.Println(`failed base64 Decode`, err)
+	}
+	b := bytes.Buffer{}
+	b.Write(by)
+	d := gob.NewDecoder(&b)
+	err = d.Decode(&m)
+	if err != nil {
+		fmt.Println(`failed gob Decode`, err)
+	}
+	return m
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +169,42 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 
-	vars := pipeline.NewVarsFrom(t.Vars)
+	varValues := make(map[string]interface{})
+
+	// TODO: Handle vars of arrays of these types
+	for k, v := range t.Vars {
+		if v.Type == "bytes32" {
+			var bytes32 [32]byte
+			copy(bytes32[:], []byte(v.Value))
+			varValues[k] = bytes32
+		} else if v.Type == "bytes" {
+			varValues[k] = []byte(v.Value)
+		} else if v.Type == "int" {
+			n := new(big.Int)
+			n, ok := n.SetString(v.Value, 10)
+			if !ok {
+				log.Fatal("big.Int SetString error")
+			}
+			varValues[k] = n
+		} else if v.Type == "bool" {
+			boolValue, err := strconv.ParseBool(v.Value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			varValues[k] = boolValue
+		} else if v.Type == "address" {
+			addressValue := common.HexToAddress(v.Value)
+			varValues[k] = addressValue
+		} else {
+			varValues[k] = v.Value
+		}
+	}
+
+	// for k, v := range t.Vars {
+	// 	varValues[k] = FromGOB64(v)
+	// }
+
+	vars := pipeline.NewVarsFrom(varValues)
 
 	task, taskErr := getTask(TaskType(t.Name), t.Options)
 
@@ -152,6 +228,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		fmt.Fprint(w, string(out))
+		// fmt.Fprintf(w, "%v", ToGOB64(result.Value.(map[string]interface{})))
 	} else {
 		fmt.Fprintf(w, "%v", result.Value)
 	}
@@ -180,9 +257,9 @@ const (
 	// TaskTypeEstimateGasLimit TaskType = "estimategaslimit"
 	// TaskTypeETHCall          TaskType = "ethcall"
 	// TaskTypeETHTx            TaskType = "ethtx"
-	// TaskTypeETHABIEncode     TaskType = "ethabiencode"
+	TaskTypeETHABIEncode TaskType = "ethabiencode"
 	// TaskTypeETHABIEncode2    TaskType = "ethabiencode2"
-	// TaskTypeETHABIDecode     TaskType = "ethabidecode"
+	TaskTypeETHABIDecode TaskType = "ethabidecode"
 	// TaskTypeETHABIDecodeLog  TaskType = "ethabidecodelog"
 	// TaskTypeMerge            TaskType = "merge"
 	// TaskTypeLowercase        TaskType = "lowercase"
@@ -327,12 +404,30 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	// 	task = &ETHCallTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeETHTx:
 	// 	task = &ETHTxTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeETHABIEncode:
-	// 	task = &ETHABIEncodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeETHABIEncode:
+		var opts pipeline.ETHABIEncodeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ETHABIEncodeTask{
+			BaseTask: baseTask,
+			ABI:      opts.ABI,
+			Data:     opts.Data,
+		}
 	// case TaskTypeETHABIEncode2:
 	// 	task = &ETHABIEncodeTask2{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeETHABIDecode:
-	// 	task = &ETHABIDecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeETHABIDecode:
+		var opts pipeline.ETHABIDecodeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ETHABIDecodeTask{
+			BaseTask: baseTask,
+			ABI:      opts.ABI,
+			Data:     opts.Data,
+		}
 	// case TaskTypeETHABIDecodeLog:
 	// 	task = &ETHABIDecodeLogTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	case TaskTypeCBORParse:
