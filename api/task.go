@@ -23,8 +23,9 @@ import (
 )
 
 type Var struct {
-	Value string
-	Type  string
+	Value  string
+	Values []string
+	Type   string
 }
 
 type Task struct {
@@ -171,30 +172,58 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varValues := make(map[string]interface{})
 
-	// TODO: Handle vars of arrays of these types
+	// TODO: Handle arrays recursively
 	for k, v := range t.Vars {
 		if v.Type == "bytes32" {
-			var bytes32 [32]byte
-			copy(bytes32[:], []byte(v.Value))
-			varValues[k] = bytes32
+			if v.Value != "" {
+				varValues[k] = toBytes32(v.Value)
+			} else if len(v.Values) > 0 {
+				var s [][32]byte
+				for _, val := range v.Values {
+					s = append(s, toBytes32(val))
+				}
+				varValues[k] = s
+			}
 		} else if v.Type == "bytes" {
-			varValues[k] = []byte(v.Value)
+			if v.Value != "" {
+				varValues[k] = toBytes(v.Value)
+			} else if len(v.Values) > 0 {
+				var s [][]byte
+				for _, val := range v.Values {
+					s = append(s, toBytes(val))
+				}
+				varValues[k] = s
+			}
 		} else if v.Type == "int" {
-			n := new(big.Int)
-			n, ok := n.SetString(v.Value, 10)
-			if !ok {
-				log.Fatal("big.Int SetString error")
+			if v.Value != "" {
+				varValues[k] = toInt(v.Value)
+			} else if len(v.Values) > 0 {
+				var s []*big.Int
+				for _, val := range v.Values {
+					s = append(s, toInt(val))
+				}
+				varValues[k] = s
 			}
-			varValues[k] = n
 		} else if v.Type == "bool" {
-			boolValue, err := strconv.ParseBool(v.Value)
-			if err != nil {
-				log.Fatal(err)
+			if v.Value != "" {
+				varValues[k] = toBool(v.Value)
+			} else if len(v.Values) > 0 {
+				var s []bool
+				for _, val := range v.Values {
+					s = append(s, toBool(val))
+				}
+				varValues[k] = s
 			}
-			varValues[k] = boolValue
 		} else if v.Type == "address" {
-			addressValue := common.HexToAddress(v.Value)
-			varValues[k] = addressValue
+			if v.Value != "" {
+				varValues[k] = toAddress(v.Value)
+			} else if len(v.Values) > 0 {
+				var s []common.Address
+				for _, val := range v.Values {
+					s = append(s, toAddress(val))
+				}
+				varValues[k] = s
+			}
 		} else {
 			varValues[k] = v.Value
 		}
@@ -232,6 +261,37 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprintf(w, "%v", result.Value)
 	}
+}
+
+func toInt(s string) *big.Int {
+	n := new(big.Int)
+	n, ok := n.SetString(s, 10)
+	if !ok {
+		log.Fatal("big.Int SetString error")
+	}
+	return n
+}
+
+func toAddress(s string) common.Address {
+	return common.HexToAddress(s)
+}
+
+func toBool(s string) bool {
+	boolValue, err := strconv.ParseBool(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return boolValue
+}
+
+func toBytes32(s string) [32]byte {
+	var bytes32 [32]byte
+	copy(bytes32[:], []byte(s))
+	return bytes32
+}
+
+func toBytes(s string) []byte {
+	return []byte(s)
 }
 
 type TaskType string
