@@ -1,68 +1,36 @@
 package task
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/gddo/httputil/header"
 	"github.com/pickleyd/chainlink/core/config"
 	"github.com/pickleyd/chainlink/core/logger"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
 )
 
-type Var struct {
-	Value  string
-	Values []string
-	Type   string
-}
-
 type Task struct {
+	Id      string
 	Name    string
 	Inputs  []string
 	Options map[string]interface{}
-	Vars    map[string]Var
+	Vars    string
 }
 
-type SX map[string]interface{}
-
-// go binary encoder
-func ToGOB64(m SX) string {
-	b := bytes.Buffer{}
-	e := gob.NewEncoder(&b)
-	err := e.Encode(m)
-	if err != nil {
-		fmt.Println(`failed gob Encode`, err)
-	}
-	return base64.StdEncoding.EncodeToString(b.Bytes())
-}
-
-// go binary decoder
-func FromGOB64(str string) SX {
-	m := SX{}
-	by, err := base64.StdEncoding.DecodeString(str)
-	if err != nil {
-		fmt.Println(`failed base64 Decode`, err)
-	}
-	b := bytes.Buffer{}
-	b.Write(by)
-	d := gob.NewDecoder(&b)
-	err = d.Decode(&m)
-	if err != nil {
-		fmt.Println(`failed gob Decode`, err)
-	}
-	return m
+type Response struct {
+	Value interface{}
+	// User-readable
+	Vars map[string]interface{}
+	// Not user-readable. Base64 representation of the var bytes can be deserialised in Go.
+	VarBytesBase64 string
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -172,66 +140,74 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varValues := make(map[string]interface{})
 
-	// TODO: Handle arrays recursively
-	for k, v := range t.Vars {
-		if v.Type == "bytes32" {
-			if v.Value != "" {
-				varValues[k] = toBytes32(v.Value)
-			} else if len(v.Values) > 0 {
-				var s [][32]byte
-				for _, val := range v.Values {
-					s = append(s, toBytes32(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "bytes" {
-			if v.Value != "" {
-				varValues[k] = toBytes(v.Value)
-			} else if len(v.Values) > 0 {
-				var s [][]byte
-				for _, val := range v.Values {
-					s = append(s, toBytes(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "int" {
-			if v.Value != "" {
-				varValues[k] = toInt(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []*big.Int
-				for _, val := range v.Values {
-					s = append(s, toInt(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "bool" {
-			if v.Value != "" {
-				varValues[k] = toBool(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []bool
-				for _, val := range v.Values {
-					s = append(s, toBool(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "address" {
-			if v.Value != "" {
-				varValues[k] = toAddress(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []common.Address
-				for _, val := range v.Values {
-					s = append(s, toAddress(val))
-				}
-				varValues[k] = s
-			}
-		} else {
-			varValues[k] = v.Value
-		}
+	// // TODO: Handle arrays recursively
+	// for k, v := range t.Vars {
+	// 	if v.Type == "bytes32" {
+	// 		if v.Value != "" {
+	// 			varValues[k] = toBytes32(v.Value)
+	// 		} else if len(v.Values) > 0 {
+	// 			var s [][32]byte
+	// 			for _, val := range v.Values {
+	// 				s = append(s, toBytes32(val))
+	// 			}
+	// 			varValues[k] = s
+	// 		}
+	// 	} else if v.Type == "bytes" {
+	// 		if v.Value != "" {
+	// 			varValues[k] = toBytes(v.Value)
+	// 		} else if len(v.Values) > 0 {
+	// 			var s [][]byte
+	// 			for _, val := range v.Values {
+	// 				s = append(s, toBytes(val))
+	// 			}
+	// 			varValues[k] = s
+	// 		}
+	// 	} else if v.Type == "int" {
+	// 		if v.Value != "" {
+	// 			varValues[k] = toInt(v.Value)
+	// 		} else if len(v.Values) > 0 {
+	// 			var s []*big.Int
+	// 			for _, val := range v.Values {
+	// 				s = append(s, toInt(val))
+	// 			}
+	// 			varValues[k] = s
+	// 		}
+	// 	} else if v.Type == "bool" {
+	// 		if v.Value != "" {
+	// 			varValues[k] = toBool(v.Value)
+	// 		} else if len(v.Values) > 0 {
+	// 			var s []bool
+	// 			for _, val := range v.Values {
+	// 				s = append(s, toBool(val))
+	// 			}
+	// 			varValues[k] = s
+	// 		}
+	// 	} else if v.Type == "address" {
+	// 		if v.Value != "" {
+	// 			varValues[k] = toAddress(v.Value)
+	// 		} else if len(v.Values) > 0 {
+	// 			var s []common.Address
+	// 			for _, val := range v.Values {
+	// 				s = append(s, toAddress(val))
+	// 			}
+	// 			varValues[k] = s
+	// 		}
+	// 	} else {
+	// 		varValues[k] = v.Value
+	// 	}
+	// }
+
+	by, errDecode := base64.StdEncoding.DecodeString(t.Vars)
+	if errDecode != nil {
+		log.Fatal(`Failed to decode vars base64 string`, errDecode)
 	}
 
-	// for k, v := range t.Vars {
-	// 	varValues[k] = FromGOB64(v)
-	// }
+	errUnmarshal := json.Unmarshal(by, &varValues)
+	if errUnmarshal != nil {
+		log.Fatal(`Failed json unmarshal of vars`, errUnmarshal)
+	}
+
+	fmt.Printf("%v", varValues)
 
 	vars := pipeline.NewVarsFrom(varValues)
 
@@ -250,49 +226,95 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	result, _ := task.Run(ctx, logger.NullLogger, vars, results)
 
+	// Append the result to the vars
+	// TODO - existence check?
+	varValues[t.Id] = result.Value
+
+	jsonVarValues, _ := json.Marshal(varValues)
+
+	base64VarValues := base64.StdEncoding.EncodeToString(jsonVarValues)
+
+	response := Response{
+		Value:          result.Value,
+		Vars:           varValues,
+		VarBytesBase64: base64VarValues,
+	}
+
 	_, ok := result.Value.(map[string]interface{})
 	if ok {
 		out, err := json.Marshal(result.Value)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Fprint(w, string(out))
-		// fmt.Fprintf(w, "%v", ToGOB64(result.Value.(map[string]interface{})))
+		response.Value = string(out)
 	} else {
-		fmt.Fprintf(w, "%v", result.Value)
+		response.Value = result.Value
+
+		// test := map[string]interface{}{
+		// 	"foo": []common.Address{
+		// 		common.HexToAddress("0x6c91b062a774cbe8b9bf52f224c37badf98fc40b"),
+		// 		common.HexToAddress("0xc4f27ead9083c756cc2c02aaa39b223fe8d0a0e5"),
+		// 		common.HexToAddress("0x749e4598819b2b0e915a02120696c7b8fe16c09c"),
+		// 	},
+		// 	"bar": big.NewInt(8293),
+		// 	"baz": []*big.Int{big.NewInt(192), big.NewInt(4182)},
+		// }
+		// testOut, _ := json.Marshal(test)
+
+		// fmt.Println(json.Valid([]byte(testOut)))
+
+		// asBase64 := base64.StdEncoding.EncodeToString(testOut)
+
+		// fmt.Println(asBase64)
+
+		// by, err := base64.StdEncoding.DecodeString(asBase64)
+		// if err != nil {
+		// 	fmt.Println(`failed base64 Decode`, err)
+		// }
+
+		// fmt.Println(json.Valid([]byte(by)))
+
+		// fmt.Fprintf(w, "%v", asBase64)
 	}
-}
 
-func toInt(s string) *big.Int {
-	n := new(big.Int)
-	n, ok := n.SetString(s, 10)
-	if !ok {
-		log.Fatal("big.Int SetString error")
+	jData, errJson := json.Marshal(response)
+	if errJson != nil {
+		log.Fatal("Error marshalling response object to json", errJson)
 	}
-	return n
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jData)
 }
 
-func toAddress(s string) common.Address {
-	return common.HexToAddress(s)
-}
+// func toInt(s string) *big.Int {
+// 	n := new(big.Int)
+// 	n, ok := n.SetString(s, 10)
+// 	if !ok {
+// 		log.Fatal("big.Int SetString error")
+// 	}
+// 	return n
+// }
 
-func toBool(s string) bool {
-	boolValue, err := strconv.ParseBool(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return boolValue
-}
+// func toAddress(s string) common.Address {
+// 	return common.HexToAddress(s)
+// }
 
-func toBytes32(s string) [32]byte {
-	var bytes32 [32]byte
-	copy(bytes32[:], []byte(s))
-	return bytes32
-}
+// func toBool(s string) bool {
+// 	boolValue, err := strconv.ParseBool(s)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return boolValue
+// }
 
-func toBytes(s string) []byte {
-	return []byte(s)
-}
+// func toBytes32(s string) [32]byte {
+// 	var bytes32 [32]byte
+// 	copy(bytes32[:], []byte(s))
+// 	return bytes32
+// }
+
+// func toBytes(s string) []byte {
+// 	return []byte(s)
+// }
 
 type TaskType string
 
