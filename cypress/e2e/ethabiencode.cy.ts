@@ -11,7 +11,8 @@ describe("ethabiencode", () => {
             abi: "chainLink(address[] calldata a, uint80 x, uint32[2] s)",
             data: `{ "a": $(foo), "x": $(bar), "s": $(baz) }`
         },
-        vars: "eyJiYXIiOjgyOTMsImJheiI6WzE5Miw0MTgyXSwiZm9vIjpbIjB4NmM5MWIwNjJhNzc0Y2JlOGI5YmY1MmYyMjRjMzdiYWRmOThmYzQwYiIsIjB4YzRmMjdlYWQ5MDgzYzc1NmNjMmMwMmFhYTM5YjIyM2ZlOGQwYTBlNSIsIjB4NzQ5ZTQ1OTg4MTliMmIwZTkxNWEwMjEyMDY5NmM3YjhmZTE2YzA5YyJdfQ=="
+        varBytesBase64: "eyJiYXIiOjgyOTMsImJheiI6WzE5Miw0MTgyXSwiZm9vIjpbIjB4NmM5MWIwNjJhNzc0Y2JlOGI5YmY1MmYyMjRjMzdiYWRmOThmYzQwYiIsIjB4YzRmMjdlYWQ5MDgzYzc1NmNjMmMwMmFhYTM5YjIyM2ZlOGQwYTBlNSIsIjB4NzQ5ZTQ1OTg4MTliMmIwZTkxNWEwMjEyMDY5NmM3YjhmZTE2YzA5YyJdfQ==",
+        vars: {}
       }
     ).then(
       (response) => {

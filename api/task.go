@@ -8,21 +8,31 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/gddo/httputil/header"
 	"github.com/pickleyd/chainlink/core/config"
 	"github.com/pickleyd/chainlink/core/logger"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
 )
 
+type Var struct {
+	Value  string
+	Values []string
+	Type   string
+}
+
 type Task struct {
-	Id      string
-	Name    string
-	Inputs  []string
-	Options map[string]interface{}
-	Vars    string
+	Id             string
+	Name           string
+	Inputs         []string
+	Options        map[string]interface{}
+	Vars           map[string]Var
+	VarBytesBase64 string `json:",omitempty"`
 }
 
 type Response struct {
@@ -140,71 +150,71 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varValues := make(map[string]interface{})
 
-	// // TODO: Handle arrays recursively
-	// for k, v := range t.Vars {
-	// 	if v.Type == "bytes32" {
-	// 		if v.Value != "" {
-	// 			varValues[k] = toBytes32(v.Value)
-	// 		} else if len(v.Values) > 0 {
-	// 			var s [][32]byte
-	// 			for _, val := range v.Values {
-	// 				s = append(s, toBytes32(val))
-	// 			}
-	// 			varValues[k] = s
-	// 		}
-	// 	} else if v.Type == "bytes" {
-	// 		if v.Value != "" {
-	// 			varValues[k] = toBytes(v.Value)
-	// 		} else if len(v.Values) > 0 {
-	// 			var s [][]byte
-	// 			for _, val := range v.Values {
-	// 				s = append(s, toBytes(val))
-	// 			}
-	// 			varValues[k] = s
-	// 		}
-	// 	} else if v.Type == "int" {
-	// 		if v.Value != "" {
-	// 			varValues[k] = toInt(v.Value)
-	// 		} else if len(v.Values) > 0 {
-	// 			var s []*big.Int
-	// 			for _, val := range v.Values {
-	// 				s = append(s, toInt(val))
-	// 			}
-	// 			varValues[k] = s
-	// 		}
-	// 	} else if v.Type == "bool" {
-	// 		if v.Value != "" {
-	// 			varValues[k] = toBool(v.Value)
-	// 		} else if len(v.Values) > 0 {
-	// 			var s []bool
-	// 			for _, val := range v.Values {
-	// 				s = append(s, toBool(val))
-	// 			}
-	// 			varValues[k] = s
-	// 		}
-	// 	} else if v.Type == "address" {
-	// 		if v.Value != "" {
-	// 			varValues[k] = toAddress(v.Value)
-	// 		} else if len(v.Values) > 0 {
-	// 			var s []common.Address
-	// 			for _, val := range v.Values {
-	// 				s = append(s, toAddress(val))
-	// 			}
-	// 			varValues[k] = s
-	// 		}
-	// 	} else {
-	// 		varValues[k] = v.Value
-	// 	}
-	// }
-
-	by, errDecode := base64.StdEncoding.DecodeString(t.Vars)
-	if errDecode != nil {
-		log.Fatal(`Failed to decode vars base64 string`, errDecode)
+	// TODO: Handle arrays recursively
+	for k, v := range t.Vars {
+		if v.Type == "bytes32" {
+			if v.Value != "" {
+				varValues[k] = toBytes32(v.Value)
+			} else if len(v.Values) > 0 {
+				var s [][32]byte
+				for _, val := range v.Values {
+					s = append(s, toBytes32(val))
+				}
+				varValues[k] = s
+			}
+		} else if v.Type == "bytes" {
+			if v.Value != "" {
+				varValues[k] = toBytes(v.Value)
+			} else if len(v.Values) > 0 {
+				var s [][]byte
+				for _, val := range v.Values {
+					s = append(s, toBytes(val))
+				}
+				varValues[k] = s
+			}
+		} else if v.Type == "int" {
+			if v.Value != "" {
+				varValues[k] = toInt(v.Value)
+			} else if len(v.Values) > 0 {
+				var s []*big.Int
+				for _, val := range v.Values {
+					s = append(s, toInt(val))
+				}
+				varValues[k] = s
+			}
+		} else if v.Type == "bool" {
+			if v.Value != "" {
+				varValues[k] = toBool(v.Value)
+			} else if len(v.Values) > 0 {
+				var s []bool
+				for _, val := range v.Values {
+					s = append(s, toBool(val))
+				}
+				varValues[k] = s
+			}
+		} else if v.Type == "address" {
+			if v.Value != "" {
+				varValues[k] = toAddress(v.Value)
+			} else if len(v.Values) > 0 {
+				var s []common.Address
+				for _, val := range v.Values {
+					s = append(s, toAddress(val))
+				}
+				varValues[k] = s
+			}
+		} else {
+			varValues[k] = v.Value
+		}
 	}
 
-	errUnmarshal := json.Unmarshal(by, &varValues)
-	if errUnmarshal != nil {
-		log.Fatal(`Failed json unmarshal of vars`, errUnmarshal)
+	by, errDecode := base64.StdEncoding.DecodeString(t.VarBytesBase64)
+	if errDecode != nil {
+		log.Fatal(`Failed to decode vars base64 string`, errDecode)
+	} else if len(by) > 0 {
+		errUnmarshal := json.Unmarshal(by, &varValues)
+		if errUnmarshal != nil {
+			log.Fatal(`Failed json unmarshal of vars`, errUnmarshal)
+		}
 	}
 
 	fmt.Printf("%v", varValues)
@@ -285,36 +295,36 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jData)
 }
 
-// func toInt(s string) *big.Int {
-// 	n := new(big.Int)
-// 	n, ok := n.SetString(s, 10)
-// 	if !ok {
-// 		log.Fatal("big.Int SetString error")
-// 	}
-// 	return n
-// }
+func toInt(s string) *big.Int {
+	n := new(big.Int)
+	n, ok := n.SetString(s, 10)
+	if !ok {
+		log.Fatal("big.Int SetString error")
+	}
+	return n
+}
 
-// func toAddress(s string) common.Address {
-// 	return common.HexToAddress(s)
-// }
+func toAddress(s string) common.Address {
+	return common.HexToAddress(s)
+}
 
-// func toBool(s string) bool {
-// 	boolValue, err := strconv.ParseBool(s)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	return boolValue
-// }
+func toBool(s string) bool {
+	boolValue, err := strconv.ParseBool(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return boolValue
+}
 
-// func toBytes32(s string) [32]byte {
-// 	var bytes32 [32]byte
-// 	copy(bytes32[:], []byte(s))
-// 	return bytes32
-// }
+func toBytes32(s string) [32]byte {
+	var bytes32 [32]byte
+	copy(bytes32[:], []byte(s))
+	return bytes32
+}
 
-// func toBytes(s string) []byte {
-// 	return []byte(s)
-// }
+func toBytes(s string) []byte {
+	return []byte(s)
+}
 
 type TaskType string
 
@@ -341,8 +351,8 @@ const (
 	// TaskTypeETHTx            TaskType = "ethtx"
 	TaskTypeETHABIEncode TaskType = "ethabiencode"
 	// TaskTypeETHABIEncode2    TaskType = "ethabiencode2"
-	TaskTypeETHABIDecode TaskType = "ethabidecode"
-	// TaskTypeETHABIDecodeLog  TaskType = "ethabidecodelog"
+	TaskTypeETHABIDecode    TaskType = "ethabidecode"
+	TaskTypeETHABIDecodeLog TaskType = "ethabidecodelog"
 	// TaskTypeMerge            TaskType = "merge"
 	// TaskTypeLowercase        TaskType = "lowercase"
 	// TaskTypeUppercase        TaskType = "uppercase"
@@ -510,8 +520,18 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 			ABI:      opts.ABI,
 			Data:     opts.Data,
 		}
-	// case TaskTypeETHABIDecodeLog:
-	// 	task = &ETHABIDecodeLogTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeETHABIDecodeLog:
+		var opts pipeline.ETHABIDecodeLogTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ETHABIDecodeLogTask{
+			BaseTask: baseTask,
+			ABI:      opts.ABI,
+			Data:     opts.Data,
+			Topics:   opts.Topics,
+		}
 	case TaskTypeCBORParse:
 		var opts pipeline.CBORParseTask
 		if err := json.Unmarshal(jsonString, &opts); err != nil {
