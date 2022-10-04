@@ -1,16 +1,16 @@
 package task
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -20,18 +20,18 @@ import (
 	"github.com/pickleyd/chainlink/core/services/pipeline"
 )
 
-type Var struct {
-	Value  string
-	Values []string
-	Type   string
-}
+// type Var struct {
+// 	Value  string
+// 	Values []string
+// 	Type   string
+// }
 
 type Task struct {
-	Id             string
-	Name           string
-	Inputs         []string
-	Options        map[string]interface{}
-	Vars           map[string]Var
+	Id      string
+	Name    string
+	Inputs  []string
+	Options map[string]interface{}
+	// Vars           map[string]Var
 	VarBytesBase64 string `json:",omitempty"`
 }
 
@@ -76,6 +76,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	err := dec.Decode(&t)
 
 	if err != nil {
+
 		var syntaxError *json.SyntaxError
 		var unmarshalTypeError *json.UnmarshalTypeError
 
@@ -150,74 +151,72 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varValues := make(map[string]interface{})
 
-	// TODO: Handle arrays recursively
-	for k, v := range t.Vars {
-		if v.Type == "bytes32" {
-			if v.Value != "" {
-				varValues[k] = toBytes32(v.Value)
-			} else if len(v.Values) > 0 {
-				var s [][32]byte
-				for _, val := range v.Values {
-					s = append(s, toBytes32(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "bytes" {
-			if v.Value != "" {
-				varValues[k] = toBytes(v.Value)
-			} else if len(v.Values) > 0 {
-				var s [][]byte
-				for _, val := range v.Values {
-					s = append(s, toBytes(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "int" {
-			if v.Value != "" {
-				varValues[k] = toInt(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []*big.Int
-				for _, val := range v.Values {
-					s = append(s, toInt(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "bool" {
-			if v.Value != "" {
-				varValues[k] = toBool(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []bool
-				for _, val := range v.Values {
-					s = append(s, toBool(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "address" {
-			if v.Value != "" {
-				varValues[k] = toAddress(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []common.Address
-				for _, val := range v.Values {
-					s = append(s, toAddress(val))
-				}
-				varValues[k] = s
-			}
-		} else {
-			varValues[k] = v.Value
-		}
-	}
+	// fmt.Printf("%v", t)
+
+	// var bytes32 [32]byte
+	// copy(bytes32[:], []byte("chainlink chainlink chainlink"))
+
+	// fmt.Printf("%v", bytes32)
+
+	// fmt.Printf("%v", []byte("stevetoshi sergeymoto"))
+
+	// varValues["foo"] = bytes32
+
+	// data := bytes32[:]
+
+	// sEnc := base64.StdEncoding.EncodeToString([]byte(data))
+	// fmt.Println(sEnc)
+
+	// sDec, _ := base64.StdEncoding.DecodeString(sEnc)
+	// fmt.Println(string(sDec))
+	// fmt.Println()
+
+	// uEnc := base64.URLEncoding.EncodeToString([]byte(data))
+	// fmt.Println(uEnc)
+	// uDec, _ := base64.URLEncoding.DecodeString(uEnc)
+	// fmt.Println(string(uDec))
+
+	// var bytes32 [32]byte
+	// copy(bytes32[:], []byte("chainlink chainlink chainlink"))
+
+	// buf := &bytes.Buffer{}
+	// enc := gob.NewEncoder(buf)
+	// if err := enc.Encode(bytes32); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+	// fmt.Println(buf.Bytes())
+
+	// dec3 := gob.NewDecoder(ourGob)
+	// if err := dec3.Decode(&thing); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
 
 	by, errDecode := base64.StdEncoding.DecodeString(t.VarBytesBase64)
 	if errDecode != nil {
 		log.Fatal(`Failed to decode vars base64 string`, errDecode)
 	} else if len(by) > 0 {
-		errUnmarshal := json.Unmarshal(by, &varValues)
-		if errUnmarshal != nil {
-			log.Fatal(`Failed json unmarshal of vars`, errUnmarshal)
+		// errUnmarshal := json.Unmarshal(by, &varValues)
+		// if errUnmarshal != nil {
+		// 	log.Fatal(`Failed json unmarshal of vars`, errUnmarshal)
+		// }
+		gob.Register(map[string]interface{}{})
+		gob.Register([32]byte{})
+		gob.Register(common.Address{})
+
+		gobBytes, _ := base64.StdEncoding.DecodeString(t.VarBytesBase64)
+
+		buf := bytes.NewBuffer(gobBytes)
+		gobDec := gob.NewDecoder(buf)
+		if err := gobDec.Decode(&varValues); err != nil {
+			log.Fatal(err)
+			return
 		}
 	}
 
-	fmt.Printf("%v", varValues)
+	// fmt.Println("Decoded: \n ")
+	// fmt.Printf("%v", varValues)
 
 	vars := pipeline.NewVarsFrom(varValues)
 
@@ -240,9 +239,28 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// TODO - existence check?
 	varValues[t.Id] = result.Value
 
-	jsonVarValues, _ := json.Marshal(varValues)
+	fmt.Printf("type of result.Value: %T\n", result.Value)
 
-	base64VarValues := base64.StdEncoding.EncodeToString(jsonVarValues)
+	// jsonVarValues, _ := json.Marshal(varValues)
+
+	// base64VarValues := base64.StdEncoding.EncodeToString(jsonVarValues)
+
+	gob.Register(map[string]interface{}{})
+	gob.Register([32]byte{})
+	gob.Register(common.Address{})
+
+	buf := &bytes.Buffer{}
+	enc := gob.NewEncoder(buf)
+	if err := enc.Encode(varValues); err != nil {
+		log.Println(err)
+		return
+	}
+
+	// fmt.Println("1")
+	// fmt.Printf("%v", varValues)
+	// fmt.Println(buf.Bytes())
+
+	base64VarValues := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	response := Response{
 		Value:          result.Value,
@@ -250,42 +268,42 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		VarBytesBase64: base64VarValues,
 	}
 
-	_, ok := result.Value.(map[string]interface{})
-	if ok {
-		out, err := json.Marshal(result.Value)
-		if err != nil {
-			panic(err)
-		}
-		response.Value = string(out)
-	} else {
-		response.Value = result.Value
+	// _, ok := result.Value.(map[string]interface{})
+	// if ok {
+	// 	out, err := json.Marshal(result.Value)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	response.Value = string(out)
+	// } else {
+	response.Value = result.Value
 
-		// test := map[string]interface{}{
-		// 	"foo": []common.Address{
-		// 		common.HexToAddress("0x6c91b062a774cbe8b9bf52f224c37badf98fc40b"),
-		// 		common.HexToAddress("0xc4f27ead9083c756cc2c02aaa39b223fe8d0a0e5"),
-		// 		common.HexToAddress("0x749e4598819b2b0e915a02120696c7b8fe16c09c"),
-		// 	},
-		// 	"bar": big.NewInt(8293),
-		// 	"baz": []*big.Int{big.NewInt(192), big.NewInt(4182)},
-		// }
-		// testOut, _ := json.Marshal(test)
+	// test := map[string]interface{}{
+	// 	"foo": []common.Address{
+	// 		common.HexToAddress("0x6c91b062a774cbe8b9bf52f224c37badf98fc40b"),
+	// 		common.HexToAddress("0xc4f27ead9083c756cc2c02aaa39b223fe8d0a0e5"),
+	// 		common.HexToAddress("0x749e4598819b2b0e915a02120696c7b8fe16c09c"),
+	// 	},
+	// 	"bar": big.NewInt(8293),
+	// 	"baz": []*big.Int{big.NewInt(192), big.NewInt(4182)},
+	// }
+	// testOut, _ := json.Marshal(test)
 
-		// fmt.Println(json.Valid([]byte(testOut)))
+	// fmt.Println(json.Valid([]byte(testOut)))
 
-		// asBase64 := base64.StdEncoding.EncodeToString(testOut)
+	// asBase64 := base64.StdEncoding.EncodeToString(testOut)
 
-		// fmt.Println(asBase64)
+	// fmt.Println(asBase64)
 
-		// by, err := base64.StdEncoding.DecodeString(asBase64)
-		// if err != nil {
-		// 	fmt.Println(`failed base64 Decode`, err)
-		// }
+	// by, err := base64.StdEncoding.DecodeString(asBase64)
+	// if err != nil {
+	// 	fmt.Println(`failed base64 Decode`, err)
+	// }
 
-		// fmt.Println(json.Valid([]byte(by)))
+	// fmt.Println(json.Valid([]byte(by)))
 
-		// fmt.Fprintf(w, "%v", asBase64)
-	}
+	// fmt.Fprintf(w, "%v", asBase64)
+	// }
 
 	jData, errJson := json.Marshal(response)
 	if errJson != nil {
@@ -293,37 +311,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jData)
-}
-
-func toInt(s string) *big.Int {
-	n := new(big.Int)
-	n, ok := n.SetString(s, 10)
-	if !ok {
-		log.Fatal("big.Int SetString error")
-	}
-	return n
-}
-
-func toAddress(s string) common.Address {
-	return common.HexToAddress(s)
-}
-
-func toBool(s string) bool {
-	boolValue, err := strconv.ParseBool(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return boolValue
-}
-
-func toBytes32(s string) [32]byte {
-	var bytes32 [32]byte
-	copy(bytes32[:], []byte(s))
-	return bytes32
-}
-
-func toBytes(s string) []byte {
-	return []byte(s)
 }
 
 type TaskType string
