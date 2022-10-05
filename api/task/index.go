@@ -22,8 +22,7 @@ type Task struct {
 	Name    string
 	Inputs  []string
 	Options map[string]interface{}
-	// Vars    map[string]interface{}
-	Vars string
+	Vars    string
 }
 
 type Response struct {
@@ -135,41 +134,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 
-	// TESTING
-
-	// var bytes32 [32]byte
-	// copy(bytes32[:], []byte("chainlink chainlink chainlink"))
-	// test := map[string]interface{}{
-	// 	"foo": bytes32,
-	// 	"bar": []byte("stevetoshi sergeymoto"),
-	// 	"baz": common.HexToAddress("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
-	// }
-
-	// jsonSerTest := pipeline.JSONSerializable{
-	// 	Valid: true,
-	// 	Val:   test,
-	// }
-
-	// jDataTest, errJsonTest := jsonSerTest.MarshalJSON()
-	// if errJsonTest != nil {
-	// 	log.Fatal("Error marshalling response object to json", errJsonTest)
-	// }
-
-	// jDataTestB64 := base64.StdEncoding.EncodeToString(jDataTest)
-
-	// fmt.Println("***Start***")
-	// fmt.Printf("%v", jDataTestB64)
-	// fmt.Println("***End***")
-
-	// jDataTestDec, _ := base64.StdEncoding.DecodeString(jDataTestB64)
-
-	// inputs := pipeline.JSONSerializable{}
-	// inputs.UnmarshalJSON(jDataTestDec)
-
-	// ENDTESTING
-
-	// vars := pipeline.NewVarsFrom(inputs.Val.(map[string]interface{}))
-
 	vars := make(map[string]interface{})
 
 	if t.Vars != "" {
@@ -206,12 +170,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if errJson != nil {
 		log.Fatal("Error marshalling response object to json", errJson)
 	}
-
-	// response := Response{
-	// 	Value: jData,
-	// }
-
-	// jData, errJson := jsonSer.MarshalJSON()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jData)
