@@ -52,25 +52,25 @@ const performTask = (test: Test, vars64?: string) => {
                 {
                     vars: {
                         ...test.vars, "task-0": {
-                            value: test.want,
-                            type: ""
+                            keep: test.want
                         }
                     }
                 },
             ).then((varsResponse) => {
-                expect(response.body).to.deep.eq({
-                    "Value": test.want,
-                    "VarBytesBase64": varsResponse.body.VarsAsBase64
-                    // "Vars": {
-                    //     ...test.vars && convertRequestVarsToResultVars(test.vars),
-                    //     "task-0": test.want
-                    // },
-                    // "VarBytesBase64": encode(JSON.stringify({
-                    //     ...test.vars && convertRequestVarsToResultVars(test.vars),
-                    //     "task-0": test.want
-                    // }))
-                })
-                // return performTask(test, varsResponse.body.VarsAsBase64)
+                // expect(response.body).to.deep.eq({
+                //     "Value": test.want,
+                //     "VarBytesBase64": varsResponse.body.VarsAsBase64
+                //     // "Vars": {
+                //     //     ...test.vars && convertRequestVarsToResultVars(test.vars),
+                //     //     "task-0": test.want
+                //     // },
+                //     // "VarBytesBase64": encode(JSON.stringify({
+                //     //     ...test.vars && convertRequestVarsToResultVars(test.vars),
+                //     //     "task-0": test.want
+                //     // }))
+                // })
+
+                expect(response.body.Value).to.deep.eq(test.want)
             })
         }
     )

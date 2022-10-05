@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
 	"strings"
 
@@ -18,20 +19,14 @@ import (
 	"github.com/pickleyd/chainlink/core/config"
 	"github.com/pickleyd/chainlink/core/logger"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
+	"github.com/shopspring/decimal"
 )
 
-// type Var struct {
-// 	Value  string
-// 	Values []string
-// 	Type   string
-// }
-
 type Task struct {
-	Id      string
-	Name    string
-	Inputs  []string
-	Options map[string]interface{}
-	// Vars           map[string]Var
+	Id             string
+	Name           string
+	Inputs         []string
+	Options        map[string]interface{}
 	VarBytesBase64 string `json:",omitempty"`
 }
 
@@ -151,59 +146,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varValues := make(map[string]interface{})
 
-	// fmt.Printf("%v", t)
-
-	// var bytes32 [32]byte
-	// copy(bytes32[:], []byte("chainlink chainlink chainlink"))
-
-	// fmt.Printf("%v", bytes32)
-
-	// fmt.Printf("%v", []byte("stevetoshi sergeymoto"))
-
-	// varValues["foo"] = bytes32
-
-	// data := bytes32[:]
-
-	// sEnc := base64.StdEncoding.EncodeToString([]byte(data))
-	// fmt.Println(sEnc)
-
-	// sDec, _ := base64.StdEncoding.DecodeString(sEnc)
-	// fmt.Println(string(sDec))
-	// fmt.Println()
-
-	// uEnc := base64.URLEncoding.EncodeToString([]byte(data))
-	// fmt.Println(uEnc)
-	// uDec, _ := base64.URLEncoding.DecodeString(uEnc)
-	// fmt.Println(string(uDec))
-
-	// var bytes32 [32]byte
-	// copy(bytes32[:], []byte("chainlink chainlink chainlink"))
-
-	// buf := &bytes.Buffer{}
-	// enc := gob.NewEncoder(buf)
-	// if err := enc.Encode(bytes32); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-	// fmt.Println(buf.Bytes())
-
-	// dec3 := gob.NewDecoder(ourGob)
-	// if err := dec3.Decode(&thing); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-
 	by, errDecode := base64.StdEncoding.DecodeString(t.VarBytesBase64)
 	if errDecode != nil {
 		log.Fatal(`Failed to decode vars base64 string`, errDecode)
 	} else if len(by) > 0 {
-		// errUnmarshal := json.Unmarshal(by, &varValues)
-		// if errUnmarshal != nil {
-		// 	log.Fatal(`Failed json unmarshal of vars`, errUnmarshal)
-		// }
 		gob.Register(map[string]interface{}{})
 		gob.Register([32]byte{})
 		gob.Register(common.Address{})
+		gob.Register([]common.Address{})
+		gob.Register(&big.Int{})
+		gob.Register([]big.Int{})
+		gob.Register([]*big.Int{})
+		gob.Register(decimal.Decimal{})
 
 		gobBytes, _ := base64.StdEncoding.DecodeString(t.VarBytesBase64)
 
@@ -214,9 +168,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	// fmt.Println("Decoded: \n ")
-	// fmt.Printf("%v", varValues)
 
 	vars := pipeline.NewVarsFrom(varValues)
 
@@ -241,13 +192,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("type of result.Value: %T\n", result.Value)
 
-	// jsonVarValues, _ := json.Marshal(varValues)
-
-	// base64VarValues := base64.StdEncoding.EncodeToString(jsonVarValues)
-
 	gob.Register(map[string]interface{}{})
 	gob.Register([32]byte{})
 	gob.Register(common.Address{})
+	gob.Register([]common.Address{})
+	gob.Register(&big.Int{})
+	gob.Register([]big.Int{})
+	gob.Register([]*big.Int{})
+	gob.Register(decimal.Decimal{})
 
 	buf := &bytes.Buffer{}
 	enc := gob.NewEncoder(buf)
@@ -255,10 +207,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-
-	// fmt.Println("1")
-	// fmt.Printf("%v", varValues)
-	// fmt.Println(buf.Bytes())
 
 	base64VarValues := base64.StdEncoding.EncodeToString(buf.Bytes())
 
@@ -268,42 +216,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		VarBytesBase64: base64VarValues,
 	}
 
-	// _, ok := result.Value.(map[string]interface{})
-	// if ok {
-	// 	out, err := json.Marshal(result.Value)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	response.Value = string(out)
-	// } else {
 	response.Value = result.Value
-
-	// test := map[string]interface{}{
-	// 	"foo": []common.Address{
-	// 		common.HexToAddress("0x6c91b062a774cbe8b9bf52f224c37badf98fc40b"),
-	// 		common.HexToAddress("0xc4f27ead9083c756cc2c02aaa39b223fe8d0a0e5"),
-	// 		common.HexToAddress("0x749e4598819b2b0e915a02120696c7b8fe16c09c"),
-	// 	},
-	// 	"bar": big.NewInt(8293),
-	// 	"baz": []*big.Int{big.NewInt(192), big.NewInt(4182)},
-	// }
-	// testOut, _ := json.Marshal(test)
-
-	// fmt.Println(json.Valid([]byte(testOut)))
-
-	// asBase64 := base64.StdEncoding.EncodeToString(testOut)
-
-	// fmt.Println(asBase64)
-
-	// by, err := base64.StdEncoding.DecodeString(asBase64)
-	// if err != nil {
-	// 	fmt.Println(`failed base64 Decode`, err)
-	// }
-
-	// fmt.Println(json.Valid([]byte(by)))
-
-	// fmt.Fprintf(w, "%v", asBase64)
-	// }
 
 	jData, errJson := json.Marshal(response)
 	if errJson != nil {

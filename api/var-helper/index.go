@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/gddo/httputil/header"
 )
@@ -22,11 +24,11 @@ type Var struct {
 	Value  string
 	Values []string
 	Type   string
+	Keep   interface{}
 }
 
 type Input struct {
 	Vars map[string]Var
-	// VarBytesBase64 string `json:",omitempty"`
 }
 
 type Response struct {
@@ -140,7 +142,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Handle deeper nesting using recursion?
 	for k, v := range i.Vars {
-		if v.Type == "bytes32" {
+		if v.Keep != nil {
+			varValues[k] = v.Keep
+		} else if v.Type == "bytes32" {
 			if v.Value != "" {
 				varValues[k] = toBytes32(v.Value)
 			} else if len(v.Values) > 0 {
@@ -196,27 +200,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// jsonVarValues, _ := json.Marshal(varValues)
-
-	// base64VarValues := base64.StdEncoding.EncodeToString(jsonVarValues)
-
-	// fmt.Println("2")
-	// fmt.Printf("%v", base64VarValues)
-
-	// response := Response{
-	// 	VarsAsBase64: base64VarValues,
-	// }
-
-	// jData, errJson := json.Marshal(response)
-	// if errJson != nil {
-	// 	log.Fatal("Error marshalling response object to json", errJson)
-	// }
-	// w.Header().Set("Content-Type", "application/json")
-	// w.Write(jData)
-
 	gob.Register(map[string]interface{}{})
 	gob.Register([32]byte{})
 	gob.Register(common.Address{})
+	gob.Register([]common.Address{})
+	gob.Register(&big.Int{})
+	gob.Register([]big.Int{})
+	gob.Register([]*big.Int{})
+	gob.Register(decimal.Decimal{})
 
 	buf := &bytes.Buffer{}
 	enc := gob.NewEncoder(buf)
@@ -224,39 +215,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-
-	// fmt.Println("3")
-	// fmt.Printf("%v", varValues)
-	// fmt.Println(buf.Bytes())
-
-	// TESTING
-	var bytes32 [32]byte
-	copy(bytes32[:], []byte("chainlink chainlink chainlink"))
-	testThing := map[string]interface{}{
-		"foo":    bytes32,
-		"bar":    []byte("stevetoshi sergeymoto"),
-		"baz":    common.HexToAddress("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
-		"task-0": "0x4f5e7a89636861696e6c696e6b20636861696e6c696e6b20636861696e6c696e6b0000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000deadbeefdeadbeefdeadbeefdeadbeefdeadbeef00000000000000000000000000000000000000000000000000000000000000157374657665746f736869207365726765796d6f746f0000000000000000000000",
-	}
-
-	buf2 := &bytes.Buffer{}
-	enc2 := gob.NewEncoder(buf2)
-	if err := enc2.Encode(testThing); err != nil {
-		log.Println(err)
-		return
-	}
-
-	// fmt.Println("4")
-	// fmt.Printf("%v", testThing)
-	fmt.Println(buf.Bytes())
-
-	testBase64VarValues := base64.StdEncoding.EncodeToString(buf.Bytes())
-	testDecode, _ := base64.StdEncoding.DecodeString(testBase64VarValues)
-
-	fmt.Println("encoded and decoded again:")
-	fmt.Println(testDecode)
-
-	//ENDTESTING
 
 	base64VarValues := base64.StdEncoding.EncodeToString(buf.Bytes())
 
@@ -298,12 +256,6 @@ func toBytes32(s string) [32]byte {
 	copy(bytes32[:], []byte(s))
 	return bytes32
 }
-
-// func toBytes16(s string) [16]byte {
-// 	var bytes16 [16]byte
-// 	copy(bytes16[:], []byte(s))
-// 	return bytes16
-// }
 
 func toBytes(s string) []byte {
 	return []byte(s)
