@@ -1,9 +1,7 @@
 package varhelper
 
 import (
-	"bytes"
 	"encoding/base64"
-	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,10 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/shopspring/decimal"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/gddo/httputil/header"
+	"github.com/pickleyd/chainlink/core/services/pipeline"
 )
 
 type Var struct {
@@ -200,34 +197,28 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	gob.Register(map[string]interface{}{})
-	gob.Register([32]byte{})
-	gob.Register(common.Address{})
-	gob.Register([]common.Address{})
-	gob.Register(&big.Int{})
-	gob.Register([]big.Int{})
-	gob.Register([]*big.Int{})
-	gob.Register(decimal.Decimal{})
-
-	buf := &bytes.Buffer{}
-	enc := gob.NewEncoder(buf)
-	if err := enc.Encode(varValues); err != nil {
-		log.Println(err)
-		return
+	asJsonSerializable := pipeline.JSONSerializable{
+		Valid: true,
+		Val:   varValues,
 	}
 
-	base64VarValues := base64.StdEncoding.EncodeToString(buf.Bytes())
-
-	response := Response{
-		VarsAsBase64: base64VarValues,
-	}
-
-	jData, errJson := json.Marshal(response)
+	jData, errJson := asJsonSerializable.MarshalJSON()
 	if errJson != nil {
 		log.Fatal("Error marshalling response object to json", errJson)
 	}
+
+	jDataBase64 := base64.StdEncoding.EncodeToString(jData)
+
+	response := Response{
+		VarsAsBase64: jDataBase64,
+	}
+
+	jDataResponse, errJsonResponse := json.Marshal(response)
+	if errJsonResponse != nil {
+		log.Fatal("Error marshalling response object to json", errJsonResponse)
+	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jData)
+	w.Write(jDataResponse)
 }
 
 func toInt(s string) *big.Int {

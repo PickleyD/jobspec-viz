@@ -1,41 +1,33 @@
 package task
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"math/big"
 	"net/http"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/gddo/httputil/header"
 	"github.com/pickleyd/chainlink/core/config"
 	"github.com/pickleyd/chainlink/core/logger"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
-	"github.com/shopspring/decimal"
 )
 
 type Task struct {
-	Id             string
-	Name           string
-	Inputs         []string
-	Options        map[string]interface{}
-	VarBytesBase64 string `json:",omitempty"`
+	Id      string
+	Name    string
+	Inputs  []string
+	Options map[string]interface{}
+	// Vars    map[string]interface{}
+	Vars string
 }
 
 type Response struct {
 	Value interface{}
-	// User-readable
-	Vars map[string]interface{}
-	// Not user-readable. Base64 representation of the var bytes can be deserialised in Go.
-	VarBytesBase64 string
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +63,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	err := dec.Decode(&t)
 
 	if err != nil {
-
 		var syntaxError *json.SyntaxError
 		var unmarshalTypeError *json.UnmarshalTypeError
 
@@ -144,32 +135,52 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 
-	varValues := make(map[string]interface{})
+	// TESTING
 
-	by, errDecode := base64.StdEncoding.DecodeString(t.VarBytesBase64)
-	if errDecode != nil {
-		log.Fatal(`Failed to decode vars base64 string`, errDecode)
-	} else if len(by) > 0 {
-		gob.Register(map[string]interface{}{})
-		gob.Register([32]byte{})
-		gob.Register(common.Address{})
-		gob.Register([]common.Address{})
-		gob.Register(&big.Int{})
-		gob.Register([]big.Int{})
-		gob.Register([]*big.Int{})
-		gob.Register(decimal.Decimal{})
+	// var bytes32 [32]byte
+	// copy(bytes32[:], []byte("chainlink chainlink chainlink"))
+	// test := map[string]interface{}{
+	// 	"foo": bytes32,
+	// 	"bar": []byte("stevetoshi sergeymoto"),
+	// 	"baz": common.HexToAddress("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
+	// }
 
-		gobBytes, _ := base64.StdEncoding.DecodeString(t.VarBytesBase64)
+	// jsonSerTest := pipeline.JSONSerializable{
+	// 	Valid: true,
+	// 	Val:   test,
+	// }
 
-		buf := bytes.NewBuffer(gobBytes)
-		gobDec := gob.NewDecoder(buf)
-		if err := gobDec.Decode(&varValues); err != nil {
-			log.Fatal(err)
-			return
-		}
+	// jDataTest, errJsonTest := jsonSerTest.MarshalJSON()
+	// if errJsonTest != nil {
+	// 	log.Fatal("Error marshalling response object to json", errJsonTest)
+	// }
+
+	// jDataTestB64 := base64.StdEncoding.EncodeToString(jDataTest)
+
+	// fmt.Println("***Start***")
+	// fmt.Printf("%v", jDataTestB64)
+	// fmt.Println("***End***")
+
+	// jDataTestDec, _ := base64.StdEncoding.DecodeString(jDataTestB64)
+
+	// inputs := pipeline.JSONSerializable{}
+	// inputs.UnmarshalJSON(jDataTestDec)
+
+	// ENDTESTING
+
+	// vars := pipeline.NewVarsFrom(inputs.Val.(map[string]interface{}))
+
+	vars := make(map[string]interface{})
+
+	if t.Vars != "" {
+		varsDec, _ := base64.StdEncoding.DecodeString(t.Vars)
+
+		inputs2 := pipeline.JSONSerializable{}
+		inputs2.UnmarshalJSON(varsDec)
+
+		vars = inputs2.Val.(map[string]interface{})
 	}
-
-	vars := pipeline.NewVarsFrom(varValues)
+	pipelineVars := pipeline.NewVarsFrom(vars)
 
 	task, taskErr := getTask(TaskType(t.Name), t.Options)
 
@@ -184,44 +195,24 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		results = append(results, pipeline.Result{Value: r})
 	}
 
-	result, _ := task.Run(ctx, logger.NullLogger, vars, results)
+	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, results)
 
-	// Append the result to the vars
-	// TODO - existence check?
-	varValues[t.Id] = result.Value
-
-	fmt.Printf("type of result.Value: %T\n", result.Value)
-
-	gob.Register(map[string]interface{}{})
-	gob.Register([32]byte{})
-	gob.Register(common.Address{})
-	gob.Register([]common.Address{})
-	gob.Register(&big.Int{})
-	gob.Register([]big.Int{})
-	gob.Register([]*big.Int{})
-	gob.Register(decimal.Decimal{})
-
-	buf := &bytes.Buffer{}
-	enc := gob.NewEncoder(buf)
-	if err := enc.Encode(varValues); err != nil {
-		log.Println(err)
-		return
+	jsonSer := pipeline.JSONSerializable{
+		Valid: true,
+		Val:   result.Value,
 	}
 
-	base64VarValues := base64.StdEncoding.EncodeToString(buf.Bytes())
-
-	response := Response{
-		Value:          result.Value,
-		Vars:           varValues,
-		VarBytesBase64: base64VarValues,
-	}
-
-	response.Value = result.Value
-
-	jData, errJson := json.Marshal(response)
+	jData, errJson := jsonSer.MarshalJSON()
 	if errJson != nil {
 		log.Fatal("Error marshalling response object to json", errJson)
 	}
+
+	// response := Response{
+	// 	Value: jData,
+	// }
+
+	// jData, errJson := jsonSer.MarshalJSON()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jData)
 }
@@ -251,8 +242,8 @@ const (
 	// TaskTypeETHTx            TaskType = "ethtx"
 	TaskTypeETHABIEncode TaskType = "ethabiencode"
 	// TaskTypeETHABIEncode2    TaskType = "ethabiencode2"
-	TaskTypeETHABIDecode    TaskType = "ethabidecode"
-	TaskTypeETHABIDecodeLog TaskType = "ethabidecodelog"
+	TaskTypeETHABIDecode TaskType = "ethabidecode"
+	// TaskTypeETHABIDecodeLog  TaskType = "ethabidecodelog"
 	// TaskTypeMerge            TaskType = "merge"
 	// TaskTypeLowercase        TaskType = "lowercase"
 	// TaskTypeUppercase        TaskType = "uppercase"
@@ -420,18 +411,8 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 			ABI:      opts.ABI,
 			Data:     opts.Data,
 		}
-	case TaskTypeETHABIDecodeLog:
-		var opts pipeline.ETHABIDecodeLogTask
-		if err := json.Unmarshal(jsonString, &opts); err != nil {
-			log.Fatal(err)
-		}
-
-		task = &pipeline.ETHABIDecodeLogTask{
-			BaseTask: baseTask,
-			ABI:      opts.ABI,
-			Data:     opts.Data,
-			Topics:   opts.Topics,
-		}
+	// case TaskTypeETHABIDecodeLog:
+	// 	task = &ETHABIDecodeLogTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	case TaskTypeCBORParse:
 		var opts pipeline.CBORParseTask
 		if err := json.Unmarshal(jsonString, &opts); err != nil {
