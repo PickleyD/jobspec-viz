@@ -26,7 +26,9 @@ type Task struct {
 }
 
 type Response struct {
-	Value interface{}
+	Value  interface{}
+	Vars   map[string]interface{}
+	Vars64 string
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -161,9 +163,31 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, results)
 
+	// Append the result to the vars
+	// TODO - existence check?
+	vars[t.Id] = result.Value
+
+	varsAsJsonSerializable := pipeline.JSONSerializable{
+		Valid: true,
+		Val:   vars,
+	}
+
+	varsJData, errJson := varsAsJsonSerializable.MarshalJSON()
+	if errJson != nil {
+		log.Fatal("Error marshalling response object to json", errJson)
+	}
+
+	varsEnc := base64.StdEncoding.EncodeToString(varsJData)
+
+	response := Response{
+		Value:  result.Value,
+		Vars:   vars,
+		Vars64: varsEnc,
+	}
+
 	jsonSer := pipeline.JSONSerializable{
 		Valid: true,
-		Val:   result.Value,
+		Val:   response,
 	}
 
 	jData, errJson := jsonSer.MarshalJSON()

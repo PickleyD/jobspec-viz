@@ -48,33 +48,34 @@ const performTask = (test: Test, vars64?: string) => {
         }
     ).then(
         (response) => {
-            expect(response.body).to.deep.eq(test.want)
-            // cy.request(
-            //     "POST",
-            //     "api/var-helper",
-            //     {
-            //         vars: {
-            //             ...test.vars, "task-0": {
-            //                 keep: test.want
-            //             }
-            //         }
-            //     },
-            // ).then((varsResponse) => {
-            //     // expect(response.body).to.deep.eq({
-            //     //     "Value": test.want,
-            //     //     "VarBytesBase64": varsResponse.body.VarsAsBase64
-            //     //     // "Vars": {
-            //     //     //     ...test.vars && convertRequestVarsToResultVars(test.vars),
-            //     //     //     "task-0": test.want
-            //     //     // },
-            //     //     // "VarBytesBase64": encode(JSON.stringify({
-            //     //     //     ...test.vars && convertRequestVarsToResultVars(test.vars),
-            //     //     //     "task-0": test.want
-            //     //     // }))
-            //     // })
+            // expect(response.body.Value).to.deep.eq(test.want)
+            cy.request(
+                "POST",
+                "api/var-helper",
+                {
+                    vars: {
+                        ...test.vars, "task-0": {
+                            keep: test.want
+                        }
+                    }
+                },
+            ).then((varsResponse) => {
+                // expect(response.body).to.deep.eq({
+                //     "Value": test.want,
+                //     "Vars64": varsResponse.body.VarsAsBase64
+                //     // "Vars": {
+                //     //     ...test.vars && convertRequestVarsToResultVars(test.vars),
+                //     //     "task-0": test.want
+                //     // },
+                //     // "VarBytesBase64": encode(JSON.stringify({
+                //     //     ...test.vars && convertRequestVarsToResultVars(test.vars),
+                //     //     "task-0": test.want
+                //     // }))
+                // })
 
-            //     expect(response.body).to.deep.eq(test.want)
-            // })
+                expect(response.body.Value).to.deep.eq(test.want)
+                expect(response.body.Vars64).to.eq(varsResponse.body.VarsAsBase64)
+            })
         }
     )
 }
