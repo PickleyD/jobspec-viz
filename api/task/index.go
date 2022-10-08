@@ -177,29 +177,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// TODO - existence check?
 	vars[t.Id] = result.Value
 
-	varsAsJsonSerializable := pipeline.JSONSerializable{
-		Valid: true,
-		Val:   vars,
-	}
-
-	varsJData, errJson := varsAsJsonSerializable.MarshalJSON()
-	if errJson != nil {
-		log.Fatal("Error marshalling response object to json", errJson)
-	}
-
-	varsEnc := base64.StdEncoding.EncodeToString(varsJData)
-
-	resultValAsJsonSerializable := pipeline.JSONSerializable{
-		Valid: true,
-		Val:   result.Value,
-	}
-
-	resultValJData, err2Json := resultValAsJsonSerializable.MarshalJSON()
-	if err2Json != nil {
-		log.Fatal("Error marshalling response object to json", err2Json)
-	}
-
-	resultValEnc := base64.StdEncoding.EncodeToString(resultValJData)
+	varsEnc := customToBase64(vars)
+	resultValEnc := customToBase64(result.Value)
 
 	response := Response{
 		Value:  result.Value,
@@ -220,6 +199,25 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jData)
+}
+
+func customToBase64(input interface{}) string {
+	return base64.StdEncoding.EncodeToString(marshalAsJsonSerializable(input))
+}
+
+// Marshal the input using Chainlink's custom marshalling logic
+func marshalAsJsonSerializable(input interface{}) []byte {
+	asJsonSerializable := pipeline.JSONSerializable{
+		Valid: true,
+		Val:   input,
+	}
+
+	jData, errJson := asJsonSerializable.MarshalJSON()
+	if errJson != nil {
+		log.Fatal("Error marshalling object to json", errJson)
+	}
+
+	return jData
 }
 
 type TaskType string

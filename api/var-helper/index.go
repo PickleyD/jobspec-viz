@@ -137,51 +137,28 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Vars
 	varValues := make(map[string]interface{})
-
 	if i.Vars != nil {
 		for k, v := range i.Vars {
 			varValues[k] = convertBasedOnTypeParam(v)
 		}
 	}
+	varsBase64 := customToBase64(varValues)
 
-	asJsonSerializable := pipeline.JSONSerializable{
-		Valid: true,
-		Val:   varValues,
-	}
-
-	jData, errJson := asJsonSerializable.MarshalJSON()
-	if errJson != nil {
-		log.Fatal("Error marshalling response object to json", errJson)
-	}
-
-	jDataBase64 := base64.StdEncoding.EncodeToString(jData)
-
-	inputValuesB64 := make([]string, len(i.Inputs))
-
+	// Inputs
+	inputsBase64 := make([]string, len(i.Inputs))
 	if i.Inputs != nil {
 		for k, v := range i.Inputs {
 			converted := convertBasedOnTypeParam(v)
-
-			asJsonSerializable2 := pipeline.JSONSerializable{
-				Valid: true,
-				Val:   converted,
-			}
-
-			jData2, errJson2 := asJsonSerializable2.MarshalJSON()
-			if errJson2 != nil {
-				log.Fatal("Error marshalling response object to json", errJson2)
-			}
-
-			inputsJDataB64 := base64.StdEncoding.EncodeToString(jData2)
-
-			inputValuesB64[k] = inputsJDataB64
+			inputsJDataB64 := customToBase64(converted)
+			inputsBase64[k] = inputsJDataB64
 		}
 	}
 
 	response := Response{
-		Vars64:   jDataBase64,
-		Inputs64: inputValuesB64,
+		Vars64:   varsBase64,
+		Inputs64: inputsBase64,
 	}
 
 	jDataResponse, errJsonResponse := json.Marshal(response)
@@ -190,6 +167,25 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jDataResponse)
+}
+
+func customToBase64(input interface{}) string {
+	return base64.StdEncoding.EncodeToString(marshalAsJsonSerializable(input))
+}
+
+// Marshal the input using Chainlink's custom marshalling logic
+func marshalAsJsonSerializable(input interface{}) []byte {
+	asJsonSerializable := pipeline.JSONSerializable{
+		Valid: true,
+		Val:   input,
+	}
+
+	jData, errJson := asJsonSerializable.MarshalJSON()
+	if errJson != nil {
+		log.Fatal("Error marshalling object to json", errJson)
+	}
+
+	return jData
 }
 
 func convertBasedOnTypeParam(v Var) interface{} {
