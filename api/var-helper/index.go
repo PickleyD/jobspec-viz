@@ -25,11 +25,13 @@ type Var struct {
 }
 
 type Input struct {
-	Vars map[string]Var
+	Vars   map[string]Var
+	Inputs []Var
 }
 
 type Response struct {
-	VarsAsBase64 string
+	Vars64   string
+	Inputs64 []string
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -137,63 +139,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varValues := make(map[string]interface{})
 
-	// TODO: Handle deeper nesting using recursion?
-	for k, v := range i.Vars {
-		if v.Keep != nil {
-			varValues[k] = v.Keep
-		} else if v.Type == "bytes32" {
-			if v.Value != "" {
-				varValues[k] = toBytes32(v.Value)
-			} else if len(v.Values) > 0 {
-				var s [][32]byte
-				for _, val := range v.Values {
-					s = append(s, toBytes32(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "bytes" {
-			if v.Value != "" {
-				varValues[k] = toBytes(v.Value)
-			} else if len(v.Values) > 0 {
-				var s [][]byte
-				for _, val := range v.Values {
-					s = append(s, toBytes(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "int" {
-			if v.Value != "" {
-				varValues[k] = toInt(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []*big.Int
-				for _, val := range v.Values {
-					s = append(s, toInt(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "bool" {
-			if v.Value != "" {
-				varValues[k] = toBool(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []bool
-				for _, val := range v.Values {
-					s = append(s, toBool(val))
-				}
-				varValues[k] = s
-			}
-		} else if v.Type == "address" {
-			if v.Value != "" {
-				varValues[k] = toAddress(v.Value)
-			} else if len(v.Values) > 0 {
-				var s []common.Address
-				for _, val := range v.Values {
-					s = append(s, toAddress(val))
-				}
-				varValues[k] = s
-			}
-		} else {
-			fmt.Printf("Not converting variable with type of: %T\n", v.Value)
-			varValues[k] = v.Value
+	if i.Vars != nil {
+		for k, v := range i.Vars {
+			varValues[k] = convertBasedOnTypeParam(v)
 		}
 	}
 
@@ -209,8 +157,31 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	jDataBase64 := base64.StdEncoding.EncodeToString(jData)
 
+	inputValuesB64 := make([]string, len(i.Inputs))
+
+	if i.Inputs != nil {
+		for k, v := range i.Inputs {
+			converted := convertBasedOnTypeParam(v)
+
+			asJsonSerializable2 := pipeline.JSONSerializable{
+				Valid: true,
+				Val:   converted,
+			}
+
+			jData2, errJson2 := asJsonSerializable2.MarshalJSON()
+			if errJson2 != nil {
+				log.Fatal("Error marshalling response object to json", errJson2)
+			}
+
+			inputsJDataB64 := base64.StdEncoding.EncodeToString(jData2)
+
+			inputValuesB64[k] = inputsJDataB64
+		}
+	}
+
 	response := Response{
-		VarsAsBase64: jDataBase64,
+		Vars64:   jDataBase64,
+		Inputs64: inputValuesB64,
 	}
 
 	jDataResponse, errJsonResponse := json.Marshal(response)
@@ -219,6 +190,66 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jDataResponse)
+}
+
+func convertBasedOnTypeParam(v Var) interface{} {
+	// TODO: Handle deeper nesting using recursion?
+	if v.Keep != nil {
+		return v.Keep
+	} else if v.Type == "bytes32" {
+		if v.Value != "" {
+			return toBytes32(v.Value)
+		} else if len(v.Values) > 0 {
+			var s [][32]byte
+			for _, val := range v.Values {
+				s = append(s, toBytes32(val))
+			}
+			return s
+		}
+	} else if v.Type == "bytes" {
+		if v.Value != "" {
+			return toBytes(v.Value)
+		} else if len(v.Values) > 0 {
+			var s [][]byte
+			for _, val := range v.Values {
+				s = append(s, toBytes(val))
+			}
+			return s
+		}
+	} else if v.Type == "int" {
+		if v.Value != "" {
+			return toInt(v.Value)
+		} else if len(v.Values) > 0 {
+			var s []*big.Int
+			for _, val := range v.Values {
+				s = append(s, toInt(val))
+			}
+			return s
+		}
+	} else if v.Type == "bool" {
+		if v.Value != "" {
+			return toBool(v.Value)
+		} else if len(v.Values) > 0 {
+			var s []bool
+			for _, val := range v.Values {
+				s = append(s, toBool(val))
+			}
+			return s
+		}
+	} else if v.Type == "address" {
+		if v.Value != "" {
+			return toAddress(v.Value)
+		} else if len(v.Values) > 0 {
+			var s []common.Address
+			for _, val := range v.Values {
+				s = append(s, toAddress(val))
+			}
+			return s
+		}
+	}
+
+	fmt.Printf("Not converting variable with type of: %T\n", v.Value)
+	return v.Value
 }
 
 func toInt(s string) *big.Int {

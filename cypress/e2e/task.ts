@@ -1,38 +1,49 @@
+export type Var = {
+    value?: string;
+    values?: Array<string>;
+    type: string;
+}
+
 export type Test = {
     task: string;
     name: string;
-    inputs?: Array<string>;
+    inputs: Array<Var>;
     options?: { [key: string]: any };
-    vars?: { [key: string]: any };
+    vars?: { [key: string]: Var };
     want: any;
 }
 
-export const generateTest = (test: Test, inputsOverride?: Array<string>) => {
-    return test.vars !== undefined ?
-        cy.request(
-            "POST",
-            "api/var-helper",
-            { vars: test.vars },
-        ).then((varsResponse) => {
-            return performTask(test, varsResponse.body.VarsAsBase64, inputsOverride)
+export const generateTest = (test: Test, inputs64Override?: Array<string>) => {
+    return handleVarsConversion(test.vars, test.inputs)
+        .then((response) => {
+            return performTask(test, response.body.Vars64, inputs64Override || response.body.Inputs64)
         })
-        :
-        performTask(test, undefined, inputsOverride)
 }
 
-const performTask = (test: Test, vars64?: string, inputsOverride?: Array<string>) => {
+const handleVarsConversion = (vars: Test["vars"], inputs: Test["inputs"]) => {
+    return cy.request(
+        "POST",
+        "api/var-helper",
+        {
+            ...vars && { vars: vars },
+            ...inputs && { inputs: inputs }
+        },
+    )
+}
+
+const performTask = (test: Omit<Test, 'inputs'>, vars64?: string, inputs64?: Array<string>) => {
     return cy.request(
         'POST',
         'api/task',
         {
             id: "task-0",
             name: test.task,
-            inputs: inputsOverride || test.inputs,
             options: test.options,
-            vars: vars64
+            ...inputs64 && { inputs64: inputs64 },
+            ...vars64 && { vars64: vars64 }
         }
     ).then(
-        (response) => {
+        (taskResponse) => {
             return cy.request(
                 "POST",
                 "api/var-helper",
@@ -43,11 +54,11 @@ const performTask = (test: Test, vars64?: string, inputsOverride?: Array<string>
                         }
                     }
                 },
-            ).then((varsResponse) => {
-                expect(response.body.Value).to.deep.eq(test.want)
-                expect(response.body.Vars64).to.eq(varsResponse.body.VarsAsBase64)
+            ).then((varHelperResponse) => {
+                expect(taskResponse.body.Value).to.deep.eq(test.want)
+                expect(taskResponse.body.Vars64).to.eq(varHelperResponse.body.Vars64)
 
-                return response.body
+                return taskResponse.body
             })
         }
     )

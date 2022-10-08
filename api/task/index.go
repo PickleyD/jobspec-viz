@@ -18,15 +18,17 @@ import (
 )
 
 type Task struct {
-	Id      string
-	Name    string
-	Inputs  []interface{}
-	Options map[string]interface{}
-	Vars    string
+	Id   string
+	Name string
+	// Inputs  []interface{}
+	Inputs64 []string
+	Options  map[string]interface{}
+	Vars64   string
 }
 
 type Response struct {
 	Value  interface{}
+	Val64  string
 	Vars   map[string]interface{}
 	Vars64 string
 }
@@ -138,13 +140,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	vars := make(map[string]interface{})
 
-	if t.Vars != "" {
-		varsDec, _ := base64.StdEncoding.DecodeString(t.Vars)
+	if t.Vars64 != "" {
+		varsDec, _ := base64.StdEncoding.DecodeString(t.Vars64)
 
-		inputs2 := pipeline.JSONSerializable{}
-		inputs2.UnmarshalJSON(varsDec)
+		inputVars := pipeline.JSONSerializable{}
+		inputVars.UnmarshalJSON(varsDec)
 
-		vars = inputs2.Val.(map[string]interface{})
+		vars = inputVars.Val.(map[string]interface{})
 	}
 	pipelineVars := pipeline.NewVarsFrom(vars)
 
@@ -156,12 +158,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 	}
 
-	results := make([]pipeline.Result, 0, len(t.Inputs))
-	for _, r := range t.Inputs {
-		results = append(results, pipeline.Result{Value: r})
+	inputs := make([]pipeline.Result, 0, len(t.Inputs64))
+	for _, r := range t.Inputs64 {
+		inputsDec, _ := base64.StdEncoding.DecodeString(r)
+		inputsTemp := pipeline.JSONSerializable{}
+		inputsTemp.UnmarshalJSON(inputsDec)
+
+		inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
 	}
 
-	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, results)
+	fmt.Println("pipelineVars:")
+	fmt.Printf("%v", pipelineVars)
+	fmt.Println("inputs:")
+	fmt.Printf("%v", inputs)
+	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
 
 	// Append the result to the vars
 	// TODO - existence check?
@@ -179,8 +189,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varsEnc := base64.StdEncoding.EncodeToString(varsJData)
 
+	resultValAsJsonSerializable := pipeline.JSONSerializable{
+		Valid: true,
+		Val:   result.Value,
+	}
+
+	resultValJData, err2Json := resultValAsJsonSerializable.MarshalJSON()
+	if err2Json != nil {
+		log.Fatal("Error marshalling response object to json", err2Json)
+	}
+
+	resultValEnc := base64.StdEncoding.EncodeToString(resultValJData)
+
 	response := Response{
 		Value:  result.Value,
+		Val64:  resultValEnc,
 		Vars:   vars,
 		Vars64: varsEnc,
 	}
