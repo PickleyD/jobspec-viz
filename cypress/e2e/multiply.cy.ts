@@ -10,6 +10,8 @@ const tests: Array<Test> = [
 
 describe("multiply", () => {
     tests.map(test => {
-        generateTest(test)
+        it(`${test.task} - ${test.name}`, () => {
+            generateTest(test)
+        })
     })
 })

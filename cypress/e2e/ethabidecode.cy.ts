@@ -21,6 +21,8 @@ const tests: Array<Test> = [
 
 describe("ethabidecode", () => {
     tests.map(test => {
-        generateTest(test)
+        it(`${test.task} - ${test.name}`, () => {
+            generateTest(test)
+        })
     })
 })

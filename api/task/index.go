@@ -20,7 +20,7 @@ import (
 type Task struct {
 	Id      string
 	Name    string
-	Inputs  []string
+	Inputs  []interface{}
 	Options map[string]interface{}
 	Vars    string
 }

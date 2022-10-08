@@ -42,10 +42,10 @@ const tests: Array<Test> = [
                 value: "chainlink chainlink chainlink",
                 type: "bytes32"
             },
-            "bar": { 
+            "bar": {
                 value: "stevetoshi sergeymoto",
                 type: "bytes"
-             },
+            },
             "baz": {
                 value: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
                 type: "address"
@@ -85,6 +85,8 @@ const tests: Array<Test> = [
 
 describe("ethabiencode", () => {
     tests.map(test => {
-        generateTest(test)
+        it(`${test.task} - ${test.name}`, () => {
+            generateTest(test)
+        })
     })
 })
