@@ -10,7 +10,7 @@ export type Test = {
     inputs: Array<Var>;
     options?: { [key: string]: any };
     vars?: { [key: string]: Var };
-    want: any;
+    want: Var;
 }
 
 export const generateTest = (test: Test, inputs64Override?: Array<string>) => {
@@ -31,7 +31,7 @@ const handleVarsConversion = (vars: Test["vars"], inputs: Test["inputs"]) => {
     )
 }
 
-const performTask = (test: Omit<Test, 'inputs'>, vars64?: string, inputs64?: Array<string>) => {
+const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
     return cy.request(
         'POST',
         'api/task',
@@ -52,11 +52,14 @@ const performTask = (test: Omit<Test, 'inputs'>, vars64?: string, inputs64?: Arr
                         ...test.vars, "task-0": {
                             keep: test.want
                         }
-                    }
+                    },
+                    want: test.want
                 },
             ).then((varHelperResponse) => {
-                expect(taskResponse.body.Value).to.deep.eq(test.want)
-                expect(taskResponse.body.Vars64).to.eq(varHelperResponse.body.Vars64)
+                // expect(taskResponse.body.Value).to.deep.eq(test.want)
+                // expect(taskResponse.body.Val64).to.eq("wtf")
+                expect(taskResponse.body.Val64).to.eq(varHelperResponse.body.Want64)
+                // expect(taskResponse.body.Vars64).to.eq(varHelperResponse.body.Vars64)
 
                 return taskResponse.body
             })

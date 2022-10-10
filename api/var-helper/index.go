@@ -27,11 +27,13 @@ type Var struct {
 type Input struct {
 	Vars   map[string]Var
 	Inputs []Var
+	Want   Var
 }
 
 type Response struct {
 	Vars64   string
 	Inputs64 []string
+	Want64   string
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -156,9 +158,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Want
+	wantBase64 := ""
+	fmt.Println("i.Want")
+	fmt.Printf("%v", i.Want)
+	if i.Want.Value != "" || i.Want.Values != nil {
+		fmt.Println("inside the IF")
+		wantBase64 = customToBase64(convertBasedOnTypeParam(i.Want))
+		fmt.Printf("%v", wantBase64)
+	}
+
 	response := Response{
 		Vars64:   varsBase64,
 		Inputs64: inputsBase64,
+		Want64:   wantBase64,
 	}
 
 	jDataResponse, errJsonResponse := json.Marshal(response)
@@ -222,6 +235,16 @@ func convertBasedOnTypeParam(v Var) interface{} {
 			}
 			return s
 		}
+	} else if v.Type == "float" {
+		if v.Value != "" {
+			return toFloat(v.Value)
+		} else if len(v.Values) > 0 {
+			var s []*big.Float
+			for _, val := range v.Values {
+				s = append(s, toFloat(val))
+			}
+			return s
+		}
 	} else if v.Type == "bool" {
 		if v.Value != "" {
 			return toBool(v.Value)
@@ -253,6 +276,15 @@ func toInt(s string) *big.Int {
 	n, ok := n.SetString(s, 10)
 	if !ok {
 		log.Fatal("big.Int SetString error")
+	}
+	return n
+}
+
+func toFloat(s string) *big.Float {
+	n := new(big.Float)
+	n, ok := n.SetString(s)
+	if !ok {
+		log.Fatal("big.Float SetString error")
 	}
 	return n
 }

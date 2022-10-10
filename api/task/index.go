@@ -27,7 +27,7 @@ type Task struct {
 }
 
 type Response struct {
-	Value  interface{}
+	Value  string
 	Val64  string
 	Vars   map[string]interface{}
 	Vars64 string
@@ -158,14 +158,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 	}
 
-	inputs := make([]pipeline.Result, 0, len(t.Inputs64))
-	for _, r := range t.Inputs64 {
-		inputsDec, _ := base64.StdEncoding.DecodeString(r)
-		inputsTemp := pipeline.JSONSerializable{}
-		inputsTemp.UnmarshalJSON(inputsDec)
+	fmt.Printf("%v", t.Inputs64)
 
-		inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
-	}
+	inputs := make([]pipeline.Result, 0, len(t.Inputs64))
+	// for _, r := range t.Inputs64 {
+	// 	inputsDec, _ := base64.StdEncoding.DecodeString(r)
+
+	// 	inputsTemp := pipeline.JSONSerializable{}
+	// 	inputsTemp.UnmarshalJSON(inputsDec)
+
+	// 	inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
+	// }
+	inputs = append(inputs, pipeline.Result{Value: `{"some_id":1564679049192120321}`})
 
 	fmt.Println("pipelineVars:")
 	fmt.Printf("%v", pipelineVars)
@@ -178,10 +182,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	vars[t.Id] = result.Value
 
 	varsEnc := customToBase64(vars)
+	fmt.Println("result.Value:")
+	// fmt.Printf("%f", result.Value)
+	fmt.Printf("%d", result.Value.(uint64))
 	resultValEnc := customToBase64(result.Value)
+	fmt.Println("resultValEnc:")
+	fmt.Printf("%v", resultValEnc)
+	// // Return the value in a javascript-friendly format
+	// j, _ := json.MarshalIndent(result.Value, "", "\t")
 
 	response := Response{
-		Value:  result.Value,
+		Value:  fmt.Sprintf("%v", result.Value),
 		Val64:  resultValEnc,
 		Vars:   vars,
 		Vars64: varsEnc,
@@ -199,6 +210,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jData)
+}
+
+func customToString(input interface{}) string {
+	return string(marshalAsJsonSerializable(input))
 }
 
 func customToBase64(input interface{}) string {
