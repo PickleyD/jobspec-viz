@@ -15,6 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/gddo/httputil/header"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
+	"github.com/shopspring/decimal"
 )
 
 type Var struct {
@@ -245,6 +246,16 @@ func convertBasedOnTypeParam(v Var) interface{} {
 			}
 			return s
 		}
+	} else if v.Type == "decimal" {
+		if v.Value != "" {
+			return toDecimal(v.Value)
+		} else if len(v.Values) > 0 {
+			var s []decimal.Decimal
+			for _, val := range v.Values {
+				s = append(s, toDecimal(val))
+			}
+			return s
+		}
 	} else if v.Type == "bool" {
 		if v.Value != "" {
 			return toBool(v.Value)
@@ -284,6 +295,14 @@ func toFloat(s string) float64 {
 	n, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		log.Fatal("big.Float SetString error")
+	}
+	return n
+}
+
+func toDecimal(s string) decimal.Decimal {
+	n, err := decimal.NewFromString(s)
+	if err != nil {
+		panic(err)
 	}
 	return n
 }

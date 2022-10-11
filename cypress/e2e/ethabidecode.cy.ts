@@ -15,7 +15,7 @@
 //                 type: "string"
 //             }
 //         },
-//         want: `{"b":true,"i":-321,"s":"foo bar baz","u":123}`
+//         want: { value: `{"b":true,"i":-321,"s":"foo bar baz","u":123}`, type: "string"}
 //     }
 // ]
 
