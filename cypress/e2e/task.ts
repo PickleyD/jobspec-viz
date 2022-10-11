@@ -1,7 +1,8 @@
 export type Var = {
     value?: string;
-    values?: Array<string>;
-    type: string;
+    values?: Array<string>; // Ugly way of handling flat arrays
+    type?: string;
+    keep?: any; // Convert to base64 but don't try any type conversions beforehand
 }
 
 export type Test = {
@@ -10,7 +11,8 @@ export type Test = {
     inputs: Array<Var>;
     options?: { [key: string]: any };
     vars?: { [key: string]: Var };
-    want: Var;
+    want?: Var;
+    want64?: string;
 }
 
 export const generateTest = (test: Test, inputs64Override?: Array<string>) => {
@@ -48,17 +50,21 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
                 "POST",
                 "api/var-helper",
                 {
-                    vars: {
-                        ...test.vars, "task-0": {
-                            keep: test.want
-                        }
-                    },
-                    want: test.want
+                    // vars: {
+                    //     ...test.vars, "task-0": {
+                    //         keep: test.want?.value
+                    //     }
+                    // },
+                    ...test.want && { want: test.want }
                 },
             ).then((varHelperResponse) => {
-                // expect(taskResponse.body.Value).to.deep.eq(test.want)
-                // expect(taskResponse.body.Val64).to.eq("wtf")
-                expect(taskResponse.body.Val64).to.eq(varHelperResponse.body.Want64)
+                if (test.want64) {
+                    expect(taskResponse.body.Val64).to.eq(test.want64)
+                }
+                else if (test.want) {
+                    expect(taskResponse.body.Val64).to.eq(varHelperResponse.body.Want64)
+                }
+
                 // expect(taskResponse.body.Vars64).to.eq(varHelperResponse.body.Vars64)
 
                 return taskResponse.body
