@@ -239,7 +239,7 @@ func convertBasedOnTypeParam(v Var) interface{} {
 		if v.Value != "" {
 			return toFloat(v.Value)
 		} else if len(v.Values) > 0 {
-			var s []*big.Float
+			var s []float64
 			for _, val := range v.Values {
 				s = append(s, toFloat(val))
 			}
@@ -280,10 +280,9 @@ func toInt(s string) *big.Int {
 	return n
 }
 
-func toFloat(s string) *big.Float {
-	n := new(big.Float)
-	n, ok := n.SetString(s)
-	if !ok {
+func toFloat(s string) float64 {
+	n, err := strconv.ParseFloat(s, 64)
+	if err != nil {
 		log.Fatal("big.Float SetString error")
 	}
 	return n

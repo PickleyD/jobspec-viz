@@ -158,23 +158,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 	}
 
-	fmt.Printf("%v", t.Inputs64)
-
 	inputs := make([]pipeline.Result, 0, len(t.Inputs64))
-	// for _, r := range t.Inputs64 {
-	// 	inputsDec, _ := base64.StdEncoding.DecodeString(r)
+	for _, r := range t.Inputs64 {
+		inputsDec, _ := base64.StdEncoding.DecodeString(r)
 
-	// 	inputsTemp := pipeline.JSONSerializable{}
-	// 	inputsTemp.UnmarshalJSON(inputsDec)
+		inputsTemp := pipeline.JSONSerializable{}
+		inputsTemp.UnmarshalJSON(inputsDec)
 
-	// 	inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
-	// }
-	inputs = append(inputs, pipeline.Result{Value: `{"some_id":1564679049192120321}`})
+		inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
+	}
 
-	fmt.Println("pipelineVars:")
-	fmt.Printf("%v", pipelineVars)
-	fmt.Println("inputs:")
-	fmt.Printf("%v", inputs)
 	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
 
 	// Append the result to the vars
@@ -182,12 +175,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	vars[t.Id] = result.Value
 
 	varsEnc := customToBase64(vars)
-	fmt.Println("result.Value:")
-	// fmt.Printf("%f", result.Value)
-	fmt.Printf("%d", result.Value.(uint64))
 	resultValEnc := customToBase64(result.Value)
-	fmt.Println("resultValEnc:")
-	fmt.Printf("%v", resultValEnc)
+
 	// // Return the value in a javascript-friendly format
 	// j, _ := json.MarshalIndent(result.Value, "", "\t")
 
