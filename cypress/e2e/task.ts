@@ -13,6 +13,7 @@ export type Test = {
     vars?: { [key: string]: Var };
     want?: Var;
     want64?: string;
+    expectError?: boolean;
 }
 
 export const generateTest = (test: Test, inputs64Override?: Array<string>) => {
@@ -63,6 +64,10 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
                 }
                 else if (test.want) {
                     expect(taskResponse.body.Val64).to.eq(varHelperResponse.body.Want64)
+                }
+
+                if (test.expectError) {
+                    expect(taskResponse.body.Error).to.not.empty
                 }
 
                 // expect(taskResponse.body.Vars64).to.eq(varHelperResponse.body.Vars64)

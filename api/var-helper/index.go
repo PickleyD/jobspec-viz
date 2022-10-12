@@ -161,12 +161,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Want
 	wantBase64 := ""
-	fmt.Println("i.Want")
-	fmt.Printf("%v", i.Want)
 	if i.Want.Value != "" || i.Want.Values != nil {
-		fmt.Println("inside the IF")
 		wantBase64 = customToBase64(convertBasedOnTypeParam(i.Want))
-		fmt.Printf("%v", wantBase64)
 	}
 
 	response := Response{
@@ -276,6 +272,8 @@ func convertBasedOnTypeParam(v Var) interface{} {
 			}
 			return s
 		}
+	} else if v.Type == "null" {
+		return nil
 	}
 
 	fmt.Printf("Not converting variable with type of: %T\n", v.Value)

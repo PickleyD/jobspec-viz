@@ -31,6 +31,7 @@ type Response struct {
 	Val64  string
 	Vars   map[string]interface{}
 	Vars64 string
+	Error  string
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -177,14 +178,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	varsEnc := customToBase64(vars)
 	resultValEnc := customToBase64(result.Value)
 
-	// // Return the value in a javascript-friendly format
-	// j, _ := json.MarshalIndent(result.Value, "", "\t")
+	resultErr := ""
+	if result.Error != nil {
+		resultErr = result.Error.Error()
+	}
 
 	response := Response{
 		Value:  fmt.Sprintf("%v", result.Value),
 		Val64:  resultValEnc,
 		Vars:   vars,
 		Vars64: varsEnc,
+		Error:  resultErr,
 	}
 
 	jsonSer := pipeline.JSONSerializable{
@@ -199,10 +203,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jData)
-}
-
-func customToString(input interface{}) string {
-	return string(marshalAsJsonSerializable(input))
 }
 
 func customToBase64(input interface{}) string {
@@ -249,14 +249,16 @@ const (
 	// TaskTypeETHTx            TaskType = "ethtx"
 	TaskTypeETHABIEncode TaskType = "ethabiencode"
 	// TaskTypeETHABIEncode2    TaskType = "ethabiencode2"
-	TaskTypeETHABIDecode TaskType = "ethabidecode"
-	// TaskTypeETHABIDecodeLog  TaskType = "ethabidecodelog"
-	// TaskTypeMerge            TaskType = "merge"
-	// TaskTypeLowercase        TaskType = "lowercase"
-	// TaskTypeUppercase        TaskType = "uppercase"
-	// TaskTypeConditional      TaskType = "conditional"
-	// TaskTypeHexDecode        TaskType = "hexdecode"
-	// TaskTypeBase64Decode     TaskType = "base64decode"
+	TaskTypeETHABIDecode    TaskType = "ethabidecode"
+	TaskTypeETHABIDecodeLog TaskType = "ethabidecodelog"
+	TaskTypeMerge           TaskType = "merge"
+	TaskTypeLowercase       TaskType = "lowercase"
+	TaskTypeUppercase       TaskType = "uppercase"
+	TaskTypeConditional     TaskType = "conditional"
+	TaskTypeHexDecode       TaskType = "hexdecode"
+	TaskTypeHexEncode       TaskType = "hexencode"
+	TaskTypeBase64Decode    TaskType = "base64decode"
+	TaskTypeBase64Encode    TaskType = "base64encode"
 
 	// // Testing only.
 	// TaskTypePanic TaskType = "panic"
@@ -418,8 +420,18 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 			ABI:      opts.ABI,
 			Data:     opts.Data,
 		}
-	// case TaskTypeETHABIDecodeLog:
-	// 	task = &ETHABIDecodeLogTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeETHABIDecodeLog:
+		var opts pipeline.ETHABIDecodeLogTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ETHABIDecodeLogTask{
+			BaseTask: baseTask,
+			ABI:      opts.ABI,
+			Data:     opts.Data,
+			Topics:   opts.Topics,
+		}
 	case TaskTypeCBORParse:
 		var opts pipeline.CBORParseTask
 		if err := json.Unmarshal(jsonString, &opts); err != nil {
@@ -433,18 +445,87 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 		}
 	// case TaskTypeFail:
 	// 	task = &FailTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeMerge:
-	// 	task = &MergeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeLowercase:
-	// 	task = &LowercaseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeUppercase:
-	// 	task = &UppercaseTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeConditional:
-	// 	task = &ConditionalTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeHexDecode:
-	// 	task = &HexDecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeBase64Decode:
-	// 	task = &Base64DecodeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeMerge:
+		var opts pipeline.MergeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.MergeTask{
+			BaseTask: baseTask,
+			Left:     opts.Left,
+			Right:    opts.Right,
+		}
+	case TaskTypeLowercase:
+		var opts pipeline.LowercaseTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.LowercaseTask{
+			BaseTask: baseTask,
+			Input:    opts.Input,
+		}
+	case TaskTypeUppercase:
+		var opts pipeline.UppercaseTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.UppercaseTask{
+			BaseTask: baseTask,
+			Input:    opts.Input,
+		}
+	case TaskTypeConditional:
+		var opts pipeline.ConditionalTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ConditionalTask{
+			BaseTask: baseTask,
+			Data:     opts.Data,
+		}
+	case TaskTypeHexEncode:
+		var opts pipeline.HexEncodeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.HexEncodeTask{
+			BaseTask: baseTask,
+			Input:    opts.Input,
+		}
+	case TaskTypeHexDecode:
+		var opts pipeline.HexDecodeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.HexDecodeTask{
+			BaseTask: baseTask,
+			Input:    opts.Input,
+		}
+	case TaskTypeBase64Encode:
+		var opts pipeline.Base64EncodeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.Base64EncodeTask{
+			BaseTask: baseTask,
+			Input:    opts.Input,
+		}
+	case TaskTypeBase64Decode:
+		var opts pipeline.Base64DecodeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.Base64DecodeTask{
+			BaseTask: baseTask,
+			Input:    opts.Input,
+		}
 	default:
 		return nil, fmt.Errorf(`unknown task type: "%v"`, taskType)
 	}
