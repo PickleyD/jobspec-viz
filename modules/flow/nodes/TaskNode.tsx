@@ -2,7 +2,7 @@ import { Handle, NodeProps, Position } from "react-flow-renderer";
 import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
-import { TrashIcon } from "@heroicons/react/solid";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import { tasks } from "../../workspace/taskNodeMachine";
 import { Select } from "../../../components";
 
@@ -111,6 +111,7 @@ export const TaskNode = ({
     });
   };
 
+
   return (
     // width divisible by grid snap size
     <div className="bg-base-100 p-4 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
@@ -151,7 +152,7 @@ export const TaskNode = ({
       <Select
         className="select select-ghost select-sm text-xl font-bold"
         value={data.type}
-        onChange={}
+        onChange={() => {}}
       >
         {tasks.map((task, index) => (
           <option className="bg-base-100" value={task} key={`task-${index}`}>

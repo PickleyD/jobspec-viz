@@ -1,7 +1,7 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useState } from "react";
-import { CogIcon, XIcon } from "@heroicons/react/solid";
+import { CogIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
 import { CronFields, DirectRequestFields } from "./jobTypes"
 import { JOB_TYPE } from "../workspace/workspaceMachine"
@@ -48,11 +48,11 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
+        className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
           }`}
       >
-        <CogIcon className="swap-off fill-current h-5 w-5 text-blue-500" />
-        <XIcon className="swap-on fill-current h-5 w-5 text-blue-500" />
+        <CogIcon className="swap-off fill-current h-5 w-5 text-white" />
+        <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
       </label>
 
       <motion.div
