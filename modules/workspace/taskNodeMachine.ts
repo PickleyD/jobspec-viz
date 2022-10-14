@@ -21,7 +21,8 @@ type TaskNodeEvent =
   | { type: "SET_CUSTOM_ID"; value: string }
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object };
 
-export type TASK_TYPE = "HTTP" | "JSONPARSE" | "ETHTX" | "SUM" | "DIVIDE" | "MULTIPLY" | "ANY" | "MODE" | "MEAN" | "MEDIAN";
+export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
+export type TASK_TYPE = typeof tasks[number]
 
 interface TaskNodeContext {
   customId?: string;
