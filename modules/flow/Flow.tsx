@@ -30,6 +30,7 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
+import { CustomConnectionLine } from "./CustomConnectionLine";
 
 const nodesSelector = (state: any) => state.context.nodes;
 const taskNodesSelector = (state: any) => state.context.nodes.tasks;
@@ -226,6 +227,7 @@ export const Flow = ({ className }: FlowProps) => {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={handleNewConnection}
+          connectionLineComponent={CustomConnectionLine}
         >
           <Controls />
           <Background gap={15} />
