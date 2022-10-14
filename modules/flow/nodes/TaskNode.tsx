@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/solid";
+import { tasks } from "../../workspace/taskNodeMachine";
+import { Select } from "../../../components";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -22,7 +24,7 @@ export const TaskNode = ({
 }: TaskNodeProps) => {
   const { machine } = data;
 
-  const [prevCustomId, setPrevCustomId] = useState<string>()
+  const [prevCustomId, setPrevCustomId] = useState<string>();
   const customId = useSelector(machine, customIdSelector);
   const outgoingNodeIds = useSelector(machine, outgoingNodesSelector);
 
@@ -33,29 +35,27 @@ export const TaskNode = ({
   );
 
   const isUniqueTaskId = (taskId: string) => {
-    return getTaskNodeByCustomId(taskId) === undefined
-  }
+    return getTaskNodeByCustomId(taskId) === undefined;
+  };
 
-  const [tempCustomId, setTempCustomId] = useState<string>(customId)
-  const [customIdError, setCustomIdError] = useState<boolean>(false)
+  const [tempCustomId, setTempCustomId] = useState<string>(customId);
+  const [customIdError, setCustomIdError] = useState<boolean>(false);
 
   const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
 
-    setTempCustomId(newValue)
+    setTempCustomId(newValue);
 
     // only update in the machine if it's a unique task ID
     if (isUniqueTaskId(newValue)) {
-
-      setCustomIdError(false)
+      setCustomIdError(false);
 
       // cache prev custom ID so we know which to update on outgoing nodes
-      setPrevCustomId(customId)
+      setPrevCustomId(customId);
 
       machine.send("SET_CUSTOM_ID", { value: newValue });
-    }
-    else {
-      setCustomIdError(true)
+    } else {
+      setCustomIdError(true);
     }
   };
 
@@ -63,76 +63,119 @@ export const TaskNode = ({
     nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.id === nodeId);
 
   const getTaskNodeByCustomId = (nodeId: string) =>
-    nodesFromMachine.tasks.find((taskNode: any) => taskNode.ref.state.context.customId === nodeId);
+    nodesFromMachine.tasks.find(
+      (taskNode: any) => taskNode.ref.state.context.customId === nodeId
+    );
 
   const updateExistingConnections = () => {
-
-    const outgoingNodes = outgoingNodeIds.map((nodeId: string) => getTaskNodeById(nodeId))
+    const outgoingNodes = outgoingNodeIds.map((nodeId: string) =>
+      getTaskNodeById(nodeId)
+    );
 
     outgoingNodes.map((outgoingNode: any) => {
       outgoingNode.ref.send("UPDATE_INCOMING_NODE", {
         nodeId: customId,
-        prevNodeId: prevCustomId
-      })
-    })
+        prevNodeId: prevCustomId,
+      });
+    });
   };
 
   const updateStoredEdges = () => {
     globalServices.workspaceService.send("UPDATE_EDGES_WITH_NODE_ID", {
       nodeId: customId,
-      prevNodeId: prevCustomId
-    })
-  }
+      prevNodeId: prevCustomId,
+    });
+  };
 
   useEffect(() => {
-    updateExistingConnections()
-    updateStoredEdges()
-  }, [customId])
+    updateExistingConnections();
+    updateStoredEdges();
+  }, [customId]);
 
   const notifyExistingConnectionsOfDeletion = () => {
-
-    const outgoingNodes = outgoingNodeIds.map((nodeId: string) => getTaskNodeById(nodeId))
+    const outgoingNodes = outgoingNodeIds.map((nodeId: string) =>
+      getTaskNodeById(nodeId)
+    );
 
     outgoingNodes.map((outgoingNode: any) => {
       outgoingNode.ref.send("REMOVE_INCOMING_NODE", {
-        nodeId: customId
-      })
-    })
+        nodeId: customId,
+      });
+    });
   };
 
   const handleDeleteNode = () => {
-    notifyExistingConnectionsOfDeletion()
+    notifyExistingConnectionsOfDeletion();
     globalServices.workspaceService.send("DELETE_TASK_NODE", {
-      nodeId: machine.state.context.customId
-    })
-  }
+      nodeId: machine.state.context.customId,
+    });
+  };
 
   return (
-    <div className="border border-white bg-blue-900 p-4 rounded-sm relative cursor-default">
-      <div onClick={handleDeleteNode} className="custom-drag-handle absolute top-0 right-6 h-10 w-8 flex items-center justify-center cursor-pointer">
+    // width divisible by grid snap size
+    <div className="bg-base-100 p-4 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
+      <div
+        onClick={handleDeleteNode}
+        className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
+      >
         <TrashIcon className="fill-current w-6" />
       </div>
-      <div className="custom-drag-handle absolute top-0 right-0 h-10 w-6 flex items-center justify-center cursor-grab">
-        <svg xmlns="http://www.w3.org/2000/svg" className="fill-current" height="28" viewBox="0 0 24 24" width="28"><path d="M0 0h24v24H0V0z" fill="none" /><path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>
+      <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="fill-current"
+          height="28"
+          viewBox="0 0 24 24"
+          width="28"
+        >
+          <path d="M0 0h24v24H0V0z" fill="none" />
+          <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+        </svg>
       </div>
       {useDefaultHandles && (
         <>
-          <Handle type="target" position={Position.Top} />
-          <Handle type="source" position={Position.Bottom} />
+          <Handle
+            id={`${id}-top`}
+            type="target"
+            position={Position.Top}
+            className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3 shadow-widget"
+          />
+          <Handle
+            id={`${id}-bottom`}
+            type="source"
+            position={Position.Bottom}
+            className="!w-6 !h-6 !bg-white !border-black !border-2 !-bottom-3 shadow-widget"
+          />
         </>
       )}
-      <div className="text-xl font-bold">{data.label}</div>
+      <Select
+        className="select select-ghost select-sm text-xl font-bold"
+        value={data.type}
+        onChange={}
+      >
+        {tasks.map((task, index) => (
+          <option className="bg-base-100" value={task} key={`task-${index}`}>
+            {task}
+          </option>
+        ))}
+      </Select>
       <div className="form-control w-full max-w-xs">
         <label className="label">
           <span className="label-text">Task ID</span>
-          {customIdError && <span className="text-error label-text-alt text-xs">Not unique</span>}
+          {customIdError && (
+            <span className="text-error label-text-alt text-xs">
+              Not unique
+            </span>
+          )}
         </label>
         <input
           value={tempCustomId}
           onChange={handleCustomIdChange}
           type="text"
           placeholder="Type here"
-          className={`${customIdError ? "input-error" : ""} input input-bordered w-full max-w-xs`}
+          className={`${
+            customIdError ? "input-error" : ""
+          } input input-bordered w-full max-w-xs`}
         />
       </div>
       {children}
