@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
-import { tasks } from "../../workspace/taskNodeMachine";
+import { tasks, XYCoords } from "../../workspace/taskNodeMachine";
 import { Select } from "../../../components";
 
 const nodesSelector = (state: any) => state.context.nodes;
@@ -21,6 +21,7 @@ export const TaskNode = ({
   data,
   useDefaultHandles = true,
   children,
+  type,
 }: TaskNodeProps) => {
   const { machine } = data;
 
@@ -33,6 +34,9 @@ export const TaskNode = ({
     globalServices.workspaceService,
     nodesSelector
   );
+
+  const reactFlowInstanceSelector = (state: any) =>
+    state.context.reactFlowInstance;
 
   const isUniqueTaskId = (taskId: string) => {
     return getTaskNodeByCustomId(taskId) === undefined;
@@ -111,6 +115,16 @@ export const TaskNode = ({
     });
   };
 
+  const reactFlowInstance = useSelector(
+    globalServices.workspaceService,
+    reactFlowInstanceSelector
+  );
+
+  const getNodePosition = (): XYCoords => {
+    return reactFlowInstance
+      ? reactFlowInstance.getNode(machine.id)?.position
+      : { x: 0, y: 0 };
+  };
 
   return (
     // width divisible by grid snap size
@@ -152,7 +166,16 @@ export const TaskNode = ({
       <Select
         className="select select-ghost select-sm text-xl font-bold"
         value={data.type}
-        onChange={() => {}}
+        onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+          globalServices.workspaceService.send("REPLACE_TASK_NODE", {
+            nodeId: machine.state.context.customId,
+            existing: {
+              coords: getNodePosition(),
+              customId: machine.state.context.customId,
+            },
+            newType: event.target.value,
+          })
+        }
       >
         {tasks.map((task, index) => (
           <option className="bg-base-100" value={task} key={`task-${index}`}>

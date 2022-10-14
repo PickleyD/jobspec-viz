@@ -19,14 +19,15 @@ type TaskNodeEvent =
   | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
   | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
   | { type: "SET_CUSTOM_ID"; value: string }
-  | { type: "SET_TASK_SPECIFIC_PROPS"; value: object };
+  | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
+  | { type: "UPDATE_COORDS"; value: XYCoords };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
 
 interface TaskNodeContext {
   customId?: string;
-  initialCoords: XYCoords;
+  coords: XYCoords;
   taskType: TASK_TYPE;
   incomingNodes: Array<string>;
   outgoingNodes: Array<string>;
@@ -37,7 +38,7 @@ interface TaskNodeContext {
 
 const defaultContext: TaskNodeContext = {
   customId: undefined,
-  initialCoords: { x: 0, y: 0 },
+  coords: { x: 0, y: 0 },
   taskType: "SUM",
   incomingNodes: [],
   outgoingNodes: [],
@@ -300,6 +301,13 @@ export const createTaskNodeMachine = (
             }),
             "regenerateToml",
             "revalidateTask"
+          ],
+        },
+        UPDATE_COORDS: {
+          actions: [
+            assign({
+              coords: (context, event) => (event.value),
+            })
           ],
         },
       },
