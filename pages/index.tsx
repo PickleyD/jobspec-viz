@@ -9,20 +9,20 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { LayoutGroup } from "framer-motion";
 import { useState } from "react";
 import {
-  XIcon,
+  XMarkIcon,
   CogIcon,
   PlusIcon,
-  CodeIcon,
+  CodeBracketIcon,
   QuestionMarkCircleIcon,
   BookOpenIcon,
-} from "@heroicons/react/solid";
+} from "@heroicons/react/24/solid";
 import Image from "next/image";
 
 const Home: NextPage = () => {
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
 
   return (
-    <div className="bg-base-100 h-screen w-screen">
+    <div className="bg-primary h-screen w-screen">
       <Head>
         <title>Chainlink Job Spec Viz</title>
         <meta
@@ -34,13 +34,13 @@ const Home: NextPage = () => {
 
       {helpMsgDisplayed && (
         <div className="invisible md:visible fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
-          <div className="rounded rounded-tr-3xl bg-gray-700 p-4 flex flex-col gap-4 relative pointer-events-auto">
+          <div className="rounded rounded-tr-3xl bg-base-100 p-4 flex flex-col gap-4 relative pointer-events-auto shadow-widget">
             <label
               tabIndex={0}
               onClick={() => setHelpMsgDisplayed(false)}
-              className={`pointer-events-auto absolute z-10 right-0 top-0 btn btn-circle`}
+              className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle`}
             >
-              <XIcon className="swap-on fill-current h-5 w-5 text-blue-500" />
+              <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
             </label>
             <div className="flex items-center gap-2">
               <Image alt="logo" src="/logo.png" width={80} height={80} />
@@ -58,12 +58,12 @@ const Home: NextPage = () => {
               <ul className="list-decimal pl-8">
                 <li className="py-1">
                   Select your job type from the config panel (
-                  <CogIcon className="inline fill-current h-3 w-3 text-blue-500" />
+                  <CogIcon className="inline fill-current h-3 w-3 text-white" />
                   ) in the top right.
                 </li>
                 <li className="py-1">
                   Drag some tasks from the palette panel (
-                  <PlusIcon className="inline fill-current h-3 w-3 text-blue-500" />
+                  <PlusIcon className="inline fill-current h-3 w-3 text-white" />
                   ) and drop them onto the workspace area.
                 </li>
                 <li className="py-1">
@@ -72,7 +72,7 @@ const Home: NextPage = () => {
                 <li className="py-1">
                   Your generated job spec (in TOML format) will be ready for you
                   in the code panel (
-                  <CodeIcon className="inline fill-current h-3 w-3 text-blue-500" />
+                  <CodeBracketIcon className="inline fill-current h-3 w-3 text-white" />
                   ). Any code highlighted in red here indicates missing or
                   invalid configuration.
                 </li>
@@ -108,9 +108,9 @@ const Home: NextPage = () => {
               <label
                 tabIndex={0}
                 onClick={() => setHelpMsgDisplayed(true)}
-                className={`pointer-events-auto btn btn-circle`}
+                className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
               >
-                <QuestionMarkCircleIcon className="fill-current h-5 w-5 text-blue-500" />
+                <QuestionMarkCircleIcon className="fill-current h-5 w-5 text-white" />
               </label>
               <a
                 href="https://docs.chain.link/docs/jobs/"
@@ -119,9 +119,9 @@ const Home: NextPage = () => {
               >
                 <label
                   tabIndex={0}
-                  className={`pointer-events-auto btn btn-circle`}
+                  className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
                 >
-                  <BookOpenIcon className="fill-current h-5 w-5 text-blue-500" />
+                  <BookOpenIcon className="fill-current h-5 w-5 text-white" />
                 </label>
               </a>
             </div>

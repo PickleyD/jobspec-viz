@@ -1,5 +1,3 @@
-import { PlusIcon, XIcon } from "@heroicons/react/solid"
-
 export interface TaskChipProps {
     name: string;
 }

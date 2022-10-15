@@ -1,4 +1,4 @@
-import { PlusIcon, XIcon } from "@heroicons/react/solid";
+import { PlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { TaskChip } from "./TaskChip";
 import { DraggableItem } from "./DraggableItem";
@@ -16,12 +16,12 @@ export const Palette = ({ className }: PaletteProps) => {
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${
+        className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${
           isOpen ? "swap-active" : ""
         }`}
       >
-        <PlusIcon className="swap-off fill-current h-5 w-5 text-blue-500" />
-        <XIcon className="swap-on fill-current h-5 w-5 text-blue-500" />
+        <PlusIcon className="swap-off fill-current h-5 w-5 text-white" />
+        <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
       </label>
 
       <motion.div

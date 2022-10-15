@@ -1,8 +1,8 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useRef } from "react";
-import { CodeIcon, XIcon } from "@heroicons/react/solid";
-import { DuplicateIcon, CheckIcon } from "@heroicons/react/outline";
+import { CodeBracketIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ObservationSrcTask } from "./ObservationSrcTask";
@@ -105,11 +105,11 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto absolute z-10 right-0 top-0 btn btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
+        className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
           }`}
       >
-        <CodeIcon className="swap-off fill-current h-5 w-5 text-blue-500" />
-        <XIcon className="swap-on fill-current h-5 w-5 text-blue-500" />
+        <CodeBracketIcon className="swap-off fill-current h-5 w-5 text-white" />
+        <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
       </label>
 
       <motion.div
@@ -128,7 +128,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             tabIndex={0}
             className={`${showCheckIcon ? "swap-active" : ""} swap swap-rotate pointer-events-auto btn btn-circle btn-sm absolute top-2.5 left-20 hover:border hover:border-white`}
           >
-            <DuplicateIcon className="h-5 w-5 swap-off" />
+            <DocumentDuplicateIcon className="h-5 w-5 swap-off" />
             <CheckIcon className="h-5 w-5 swap-on" />
           </label>
           <pre data-prefix=">">

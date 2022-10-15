@@ -5,34 +5,51 @@ import ReactFlow, {
   ReactFlowInstance,
   useNodesState,
   useEdgesState,
-  addEdge,
-  Connection,
+  OnConnectEnd,
+  OnConnectStart,
+  Node as ReactFlowNode,
+  EdgeChange
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
   import("react-flow-renderer").then((mod) => mod.Background) as
-  | DynamicOptions<{}>
-  | Loader<{}>,
+    | DynamicOptions<{}>
+    | Loader<{}>,
   { ssr: false }
 ); // disable ssr
-import { 
-  TaskNode, 
+import {
+  TaskNode,
   HttpTaskNode,
   JsonParseTaskNode,
-  EthTxTaskNode, 
-  DivideTaskNode, 
-  MultiplyTaskNode, 
-  MeanTaskNode 
+  EthTxTaskNode,
+  DivideTaskNode,
+  MultiplyTaskNode,
+  MeanTaskNode,
 } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext, useEffect, useMemo, useState, useCallback } from "react";
-import { useDrop } from "react-dnd";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
+import { CustomConnectionLine } from "./CustomConnectionLine";
+import { NEW_NODE_TYPE } from "../workspace/workspaceMachine";
 
-const nodesSelector = (state: any) => state.context.nodes;
 const taskNodesSelector = (state: any) => state.context.nodes.tasks;
+const edgesSelector = (state: any) => state.context.edges;
+const reactFlowInstanceSelector = (state: any) => state.context.reactFlowInstance;
+
+export const NODE_WIDTH = 300;
+export const SNAP_GRID = 15;
+
+const toNearestGridMark = (n: number) => Math.round(n / SNAP_GRID) * SNAP_GRID;
+
+// Rounds coordinates to closest grid snap
+export const snapToGrid = ({ x, y }: { x: number; y: number }) => {
+  return {
+    snappedX: toNearestGridMark(x),
+    snappedY: toNearestGridMark(y),
+  };
+};
 
 export interface FlowProps {
   className?: string;
@@ -42,30 +59,36 @@ export const Flow = ({ className }: FlowProps) => {
   const topLevelStyles = clsx(className, "h-full w-full");
 
   const globalServices = useContext(GlobalStateContext);
-  const nodesFromMachine = useSelector(
-    globalServices.workspaceService,
-    nodesSelector
-  );
 
   const taskNodesFromMachine = useSelector(
     globalServices.workspaceService,
     taskNodesSelector
   );
 
+  const edgesFromMachine = useSelector(
+    globalServices.workspaceService,
+    edgesSelector
+  );
+
+  const reactFlowInstance = useSelector(
+    globalServices.workspaceService,
+    reactFlowInstanceSelector
+  )
+
   const nodeToFlowElement = (node: any) => {
     const nodeType = node.ref.machine.id;
 
-    const { initialCoords, taskType } = node.ref.state.context;
+    const { coords, taskType } = node.ref.state.context;
 
     let flowElement = {
       id: node.ref.id,
       type: "",
       data: {
-        label: <>{taskType}</>,
+        type: taskType,
         machine: node.ref,
       },
-      position: initialCoords,
-      dragHandle: '.custom-drag-handle'
+      position: coords,
+      dragHandle: ".custom-drag-handle",
     };
 
     switch (taskType) {
@@ -97,135 +120,122 @@ export const Flow = ({ className }: FlowProps) => {
 
   const elements = [...taskNodesFromMachine.map(nodeToFlowElement)];
 
-  const [prevElementsLength, setPrevElementsLength] = useState(0);
-  useEffect(() => {
-    if (elements.length !== prevElementsLength) {
-      setPrevElementsLength(elements.length);
+  const [prevElements, setPrevElements] = useState<Array<{
+    id: string;
+    type: string;
+  }>>([])
 
-      const elementIds = elements.map(element => element.id)
+  useEffect(() => {
+    const elementsToCompare = elements.map((element) => ({id: element.id, type: element.type}));
+    if ((JSON.stringify(elementsToCompare.sort()) !== JSON.stringify(prevElements.sort()))) {
+      setPrevElements(elementsToCompare);
+
+      // const elementIds = elements.map((element) => element.id);
 
       // Sync up flow nodes with our machine state
-      setNodes((nds) => nds
-        .filter(node => elementIds.includes(node.id))
-        .concat(elements.filter(element => !nds.map(node => node.id).includes(element.id)))
+      setNodes((nds) =>
+        elements
+        // nds
+        //   .filter((node) => elementIds.includes(node.id))
+        //   .concat(
+        //     elements.filter(
+        //       (element) => !nds.map((node) => node.id).includes(element.id)
+        //     )
+        //   )
       );
-
-      // Remove any edges which don't link between two active nodes
-      setEdges(edges => edges.filter(edge => elementIds.includes(edge.source) && elementIds.includes(edge.target)))
     }
   }, [elements]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(elements);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const getTaskNodeById = (nodeId: string) =>
-    taskNodesFromMachine.find((taskNode: any) => taskNode.ref.id === nodeId);
-
-  const handleNewConnection = (newConnection: Connection) => {
-
-    const sourceTaskNode = getTaskNodeById(newConnection.source || "");
-
-    const targetTaskNode = getTaskNodeById(newConnection.target || "");
-
-    const sourceTaskCustomId = sourceTaskNode.ref.state.context.customId
-    const targetTaskCustomId = targetTaskNode.ref.state.context.customId
-
-    if (sourceTaskNode && targetTaskNode) {
-      sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
-        nodeId: targetTaskCustomId,
-      });
-
-      targetTaskNode.ref.send("ADD_INCOMING_NODE", {
-        nodeId: sourceTaskCustomId,
-      });
-    }
-
-    onConnect(newConnection);
-  };
+  useEffect(() => {
+    setEdges(edgesFromMachine);
+  }, [edgesFromMachine]);
 
   useEffect(() => {
-    const withCustomIds = [
-      ...edges.map(edge => ({
-        ...edge,
-        sourceCustomId: getTaskNodeById(edge.source).ref.state.context.customId,
-        targetCustomId: getTaskNodeById(edge.target).ref.state.context.customId
-      }))
-    ]
+    handleAddNewNode({ x: 495, y: 495 }, "HTTP");
+  }, []);
 
-    globalServices.workspaceService.send("SET_EDGES", {
-      newEdges: withCustomIds,
-    });
-  }, [edges]);
-
-  const onConnect = useCallback(
-    (connection: any) => {
-      return setEdges((eds) => addEdge({ ...connection, animated: true }, eds))
-    },
-    []
-  );
-
-  /**
-   * Handle drop event. This will mean a new node from
-   * the toolbar has been dragged over the flow and dropped.
-   * @param item
-   * @param monitor
-   */
-  const handleDrop = (item: any, monitor: any) => {
-    const clientOffset = monitor.getClientOffset() as XYCoords;
-
-    const position = reactFlowInstance?.project(clientOffset) || { x: 0, y: 0 };
-
-    handleAddNewNode(position, item.taskType);
-  };
-
-  const handleAddNewNode = (initialCoords: XYCoords, taskType: TASK_TYPE) => {
+  const handleAddNewNode = (
+    initialCoords: XYCoords,
+    taskType: TASK_TYPE,
+    newNodeType?: NEW_NODE_TYPE,
+    fromHandleId?: string
+  ) => {
     globalServices.workspaceService.send("NEW_TASK_NODE.ADD", {
       options: {
         initialCoords,
-        taskType
+        taskType,
+      },
+      edgeDetails: {
+        newNodeType,
+        fromHandleId,
       },
     });
   };
 
-  const [reactFlowInstance, setReactFlowInstance] =
-    useState<ReactFlowInstance | null>(null);
+  const handleConnectStart: OnConnectStart = (event, params) => {
+    globalServices.workspaceService.send("CONNECTION_START", { params });
+  };
 
-  const [{ isOver }, dropRef] = useDrop(
+  const handleConnectEnd: OnConnectEnd = (event) => {
+    const viewport = reactFlowInstance?.getViewport() || {
+      x: 0,
+      y: 0,
+      zoom: 1,
+    };
+
+    const snappedCoords = snapToGrid({
+      x: (event.clientX - viewport.x) / viewport.zoom - NODE_WIDTH / 2,
+      y: (event.clientY - viewport.y) / viewport.zoom,
+    });
+
+    globalServices.workspaceService.send("CONNECTION_END", {
+      initialCoords: { x: snappedCoords.snappedX, y: snappedCoords.snappedY },
+    });
+  };
+
+  const handleReactFlowInit = (reactFlowInstance: ReactFlowInstance) => {
+    globalServices.workspaceService.send("SET_REACT_FLOW_INSTANCE", { value: reactFlowInstance})
+  }
+
+  const handleNodeDragStop = (event: React.MouseEvent, node: ReactFlowNode) => {
+    const taskNodeMachine = taskNodesFromMachine.filter((taskNode: any) => taskNode.ref.id === node.id)[0]?.ref
+
+    taskNodeMachine && taskNodeMachine.send("UPDATE_COORDS", { value: node.position })
+  }
+
+  const nodeTypes = useMemo(
     () => ({
-      accept: "node",
-      drop: (item, monitor) => handleDrop(item, monitor),
-      collect: (monitor) => {
-        return {
-          isOver: Boolean(monitor.isOver()),
-        };
-      },
+      task: TaskNode,
+      httpTask: HttpTaskNode,
+      jsonParseTask: JsonParseTaskNode,
+      ethTxTask: EthTxTaskNode,
+      divideTask: DivideTaskNode,
+      multiplyTask: MultiplyTaskNode,
+      meanTask: MeanTaskNode,
     }),
-    [reactFlowInstance]
+    []
   );
-
-  const nodeTypes = useMemo(() => ({ 
-    task: TaskNode, 
-    httpTask: HttpTaskNode, 
-    jsonParseTask: JsonParseTaskNode,
-    ethTxTask: EthTxTaskNode,
-    divideTask: DivideTaskNode, 
-    multiplyTask: MultiplyTaskNode, 
-    meanTask: MeanTaskNode,
-  }), []);
 
   return (
     <ReactFlowProvider>
-      <div className={topLevelStyles} ref={dropRef}>
+      <div className={topLevelStyles}>
         <ReactFlow
+          onInit={handleReactFlowInit}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
           snapToGrid={true}
           snapGrid={[15, 15]}
-          onInit={setReactFlowInstance}
+          onNodeDragStop={handleNodeDragStop}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onConnect={handleNewConnection}
+          connectionLineStyle={{ strokeWidth: 4 }}
+          onConnectStart={handleConnectStart}
+          onConnectEnd={handleConnectEnd}
+          connectionLineComponent={CustomConnectionLine}
         >
           <Controls />
           <Background gap={15} />
