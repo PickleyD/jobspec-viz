@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { Flow } from "../modules/flow";
-import { Palette } from "../modules/palette";
 import { Configurator } from "../modules/configurator";
 import { Codegen } from "../modules/codegen";
 import { DndProvider } from "react-dnd";
@@ -128,7 +127,6 @@ const Home: NextPage = () => {
             <div className="p-8 absolute right-0 flex flex-col items-end gap-2">
               <LayoutGroup>
                 <Configurator className="pointer-events-none w-fit" />
-                <Palette className="pointer-events-none w-fit" />
                 <Codegen className="pointer-events-none w-fit" />
               </LayoutGroup>
             </div>
