@@ -30,7 +30,7 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+{/* 
       {helpMsgDisplayed && (
         <div className="invisible md:visible fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
           <div className="rounded rounded-tr-3xl bg-base-100 p-4 flex flex-col gap-4 relative pointer-events-auto shadow-widget">
@@ -79,9 +79,9 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
-      <DndProvider backend={HTML5Backend}>
+      {/* <DndProvider backend={HTML5Backend}> */}
         <main className="w-full h-full relative">
           <div className="w-full h-full fixed z-0">
             <Flow />
@@ -104,13 +104,13 @@ const Home: NextPage = () => {
           </div>
           <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
             <div className="p-8 absolute left-0 flex flex-col items-end gap-2">
-              <label
+              {/* <label
                 tabIndex={0}
                 onClick={() => setHelpMsgDisplayed(true)}
                 className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
               >
                 <QuestionMarkCircleIcon className="fill-current h-5 w-5 text-white" />
-              </label>
+              </label> */}
               <a
                 href="https://docs.chain.link/docs/jobs/"
                 target="_blank"
@@ -132,7 +132,7 @@ const Home: NextPage = () => {
             </div>
           </div>
         </main>
-      </DndProvider>
+      {/* </DndProvider> */}
     </div>
   );
 };

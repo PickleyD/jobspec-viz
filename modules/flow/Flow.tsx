@@ -154,7 +154,7 @@ export const Flow = ({ className }: FlowProps) => {
   }, [edgesFromMachine]);
 
   useEffect(() => {
-    handleAddNewNode({ x: 495, y: 495 }, "HTTP");
+    handleAddNewNode({ x: 150, y: 150 }, "HTTP");
   }, []);
 
   const handleAddNewNode = (
@@ -236,6 +236,11 @@ export const Flow = ({ className }: FlowProps) => {
           onConnectStart={handleConnectStart}
           onConnectEnd={handleConnectEnd}
           connectionLineComponent={CustomConnectionLine}
+          fitView
+          fitViewOptions={{
+            duration: 500,
+            padding: 1
+          }}
         >
           <Controls />
           <Background gap={15} />
