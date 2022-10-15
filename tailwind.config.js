@@ -30,6 +30,14 @@ module.exports = {
           "2.9px 2.9px 3.1px -1.9px hsl(0deg 0% 10% / 0.6)",
           "6.5px 6.4px 6.8px -2.5px hsl(0deg 0% 10% / 0.5)"
         ],
+        blacksoft: [
+          "4px 4px 8px #0e0e0e",
+          "-4px -4px 8px #202020"
+        ],
+        blacksofthover: [
+          "4px 4px 8px #121212",
+          "-4px -4px 8px #1c1c1c"
+        ]
       },
     },
   },
@@ -42,7 +50,7 @@ module.exports = {
           accent: "#37CDBE",
           neutral: "#000000",
           "neutral-content": "#FFFFFF",
-          "base-100": "#000000",
+          "base-100": "#171717",
           "base-300": "#000000",
           "base-content": "#FFFFFF",
           info: "#3ABFF8",

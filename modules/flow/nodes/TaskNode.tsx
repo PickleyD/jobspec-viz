@@ -3,8 +3,9 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
+import { Squares2X2Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { tasks, XYCoords } from "../../workspace/taskNodeMachine";
-import { Select } from "../../../components";
+// import { Select } from "../../../components";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -126,6 +127,8 @@ export const TaskNode = ({
       : { x: 0, y: 0 };
   };
 
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
     // width divisible by grid snap size
     <div className="bg-base-100 p-4 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
@@ -153,7 +156,7 @@ export const TaskNode = ({
             id={`${id}-top`}
             type="target"
             position={Position.Top}
-            className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3 shadow-widget"
+            className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3"
           />
           <Handle
             id={`${id}-bottom`}
@@ -163,7 +166,7 @@ export const TaskNode = ({
           />
         </>
       )}
-      <Select
+      {/* <Select
         className="select select-ghost select-sm text-xl font-bold"
         value={data.type}
         onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
@@ -182,7 +185,19 @@ export const TaskNode = ({
             {task}
           </option>
         ))}
-      </Select>
+      </Select> */}
+      <div className="flex flex-row items-center gap-2">
+        <p className="text-xl font-bold">{data.type}</p>
+        <label
+        tabIndex={0}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`bg-gradient-to-br from-[#131313] to-[#1B1B1B] shadow-blacksoft hover:border hover:border-secondary hover:shadow-blacksofthover hover:bg-base-100 bg-base-100 pointer-events-auto h-6 w-6 min-h-0 btn border-0 btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
+          }`}
+      >
+        <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
+        <XMarkIcon className="swap-on h-4 w-4 text-white" />
+      </label>
+      </div>
       <div className="form-control w-full max-w-xs">
         <label className="label">
           <span className="label-text">Task ID</span>
@@ -197,9 +212,8 @@ export const TaskNode = ({
           onChange={handleCustomIdChange}
           type="text"
           placeholder="Type here"
-          className={`${
-            customIdError ? "input-error" : ""
-          } input input-bordered w-full max-w-xs`}
+          className={`${customIdError ? "input-error" : ""
+            } input input-bordered w-full max-w-xs`}
         />
       </div>
       {children}
