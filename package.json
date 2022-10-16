@@ -11,6 +11,8 @@
     "cypress:run": "cypress run"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.3",
+    "@headlessui/tailwindcss": "^0.1.1",
     "@heroicons/react": "^2.0.11",
     "@xstate/react": "^3.0.0",
     "cronstrue": "^2.7.0",

@@ -4,9 +4,9 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { Squares2X2Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { tasks, TASK_TYPE, XYCoords } from "../../workspace/taskNodeMachine";
-// import { Select } from "../../../components";
+import { TASK_TYPE, XYCoords } from "../../workspace/taskNodeMachine";
 import { TaskSelector } from "../taskSelector/TaskSelector";
+import { Popover, Transition } from "@headlessui/react"
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -178,40 +178,40 @@ export const TaskNode = ({
           />
         </>
       )}
-      {/* <Select
-        className="select select-ghost select-sm text-xl font-bold"
-        value={data.type}
-        onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-          globalServices.workspaceService.send("REPLACE_TASK_NODE", {
-            nodeId: machine.state.context.customId,
-            existing: {
-              coords: getNodePosition(),
-              customId: machine.state.context.customId,
-            },
-            newType: event.target.value,
-          })
-        }
-      >
-        {tasks.map((task, index) => (
-          <option className="bg-base-100" value={task} key={`task-${index}`}>
-            {task}
-          </option>
-        ))}
-      </Select> */}
       <div className="flex flex-row items-center gap-2">
         <p className="text-xl font-bold">{data.type}</p>
         <div className="relative flex flex-col items-center">
-          <label
-            tabIndex={0}
-            onClick={() => setIsOpen(!isOpen)}
-            className={`border-gray-800 hover:border hover:border-secondary hover:bg-base-100 bg-base-100 pointer-events-auto h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""}`}
-          >
-            <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
-            <XMarkIcon className="swap-on h-4 w-4 text-white" />
-          </label>
-          <div className={`${isOpen ? "scale-100 opacity-100" : "scale-50 opacity-0"} origin-top transition top-6 absolute z-10 bg-base-300 rounded-lg border-0 border-gray-700`}>
-            <TaskSelector onTaskSelected={handleTaskSelected}/>
-          </div>
+          <Popover>
+            {({ open }) => (
+              <div className="relative flex flex-col items-center">
+                <Popover.Button className="focus:outline-none">
+                  <label
+                    tabIndex={0}
+                    className={`border-gray-800 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+                  >
+                    <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
+                    <XMarkIcon className="swap-on h-4 w-4 text-white" />
+                  </label>
+                </Popover.Button>
+                <Transition
+                  className="z-10 w-fit absolute top-6 z-10"
+                  enter="transition duration-100 ease-out"
+                  enterFrom="transform scale-95 opacity-0"
+                  enterTo="transform scale-100 opacity-100"
+                  leave="transition duration-75 ease-out"
+                  leaveFrom="transform scale-100 opacity-100"
+                  leaveTo="transform scale-95 opacity-0"
+                >
+                  <Popover.Panel>
+                    <div className={`bg-base-300 rounded-lg border-0 border-gray-700`}>
+                      <TaskSelector onTaskSelected={handleTaskSelected} />
+                    </div>
+                  </Popover.Panel>
+                </Transition>
+              </div>
+            )}
+
+          </Popover>
         </div>
       </div>
       <div className="form-control w-full max-w-xs">
