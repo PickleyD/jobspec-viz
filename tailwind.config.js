@@ -23,21 +23,6 @@ module.exports = {
           "33.3px 32.7px 35px -4.4px hsl(254deg 100% 16% / 0.2)",
           "49.6px 48.7px 52.1px -5px hsl(254deg 100% 16% / 0.1)",
         ],
-        blackonblack: [
-          "0.3px 0.3px 0.3px -0.2px hsl(0deg 0% 10% / 0.9)",
-          "0.4px 0.4px 0.4px -0.6px hsl(0deg 0% 10% / 0.8)",
-          "1.1px 1.1px 1.2px -1.2px hsl(0deg 0% 10% / 0.7)",
-          "2.9px 2.9px 3.1px -1.9px hsl(0deg 0% 10% / 0.6)",
-          "6.5px 6.4px 6.8px -2.5px hsl(0deg 0% 10% / 0.5)"
-        ],
-        blacksoft: [
-          "4px 4px 8px #0e0e0e",
-          "-4px -4px 8px #202020"
-        ],
-        blacksofthover: [
-          "4px 4px 8px #121212",
-          "-4px -4px 8px #1c1c1c"
-        ]
       },
     },
   },

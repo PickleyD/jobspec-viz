@@ -15,7 +15,7 @@ export const Select = ({
       >
         {children}
       </select>
-      <div className="peer-focus:shadow-blackonblack peer-hover:shadow-blackonblack bg-transparent text-xl font-bold uppercase p-2 pr-10 rounded-lg">
+      <div className="peer-focus:shadow-lg peer-hover:shadow-lg bg-transparent text-xl font-bold uppercase p-2 pr-10 rounded-lg">
         {value}
       </div>
       <div className="
