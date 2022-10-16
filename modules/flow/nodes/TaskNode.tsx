@@ -4,8 +4,9 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { Squares2X2Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { tasks, XYCoords } from "../../workspace/taskNodeMachine";
+import { tasks, TASK_TYPE, XYCoords } from "../../workspace/taskNodeMachine";
 // import { Select } from "../../../components";
+import { TaskSelector } from "../taskSelector/TaskSelector";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -129,6 +130,17 @@ export const TaskNode = ({
 
   const [isOpen, setIsOpen] = useState(false)
 
+  const handleTaskSelected = (task: TASK_TYPE) => {
+    globalServices.workspaceService.send("REPLACE_TASK_NODE", {
+      nodeId: machine.state.context.customId,
+      existing: {
+        coords: getNodePosition(),
+        customId: machine.state.context.customId,
+      },
+      newType: task,
+    })
+  }
+
   return (
     // width divisible by grid snap size
     <div className="bg-base-100 p-4 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
@@ -188,15 +200,19 @@ export const TaskNode = ({
       </Select> */}
       <div className="flex flex-row items-center gap-2">
         <p className="text-xl font-bold">{data.type}</p>
-        <label
-        tabIndex={0}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`bg-gradient-to-br from-[#131313] to-[#1B1B1B] shadow-blacksoft hover:border hover:border-secondary hover:shadow-blacksofthover hover:bg-base-100 bg-base-100 pointer-events-auto h-6 w-6 min-h-0 btn border-0 btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
-          }`}
-      >
-        <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
-        <XMarkIcon className="swap-on h-4 w-4 text-white" />
-      </label>
+        <div className="relative flex flex-col items-center">
+          <label
+            tabIndex={0}
+            onClick={() => setIsOpen(!isOpen)}
+            className={`border-gray-800 hover:border hover:border-secondary hover:bg-base-100 bg-base-100 pointer-events-auto h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""}`}
+          >
+            <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
+            <XMarkIcon className="swap-on h-4 w-4 text-white" />
+          </label>
+          <div className={`${isOpen ? "scale-100 opacity-100" : "scale-50 opacity-0"} origin-top transition top-6 absolute z-10 bg-base-300 rounded-lg border-0 border-gray-700`}>
+            <TaskSelector onTaskSelected={handleTaskSelected}/>
+          </div>
+        </div>
       </div>
       <div className="form-control w-full max-w-xs">
         <label className="label">
