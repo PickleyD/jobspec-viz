@@ -202,8 +202,11 @@ export const TaskNode = ({
                   leaveFrom="transform scale-100 opacity-100"
                   leaveTo="transform scale-95 opacity-0"
                 >
-                  <Popover.Panel>
-                    <div className={`bg-base-300 rounded-lg border-0 border-gray-700`}>
+                  <Popover.Panel className="flex flex-col items-center">
+                    <svg width="10" height="10" viewBox="0 0 10 10" className="fill-gray-700">
+                      <polygon points="0,10 5,5 10,10" />
+                    </svg>
+                    <div className={`bg-base-300 rounded-lg border border-gray-700`}>
                       <TaskSelector onTaskSelected={handleTaskSelected} />
                     </div>
                   </Popover.Panel>
