@@ -128,8 +128,6 @@ export const TaskNode = ({
       : { x: 0, y: 0 };
   };
 
-  const [isOpen, setIsOpen] = useState(false)
-
   const handleTaskSelected = (task: TASK_TYPE) => {
     globalServices.workspaceService.send("REPLACE_TASK_NODE", {
       nodeId: machine.state.context.customId,
@@ -194,7 +192,7 @@ export const TaskNode = ({
                   </label>
                 </Popover.Button>
                 <Transition
-                  className="z-10 w-fit absolute top-6 z-10"
+                  className="z-10 w-fit absolute top-5 z-10"
                   enter="transition duration-100 ease-out"
                   enterFrom="transform scale-95 opacity-0"
                   enterTo="transform scale-100 opacity-100"
@@ -207,7 +205,7 @@ export const TaskNode = ({
                       <polygon points="0,10 5,5 10,10" />
                     </svg>
                     <div className={`bg-base-300 rounded-lg border border-gray-700`}>
-                      <TaskSelector onTaskSelected={handleTaskSelected} />
+                      <TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />
                     </div>
                   </Popover.Panel>
                 </Transition>

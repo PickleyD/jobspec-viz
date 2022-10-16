@@ -23,9 +23,10 @@ const categories: Array<Category> = [
 
 export type TaskSelectorProps = {
     onTaskSelected: (task: TASK_TYPE) => void;
+    value: TASK_TYPE;
 }
 
-export const TaskSelector = ({ onTaskSelected }: TaskSelectorProps) => {
+export const TaskSelector = ({ onTaskSelected, value }: TaskSelectorProps) => {
 
     return <div className="flex flex-col gap-4 p-4 w-60">
         {
@@ -34,11 +35,11 @@ export const TaskSelector = ({ onTaskSelected }: TaskSelectorProps) => {
                 <div className="flex flex-row flex-wrap gap-1">
                     {
                         category.tasks.map((task, taskIndex) => <TaskChip
+                            disabled={task === value}
                             onClick={() => onTaskSelected(task)}
                             key={`cat-${catIndex}-task-${taskIndex}`}>
                             {task}
-                        </TaskChip>
-                        )
+                        </TaskChip>)
                     }
                 </div>
             </section>)
