@@ -23,9 +23,9 @@ export const TaskNode = ({
   data,
   useDefaultHandles = true,
   children,
-  type,
+  type
 }: TaskNodeProps) => {
-  const { machine } = data;
+  const { machine, deletable } = data;
 
   const [prevCustomId, setPrevCustomId] = useState<string>();
   const customId = useSelector(machine, customIdSelector);
@@ -142,12 +142,14 @@ export const TaskNode = ({
   return (
     // width divisible by grid snap size
     <div className="bg-base-100 p-4 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
-      <div
-        onClick={handleDeleteNode}
-        className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
-      >
-        <TrashIcon className="fill-current w-6" />
-      </div>
+      {deletable &&
+        <div
+          onClick={handleDeleteNode}
+          className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
+        >
+          <TrashIcon className="fill-current w-6" />
+        </div>
+      }
       <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -75,7 +75,7 @@ export const Flow = ({ className }: FlowProps) => {
     reactFlowInstanceSelector
   )
 
-  const nodeToFlowElement = (node: any) => {
+  const nodeToFlowElement = (node: any, index: number, numNodes: number) => {
     const nodeType = node.ref.machine.id;
 
     const { coords, taskType } = node.ref.state.context;
@@ -86,6 +86,7 @@ export const Flow = ({ className }: FlowProps) => {
       data: {
         type: taskType,
         machine: node.ref,
+        deletable: numNodes > 1
       },
       position: coords,
       dragHandle: ".custom-drag-handle",
@@ -118,7 +119,7 @@ export const Flow = ({ className }: FlowProps) => {
     return flowElement;
   };
 
-  const elements = [...taskNodesFromMachine.map(nodeToFlowElement)];
+  const elements = [...taskNodesFromMachine.map((node: any, index: number) => nodeToFlowElement(node, index, taskNodesFromMachine.length))];
 
   const [prevElements, setPrevElements] = useState<Array<{
     id: string;
