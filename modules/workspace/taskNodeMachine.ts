@@ -20,7 +20,9 @@ type TaskNodeEvent =
   | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
   | { type: "SET_CUSTOM_ID"; value: string }
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
-  | { type: "UPDATE_COORDS"; value: XYCoords };
+  | { type: "UPDATE_COORDS"; value: XYCoords }
+  | { type: "ENABLE_TEST_MODE" }
+  | { type: "SIMULATE_EXEC" };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
@@ -223,7 +225,22 @@ export const createTaskNodeMachine = (
       },
       initial: "idle",
       states: {
-        idle: {},
+        idle: {
+          on: {
+            ENABLE_TEST_MODE: {
+              target: "pendingExec",
+              cond: "parentsExecCompleted"
+            }
+          }
+        },
+        pendingExec: {
+          on: {
+            SIMULATE_EXEC: {
+              target: "processing"
+            }
+          }
+        },
+        processing: {}
       },
       on: {
         ADD_INCOMING_NODE: {
@@ -321,6 +338,11 @@ export const createTaskNodeMachine = (
           isValid: (context, event) => validateTask(context)
         })
       },
-    }
+      guards: {
+        parentsExecCompleted: (context, event) => {
+          return context.incomingNodes.length === 0
+        }
+      }
+    },
   );
 };

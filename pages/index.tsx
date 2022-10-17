@@ -6,7 +6,7 @@ import { Codegen } from "../modules/codegen";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { LayoutGroup } from "framer-motion";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   XMarkIcon,
   CogIcon,
@@ -16,9 +16,25 @@ import {
   BookOpenIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
+import { GlobalStateContext } from "../context/GlobalStateContext";
+import { useSelector } from "@xstate/react";
+
+const taskNodesSelector = (state: any) => state.context.nodes.tasks;
 
 const Home: NextPage = () => {
+
+  const globalServices = useContext(GlobalStateContext)
+
+  const taskNodesFromMachine = useSelector(
+    globalServices.workspaceService,
+    taskNodesSelector
+  );
+
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
+
+  const handleEnterTestMode = () => {
+    return taskNodesFromMachine.map((taskNode: any) => taskNode.ref.send("ENABLE_TEST_MODE"))
+  }
 
   return (
     <div className="bg-primary h-screen w-screen">
@@ -30,7 +46,7 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-{/* 
+      {/* 
       {helpMsgDisplayed && (
         <div className="invisible md:visible fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
           <div className="rounded rounded-tr-3xl bg-base-100 p-4 flex flex-col gap-4 relative pointer-events-auto shadow-widget">
@@ -82,56 +98,57 @@ const Home: NextPage = () => {
       )} */}
 
       {/* <DndProvider backend={HTML5Backend}> */}
-        <main className="w-full h-full relative">
-          <div className="w-full h-full fixed z-0">
-            <Flow />
-          </div>
-          <div className="visible md:invisible fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
-            <div className="rounded bg-gray-700 p-4 flex flex-col gap-4 relative pointer-events-auto w-80">
-              <div className="flex flex-col items-center gap-2">
-                <Image alt="logo" src="/logo.png" width={40} height={40} />
-                <h1 className="font-bold underline text-xl">
-                  Chainlink Job Spec Viz
-                </h1>
-              </div>
-              <div className="text-xs max-w-sm flex flex-col gap-2">
-                <p>
-                  Mobile support is not implemented. Please use the app on a
-                  larger device. Sorry!
-                </p>
-              </div>
+      <main className="w-full h-full relative">
+        <div className="w-full h-full fixed z-0">
+          <Flow />
+        </div>
+        <div className="visible md:invisible fixed grid items-center justify-center h-full w-full z-10 pointer-events-none">
+          <div className="rounded bg-gray-700 p-4 flex flex-col gap-4 relative pointer-events-auto w-80">
+            <div className="flex flex-col items-center gap-2">
+              <Image alt="logo" src="/logo.png" width={40} height={40} />
+              <h1 className="font-bold underline text-xl">
+                Chainlink Job Spec Viz
+              </h1>
+            </div>
+            <div className="text-xs max-w-sm flex flex-col gap-2">
+              <p>
+                Mobile support is not implemented. Please use the app on a
+                larger device. Sorry!
+              </p>
             </div>
           </div>
-          <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
-            <div className="p-8 absolute left-0 flex flex-col items-end gap-2">
-              {/* <label
+        </div>
+        <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
+          <div className="p-8 absolute left-0 flex flex-col items-end gap-2">
+            {/* <label
                 tabIndex={0}
                 onClick={() => setHelpMsgDisplayed(true)}
                 className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
               >
                 <QuestionMarkCircleIcon className="fill-current h-5 w-5 text-white" />
               </label> */}
-              <a
-                href="https://docs.chain.link/docs/jobs/"
-                target="_blank"
-                rel="noopener noreferrer"
+            <a
+              href="https://docs.chain.link/docs/jobs/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <label
+                tabIndex={0}
+                className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
               >
-                <label
-                  tabIndex={0}
-                  className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
-                >
-                  <BookOpenIcon className="fill-current h-5 w-5 text-white" />
-                </label>
-              </a>
-            </div>
-            <div className="p-8 absolute right-0 flex flex-col items-end gap-2">
-              <LayoutGroup>
-                <Configurator className="pointer-events-none w-fit" />
-                <Codegen className="pointer-events-none w-fit" />
-              </LayoutGroup>
-            </div>
+                <BookOpenIcon className="fill-current h-5 w-5 text-white" />
+              </label>
+            </a>
           </div>
-        </main>
+          <div className="p-8 absolute right-0 flex flex-col items-end gap-2">
+            <LayoutGroup>
+              <Configurator className="pointer-events-none w-fit" />
+              <Codegen className="pointer-events-none w-fit" />
+              <div className="pointer-events-auto h-8 w-8 bg-red-500 cursor-pointer" onClick={handleEnterTestMode}>test mode</div>
+            </LayoutGroup>
+          </div>
+        </div>
+      </main>
       {/* </DndProvider> */}
     </div>
   );

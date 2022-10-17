@@ -8,6 +8,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
+      },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
@@ -23,7 +26,7 @@ module.exports = {
           "33.3px 32.7px 35px -4.4px hsl(254deg 100% 16% / 0.2)",
           "49.6px 48.7px 52.1px -5px hsl(254deg 100% 16% / 0.1)",
         ],
-      },
+      }
     },
   },
   daisyui: {
@@ -39,9 +42,9 @@ module.exports = {
           "base-300": "#131313",
           "base-content": "#FFFFFF",
           info: "#3ABFF8",
-          success: "#36D399",
+          success: "#22c55e",
           warning: "#FBBD23",
-          error: "#F87272",
+          error: "#ef4444",
         },
       },
     ],

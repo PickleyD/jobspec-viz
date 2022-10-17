@@ -12,6 +12,12 @@ const nodesSelector = (state: any) => state.context.nodes;
 
 const customIdSelector = (state: any) => state.context.customId;
 const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
+const isPendingExecutionSelector = (state: any) => {
+  return state.matches('pendingExec');
+};
+const isProcessingSelector = (state: any) => {
+  return state.matches('processing');
+};
 
 type TaskNodeProps = NodeProps & {
   useDefaultHandles?: boolean;
@@ -26,6 +32,9 @@ export const TaskNode = ({
   type
 }: TaskNodeProps) => {
   const { machine, deletable } = data;
+
+  const isProcessing = useSelector(machine, isProcessingSelector)
+  const isPendingExecution = useSelector(machine, isPendingExecutionSelector)
 
   const [prevCustomId, setPrevCustomId] = useState<string>();
   const customId = useSelector(machine, customIdSelector);
@@ -141,101 +150,111 @@ export const TaskNode = ({
 
   return (
     // width divisible by grid snap size
-    <div className="bg-base-100 p-4 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
-      {deletable &&
-        <div
-          onClick={handleDeleteNode}
-          className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
-        >
-          <TrashIcon className="fill-current w-6" />
-        </div>
+    <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
+      {isPendingExecution && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
+        <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-base-100 to-secondary"></div>
+      </div>
       }
-      <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="fill-current"
-          height="28"
-          viewBox="0 0 24 24"
-          width="28"
-        >
-          <path d="M0 0h24v24H0V0z" fill="none" />
-          <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-        </svg>
+      {isProcessing && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
+        <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-base-100 to-secondary"></div>
       </div>
-      {useDefaultHandles && (
-        <>
-          <Handle
-            id={`${id}-top`}
-            type="target"
-            position={Position.Top}
-            className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3"
-          />
-          <Handle
-            id={`${id}-bottom`}
-            type="source"
-            position={Position.Bottom}
-            className="!w-6 !h-6 !bg-white !border-black !border-2 !-bottom-3 shadow-widget"
-          />
-        </>
-      )}
-      <div className="flex flex-row items-center gap-2">
-        <p className="text-xl font-bold">{data.type}</p>
-        <div className="relative flex flex-col items-center">
-          <Popover>
-            {({ open }) => (
-              <div className="relative flex flex-col items-center">
-                <Popover.Button className="focus:outline-none">
-                  <label
-                    tabIndex={0}
-                    className={`border-gray-800 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
-                  >
-                    <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
-                    <XMarkIcon className="swap-on h-4 w-4 text-white" />
-                  </label>
-                </Popover.Button>
-                <Transition
-                  className="z-10 w-fit absolute top-5 z-10"
-                  enter="transition duration-100 ease-out"
-                  enterFrom="transform scale-95 opacity-0"
-                  enterTo="transform scale-100 opacity-100"
-                  leave="transition duration-75 ease-out"
-                  leaveFrom="transform scale-100 opacity-100"
-                  leaveTo="transform scale-95 opacity-0"
-                >
-                  <Popover.Panel className="flex flex-col items-center">
-                    <svg width="10" height="10" viewBox="0 0 10 10" className="fill-gray-700">
-                      <polygon points="0,10 5,5 10,10" />
-                    </svg>
-                    <div className={`bg-base-300 rounded-lg border border-gray-700`}>
-                      <TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />
-                    </div>
-                  </Popover.Panel>
-                </Transition>
-              </div>
-            )}
-
-          </Popover>
+      }
+      <div className="relative w-full h-full p-3 bg-base-100 rounded-md z-10">
+        {deletable &&
+          <div
+            onClick={handleDeleteNode}
+            className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
+          >
+            <TrashIcon className="fill-current w-6" />
+          </div>
+        }
+        <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="fill-current"
+            height="28"
+            viewBox="0 0 24 24"
+            width="28"
+          >
+            <path d="M0 0h24v24H0V0z" fill="none" />
+            <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+          </svg>
         </div>
+        {useDefaultHandles && (
+          <>
+            <Handle
+              id={`${id}-top`}
+              type="target"
+              position={Position.Top}
+              className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3"
+            />
+            <Handle
+              id={`${id}-bottom`}
+              type="source"
+              position={Position.Bottom}
+              className="!w-6 !h-6 !bg-white !border-black !border-2 !-bottom-3 shadow-widget"
+            />
+          </>
+        )}
+        <div className="flex flex-row items-center gap-2">
+          <p className="text-xl font-bold">{data.type}</p>
+          <div className="relative flex flex-col items-center">
+            <Popover>
+              {({ open }) => (
+                <div className="relative flex flex-col items-center">
+                  <Popover.Button className="focus:outline-none">
+                    <label
+                      tabIndex={0}
+                      className={`border-gray-800 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+                    >
+                      <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
+                      <XMarkIcon className="swap-on h-4 w-4 text-white" />
+                    </label>
+                  </Popover.Button>
+                  <Transition
+                    className="z-10 w-fit absolute top-5 z-10"
+                    enter="transition duration-100 ease-out"
+                    enterFrom="transform scale-95 opacity-0"
+                    enterTo="transform scale-100 opacity-100"
+                    leave="transition duration-75 ease-out"
+                    leaveFrom="transform scale-100 opacity-100"
+                    leaveTo="transform scale-95 opacity-0"
+                  >
+                    <Popover.Panel className="flex flex-col items-center">
+                      <svg width="10" height="10" viewBox="0 0 10 10" className="fill-gray-700">
+                        <polygon points="0,10 5,5 10,10" />
+                      </svg>
+                      <div className={`bg-base-300 rounded-lg border border-gray-700`}>
+                        <TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />
+                      </div>
+                    </Popover.Panel>
+                  </Transition>
+                </div>
+              )}
+
+            </Popover>
+          </div>
+        </div>
+        <div className="form-control w-full max-w-xs">
+          <label className="label">
+            <span className="label-text">Task ID</span>
+            {customIdError && (
+              <span className="text-error label-text-alt text-xs">
+                Not unique
+              </span>
+            )}
+          </label>
+          <input
+            value={tempCustomId}
+            onChange={handleCustomIdChange}
+            type="text"
+            placeholder="Type here"
+            className={`${customIdError ? "input-error" : ""
+              } input input-bordered w-full max-w-xs`}
+          />
+        </div>
+        {children}
       </div>
-      <div className="form-control w-full max-w-xs">
-        <label className="label">
-          <span className="label-text">Task ID</span>
-          {customIdError && (
-            <span className="text-error label-text-alt text-xs">
-              Not unique
-            </span>
-          )}
-        </label>
-        <input
-          value={tempCustomId}
-          onChange={handleCustomIdChange}
-          type="text"
-          placeholder="Type here"
-          className={`${customIdError ? "input-error" : ""
-            } input input-bordered w-full max-w-xs`}
-        />
-      </div>
-      {children}
     </div>
   );
 };
