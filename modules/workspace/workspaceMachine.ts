@@ -47,7 +47,8 @@ type WorkspaceEvent =
       valid?: boolean;
     }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
-  | { type: "CONNECTION_END"; initialCoords: XYCoords };
+  | { type: "CONNECTION_END"; initialCoords: XYCoords }
+  | { type: "ENABLE_TEST_MODE" };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -325,6 +326,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           "addTaskNode",
         ],
       },
+      ENABLE_TEST_MODE: {
+        actions: (context, event) => context.nodes.tasks.forEach(task => {
+          if (task.ref.state.context.incomingNodes.length === 0) {
+            task.ref.send("SET_PENDING_EXEC")
+          }
+        })
+      }
     },
   },
   {

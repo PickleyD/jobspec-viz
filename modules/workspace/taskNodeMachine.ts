@@ -21,7 +21,7 @@ type TaskNodeEvent =
   | { type: "SET_CUSTOM_ID"; value: string }
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
   | { type: "UPDATE_COORDS"; value: XYCoords }
-  | { type: "ENABLE_TEST_MODE" }
+  | { type: "SET_PENDING_EXEC" }
   | { type: "SIMULATE_EXEC" };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
@@ -227,9 +227,8 @@ export const createTaskNodeMachine = (
       states: {
         idle: {
           on: {
-            ENABLE_TEST_MODE: {
-              target: "pendingExec",
-              cond: "parentsExecCompleted"
+            SET_PENDING_EXEC: {
+              target: "pendingExec"
             }
           }
         },
@@ -338,11 +337,11 @@ export const createTaskNodeMachine = (
           isValid: (context, event) => validateTask(context)
         })
       },
-      guards: {
-        parentsExecCompleted: (context, event) => {
-          return context.incomingNodes.length === 0
-        }
-      }
+      // guards: {
+      //   parentsExecCompleted: (context, event) => {
+      //     return context.incomingNodes.length === 0
+      //   }
+      // }
     },
   );
 };

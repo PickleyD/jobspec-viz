@@ -3,8 +3,6 @@ import Head from "next/head";
 import { Flow } from "../modules/flow";
 import { Configurator } from "../modules/configurator";
 import { Codegen } from "../modules/codegen";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { LayoutGroup } from "framer-motion";
 import { useContext, useState } from "react";
 import {
@@ -17,23 +15,15 @@ import {
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { GlobalStateContext } from "../context/GlobalStateContext";
-import { useSelector } from "@xstate/react";
-
-const taskNodesSelector = (state: any) => state.context.nodes.tasks;
 
 const Home: NextPage = () => {
 
   const globalServices = useContext(GlobalStateContext)
 
-  const taskNodesFromMachine = useSelector(
-    globalServices.workspaceService,
-    taskNodesSelector
-  );
-
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
 
   const handleEnterTestMode = () => {
-    return taskNodesFromMachine.map((taskNode: any) => taskNode.ref.send("ENABLE_TEST_MODE"))
+    return globalServices.workspaceService.send("ENABLE_TEST_MODE")
   }
 
   return (
