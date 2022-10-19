@@ -58,7 +58,7 @@ interface WorkspaceContext {
   edges: CustomEdge[];
   nodes: Nodes;
   jobTypeSpecific: any;
-  totalNodesAdded: number;
+  totalNodes: number;
   isConnecting: boolean;
   connectionParams: OnConnectStartParams;
 }
@@ -126,7 +126,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       name: "",
       externalJobId: "",
       edges: [],
-      totalNodesAdded: 0,
+      totalNodes: 0,
       nodes: {
         tasks: [],
       },
@@ -181,7 +181,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
           return [
             assign({
-              totalNodesAdded: context.totalNodesAdded + 1,
+              totalNodes: context.totalNodes + 1,
               nodes: {
                 ...context.nodes,
                 tasks: [
@@ -195,7 +195,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                         customId: newNodePresentationId,
                         ...!isFirstNode && (isForwardConnection ? { incomingNodes: [fromNodeId] } : { outgoingNodes: [fromNodeId] })
                       }),
-                      `task-${event.options.id ?? context.totalNodesAdded}`
+                      `task-${event.options.id ?? context.totalNodes}`
                     ),
                   },
                 ],
@@ -220,6 +220,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       },
       DELETE_TASK_NODE: {
         actions: assign({
+          totalNodes: (context, event) => context.totalNodes - 1,
           nodes: (context, event) => ({
             ...context.nodes,
             tasks: [
