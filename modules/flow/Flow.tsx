@@ -8,13 +8,14 @@ import ReactFlow, {
   OnConnectEnd,
   OnConnectStart,
   Node as ReactFlowNode,
-  EdgeChange
+  EdgeChange,
+  OnConnect
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
   import("react-flow-renderer").then((mod) => mod.Background) as
-    | DynamicOptions<{}>
-    | Loader<{}>,
+  | DynamicOptions<{}>
+  | Loader<{}>,
   { ssr: false }
 ); // disable ssr
 import {
@@ -127,7 +128,7 @@ export const Flow = ({ className }: FlowProps) => {
   }>>([])
 
   useEffect(() => {
-    const elementsToCompare = elements.map((element) => ({id: element.id, type: element.type}));
+    const elementsToCompare = elements.map((element) => ({ id: element.id, type: element.type }));
     if ((JSON.stringify(elementsToCompare.sort()) !== JSON.stringify(prevElements.sort()))) {
       setPrevElements(elementsToCompare);
 
@@ -181,6 +182,13 @@ export const Flow = ({ className }: FlowProps) => {
   };
 
   const handleConnectEnd: OnConnectEnd = (event) => {
+
+    // @ts-ignore
+    const toExistingNodeId = event?.target?.dataset?.nodeid
+
+    // If the connection was dragged to an existing node's handle we let the onConnect handler deal with it
+    if (toExistingNodeId) return;
+
     const viewport = reactFlowInstance?.getViewport() || {
       x: 0,
       y: 0,
@@ -197,8 +205,12 @@ export const Flow = ({ className }: FlowProps) => {
     });
   };
 
+  const handleConnect: OnConnect = (event) => {
+    console.log(event)
+  }
+
   const handleReactFlowInit = (reactFlowInstance: ReactFlowInstance) => {
-    globalServices.workspaceService.send("SET_REACT_FLOW_INSTANCE", { value: reactFlowInstance})
+    globalServices.workspaceService.send("SET_REACT_FLOW_INSTANCE", { value: reactFlowInstance })
   }
 
   const handleNodeDragStop = (event: React.MouseEvent, node: ReactFlowNode) => {
@@ -236,6 +248,7 @@ export const Flow = ({ className }: FlowProps) => {
           connectionLineStyle={{ strokeWidth: 4 }}
           onConnectStart={handleConnectStart}
           onConnectEnd={handleConnectEnd}
+          onConnect={handleConnect}
           connectionLineComponent={CustomConnectionLine}
           fitView
           fitViewOptions={{
