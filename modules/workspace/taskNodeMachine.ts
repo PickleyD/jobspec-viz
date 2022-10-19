@@ -22,7 +22,7 @@ type TaskNodeEvent =
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
   | { type: "UPDATE_COORDS"; value: XYCoords }
   | { type: "SET_PENDING_EXEC" }
-  | { type: "SIMULATE_EXEC" };
+  | { type: "TRY_RUN_TASK" };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
@@ -234,7 +234,7 @@ export const createTaskNodeMachine = (
         },
         pendingExec: {
           on: {
-            SIMULATE_EXEC: {
+            TRY_RUN_TASK: {
               target: "processing"
             }
           }
