@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
-import { Squares2X2Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Squares2X2Icon, XMarkIcon, PlayIcon } from "@heroicons/react/24/outline";
 import { TASK_TYPE, XYCoords } from "../../workspace/taskNodeMachine";
 import { TaskSelector } from "../taskSelector/TaskSelector";
 import { Popover, Transition } from "@headlessui/react"
@@ -12,6 +12,9 @@ const nodesSelector = (state: any) => state.context.nodes;
 
 const customIdSelector = (state: any) => state.context.customId;
 const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
+const isIdleSelector = (state: any) => {
+  return state.matches('idle');
+};
 const isPendingExecutionSelector = (state: any) => {
   return state.matches('pendingExec');
 };
@@ -33,6 +36,7 @@ export const TaskNode = ({
 }: TaskNodeProps) => {
   const { machine, deletable } = data;
 
+  const isIdle = useSelector(machine, isIdleSelector)
   const isProcessing = useSelector(machine, isProcessingSelector)
   const isPendingExecution = useSelector(machine, isPendingExecutionSelector)
 
@@ -170,6 +174,19 @@ export const TaskNode = ({
             <TrashIcon className="fill-current w-6" />
           </div>
         }
+        {!isIdle &&
+          <div className="absolute top-0 right-0 bottom-0 left-0 transparent z-20">
+            <div className="absolute top-0 right-0 bottom-0 left-0 bg-base-100 opacity-50 rounded-md" />
+            {
+              isPendingExecution && <div className="relative w-full h-full p-6 flex items-end justify-center">
+                <button className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-800 hover:text-black">
+                  <span className="px-2">Run Task</span>
+                  <PlayIcon className="fill-current w-6 h-6" />
+                </button>
+              </div>
+            }
+          </div>
+        }
         <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -188,13 +205,13 @@ export const TaskNode = ({
               id={`${id}-top`}
               type="target"
               position={Position.Top}
-              className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3"
+              className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3 z-30"
             />
             <Handle
               id={`${id}-bottom`}
               type="source"
               position={Position.Bottom}
-              className="!w-6 !h-6 !bg-white !border-black !border-2 !-bottom-3 shadow-widget"
+              className="!w-6 !h-6 !bg-white !border-black !border-2 !-bottom-3 shadow-widget z-30"
             />
           </>
         )}
