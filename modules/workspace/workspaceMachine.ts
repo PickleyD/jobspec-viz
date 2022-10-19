@@ -1,4 +1,4 @@
-import { createMachine, spawn, assign, send } from "xstate";
+import { createMachine, spawn, assign, send, actions } from "xstate";
 import {
   createTaskNodeMachine,
   TaskNodeOptions,
@@ -13,39 +13,40 @@ export type NEW_NODE_TYPE = "source" | "target";
 
 type WorkspaceEvent =
   | {
-      type: "SET_REACT_FLOW_INSTANCE", value: ReactFlowInstance
-    }
+    type: "SET_REACT_FLOW_INSTANCE", value: ReactFlowInstance
+  }
   | {
-      type: "NEW_TASK_NODE.ADD";
-      options: TaskNodeOptions;
-      edgeDetails: {
-        newNodeType: NEW_NODE_TYPE;
-        fromHandleId: string;
-        fromNodeId: string;
-      };
-    }
+    type: "ADD_TASK_NODE";
+    options: TaskNodeOptions;
+    edgeDetails: {
+      newNodeType: NEW_NODE_TYPE;
+      fromHandleId: string;
+      fromNodeId: string;
+    };
+  }
   | { type: "DELETE_TASK_NODE"; nodeId: string }
   | {
-      type: "REPLACE_TASK_NODE";
-      nodeId: string;
-      newType: TASK_TYPE;
-      existing: {
-        coords: XYCoords;
-        customId: string;
-      };
-    }
-  | { type: "SET_EDGES"; newEdges: CustomEdge[] }
+    type: "REPLACE_TASK_NODE";
+    nodeId: string;
+    newType: TASK_TYPE;
+    existing: {
+      coords: XYCoords;
+      customId: string;
+      incomingNodes: Array<string>;
+      outgoingNodes: Array<string>;
+    };
+  }
   | { type: "UPDATE_EDGES_WITH_NODE_ID"; nodeId: string; prevNodeId: string }
   | { type: "SET_JOB_TYPE"; value: JOB_TYPE }
   | { type: "SET_NAME"; value: string }
   | { type: "SET_EXTERNAL_JOB_ID"; value: string }
   | {
-      type: "SET_JOB_TYPE_SPECIFIC_PROPS";
-      jobType: string;
-      prop: string;
-      value?: string;
-      valid?: boolean;
-    }
+    type: "SET_JOB_TYPE_SPECIFIC_PROPS";
+    jobType: string;
+    prop: string;
+    value?: string;
+    valid?: boolean;
+  }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
   | { type: "CONNECTION_END"; initialCoords: XYCoords };
 
@@ -157,50 +158,51 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
     on: {
       "SET_REACT_FLOW_INSTANCE": {
         actions: assign({
-          reactFlowInstance: (context, event) => event.value
+          reactFlowInstance: (_, event) => event.value
         })
       },
-      "NEW_TASK_NODE.ADD": {
-        actions: assign({
-          totalNodesAdded: (context, event) => context.totalNodesAdded + 1,
-          nodes: (context, event) => {
-            return {
-              ...context.nodes,
-              tasks: [
-                ...context.nodes.tasks,
-                {
-                  // add a new taskNodeMachine actor with a unique name
-                  ref: spawn(
-                    createTaskNodeMachine({
-                      coords: event.options.initialCoords,
-                      taskType: event.options.taskType,
-                      customId: `task-${
-                        event.options.id ??
-                        getNextUniqueTaskId(context.nodes.tasks)
-                      }`,
-                    }),
-                    `task-${event.options.id ?? context.totalNodesAdded}`
-                  ),
-                },
-              ],
-            };
-          },
-          edges: (context, event) => {
-            const isForwardConnection =
-              event.edgeDetails?.fromHandleId?.endsWith("-bottom");
-            const newNodeId = `task-${
-              event.options.id ?? getNextUniqueTaskId(context.nodes.tasks)
-            }`;
-            const fromId = isForwardConnection
-              ? event.edgeDetails.fromNodeId
-              : newNodeId;
-            const toId = isForwardConnection
-              ? newNodeId
-              : event.edgeDetails.fromNodeId;
+      "ADD_TASK_NODE": {
+        // @ts-ignore
+        actions: actions.pure((context, event) => {
 
-            return event.edgeDetails.fromNodeId &&
-              event.edgeDetails.fromHandleId
-              ? [
+          const { fromHandleId, fromNodeId, newNodeType } = event.edgeDetails
+
+          const isFirstNode = !fromHandleId || !newNodeType
+          const isForwardConnection = newNodeType === "target";
+
+          const newNodePresentationId = `task-${event.options.id ?? getNextUniqueTaskId(context.nodes.tasks)}`;
+
+          const fromId = isForwardConnection
+            ? fromNodeId
+            : newNodePresentationId;
+          const toId = isForwardConnection
+            ? newNodePresentationId
+            : fromNodeId;
+
+          return [
+            assign({
+              totalNodesAdded: context.totalNodesAdded + 1,
+              nodes: {
+                ...context.nodes,
+                tasks: [
+                  ...context.nodes.tasks,
+                  {
+                    // add a new taskNodeMachine actor with a unique name
+                    ref: spawn(
+                      createTaskNodeMachine({
+                        coords: event.options.initialCoords,
+                        taskType: event.options.taskType,
+                        customId: newNodePresentationId,
+                        ...!isFirstNode && (isForwardConnection ? { incomingNodes: [fromNodeId] } : { outgoingNodes: [fromNodeId] })
+                      }),
+                      `task-${event.options.id ?? context.totalNodesAdded}`
+                    ),
+                  },
+                ],
+              },
+              edges: fromNodeId &&
+                fromHandleId
+                ? [
                   ...context.edges,
                   {
                     id: `edge-${context.edges.length}`,
@@ -210,9 +212,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                     targetCustomId: toId,
                   },
                 ]
-              : context.edges;
-          },
-        }),
+                : context.edges
+            }),
+            send({ type: isForwardConnection ? "ADD_OUTGOING_NODE" : "ADD_INCOMING_NODE", nodeId: newNodePresentationId }, { to: fromNodeId })
+          ]
+        })
       },
       DELETE_TASK_NODE: {
         actions: assign({
@@ -247,6 +251,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                     coords: event.existing.coords,
                     taskType: event.newType,
                     customId: event.existing.customId,
+                    incomingNodes: event.existing.incomingNodes,
+                    outgoingNodes: event.existing.outgoingNodes
                   }),
                   event.nodeId
                 ),
@@ -255,11 +261,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           }),
         }),
       },
-      // SET_EDGES: {
-      //   actions: assign({
-      //     edges: (context, event) => event.newEdges,
-      //   }),
-      // },
       UPDATE_EDGES_WITH_NODE_ID: {
         actions: assign({
           edges: (context, event) =>
@@ -344,14 +345,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         const initialCoords =
           "initialCoords" in event
             ? adjustNewSourceNodeHeightByTypeDefault(
-                event.initialCoords,
-                taskType,
-                isForwardConnection
-              )
+              event.initialCoords,
+              taskType,
+              isForwardConnection
+            )
             : { x: 0, y: 0 };
 
         return {
-          type: "NEW_TASK_NODE.ADD",
+          type: "ADD_TASK_NODE",
           options: {
             initialCoords,
             taskType,

@@ -164,7 +164,7 @@ export const Flow = ({ className }: FlowProps) => {
     newNodeType?: NEW_NODE_TYPE,
     fromHandleId?: string
   ) => {
-    globalServices.workspaceService.send("NEW_TASK_NODE.ADD", {
+    globalServices.workspaceService.send("ADD_TASK_NODE", {
       options: {
         initialCoords,
         taskType,
