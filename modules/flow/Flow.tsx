@@ -8,8 +8,8 @@ import ReactFlow, {
   OnConnectEnd,
   OnConnectStart,
   Node as ReactFlowNode,
-  EdgeChange,
-  OnConnect
+  Connection,
+  addEdge
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
@@ -30,7 +30,7 @@ import {
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
 import { CustomConnectionLine } from "./CustomConnectionLine";
 import { NEW_NODE_TYPE } from "../workspace/workspaceMachine";
@@ -132,19 +132,8 @@ export const Flow = ({ className }: FlowProps) => {
     if ((JSON.stringify(elementsToCompare.sort()) !== JSON.stringify(prevElements.sort()))) {
       setPrevElements(elementsToCompare);
 
-      // const elementIds = elements.map((element) => element.id);
-
       // Sync up flow nodes with our machine state
-      setNodes((nds) =>
-        elements
-        // nds
-        //   .filter((node) => elementIds.includes(node.id))
-        //   .concat(
-        //     elements.filter(
-        //       (element) => !nds.map((node) => node.id).includes(element.id)
-        //     )
-        //   )
-      );
+      setNodes((nds) => elements);
     }
   }, [elements]);
 
@@ -205,9 +194,37 @@ export const Flow = ({ className }: FlowProps) => {
     });
   };
 
-  const handleConnect: OnConnect = (event) => {
-    console.log(event)
-  }
+  const getTaskNodeById = (nodeId: string) =>
+    taskNodesFromMachine.find((taskNode: any) => taskNode.ref.id === nodeId);
+
+  const handleConnect = (newConnection: Connection) => {
+
+    const sourceTaskNode = getTaskNodeById(newConnection.source || "");
+
+    const targetTaskNode = getTaskNodeById(newConnection.target || "");
+
+    const sourceTaskCustomId = sourceTaskNode.ref.state.context.customId
+    const targetTaskCustomId = targetTaskNode.ref.state.context.customId
+
+    if (sourceTaskNode && targetTaskNode) {
+      sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
+        nodeId: targetTaskCustomId,
+      });
+
+      targetTaskNode.ref.send("ADD_INCOMING_NODE", {
+        nodeId: sourceTaskCustomId,
+      });
+    }
+
+    onConnect(newConnection);
+  };
+
+  const onConnect = useCallback(
+    (connection: any) => {
+      return setEdges((eds) => addEdge({ ...connection, animated: true }, eds))
+    },
+    []
+  );
 
   const handleReactFlowInit = (reactFlowInstance: ReactFlowInstance) => {
     globalServices.workspaceService.send("SET_REACT_FLOW_INSTANCE", { value: reactFlowInstance })
