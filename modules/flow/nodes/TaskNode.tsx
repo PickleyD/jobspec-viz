@@ -143,6 +143,8 @@ export const TaskNode = ({
       existing: {
         coords: getNodePosition(),
         customId: machine.state.context.customId,
+        incomingNodes: machine.state.context.incomingNodes,
+        outgoingNodes: machine.state.context.outgoingNodes
       },
       newType: task,
     })

@@ -8,13 +8,14 @@ import ReactFlow, {
   OnConnectEnd,
   OnConnectStart,
   Node as ReactFlowNode,
-  EdgeChange
+  Connection,
+  addEdge
 } from "react-flow-renderer";
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
   import("react-flow-renderer").then((mod) => mod.Background) as
-    | DynamicOptions<{}>
-    | Loader<{}>,
+  | DynamicOptions<{}>
+  | Loader<{}>,
   { ssr: false }
 ); // disable ssr
 import {
@@ -29,7 +30,7 @@ import {
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
 import { CustomConnectionLine } from "./CustomConnectionLine";
 import { NEW_NODE_TYPE } from "../workspace/workspaceMachine";
@@ -127,23 +128,12 @@ export const Flow = ({ className }: FlowProps) => {
   }>>([])
 
   useEffect(() => {
-    const elementsToCompare = elements.map((element) => ({id: element.id, type: element.type}));
+    const elementsToCompare = elements.map((element) => ({ id: element.id, type: element.type }));
     if ((JSON.stringify(elementsToCompare.sort()) !== JSON.stringify(prevElements.sort()))) {
       setPrevElements(elementsToCompare);
 
-      // const elementIds = elements.map((element) => element.id);
-
       // Sync up flow nodes with our machine state
-      setNodes((nds) =>
-        elements
-        // nds
-        //   .filter((node) => elementIds.includes(node.id))
-        //   .concat(
-        //     elements.filter(
-        //       (element) => !nds.map((node) => node.id).includes(element.id)
-        //     )
-        //   )
-      );
+      setNodes((nds) => elements);
     }
   }, [elements]);
 
@@ -164,7 +154,7 @@ export const Flow = ({ className }: FlowProps) => {
     newNodeType?: NEW_NODE_TYPE,
     fromHandleId?: string
   ) => {
-    globalServices.workspaceService.send("NEW_TASK_NODE.ADD", {
+    globalServices.workspaceService.send("ADD_TASK_NODE", {
       options: {
         initialCoords,
         taskType,
@@ -181,6 +171,13 @@ export const Flow = ({ className }: FlowProps) => {
   };
 
   const handleConnectEnd: OnConnectEnd = (event) => {
+
+    // @ts-ignore
+    const toExistingNodeId = event?.target?.dataset?.nodeid
+
+    // If the connection was dragged to an existing node's handle we let the onConnect handler deal with it
+    if (toExistingNodeId) return;
+
     const viewport = reactFlowInstance?.getViewport() || {
       x: 0,
       y: 0,
@@ -197,8 +194,40 @@ export const Flow = ({ className }: FlowProps) => {
     });
   };
 
+  const getTaskNodeById = (nodeId: string) =>
+    taskNodesFromMachine.find((taskNode: any) => taskNode.ref.id === nodeId);
+
+  const handleConnect = (newConnection: Connection) => {
+
+    const sourceTaskNode = getTaskNodeById(newConnection.source || "");
+
+    const targetTaskNode = getTaskNodeById(newConnection.target || "");
+
+    const sourceTaskCustomId = sourceTaskNode.ref.state.context.customId
+    const targetTaskCustomId = targetTaskNode.ref.state.context.customId
+
+    if (sourceTaskNode && targetTaskNode) {
+      sourceTaskNode.ref.send("ADD_OUTGOING_NODE", {
+        nodeId: targetTaskCustomId,
+      });
+
+      targetTaskNode.ref.send("ADD_INCOMING_NODE", {
+        nodeId: sourceTaskCustomId,
+      });
+    }
+
+    onConnect(newConnection);
+  };
+
+  const onConnect = useCallback(
+    (connection: any) => {
+      return setEdges((eds) => addEdge({ ...connection, animated: true }, eds))
+    },
+    []
+  );
+
   const handleReactFlowInit = (reactFlowInstance: ReactFlowInstance) => {
-    globalServices.workspaceService.send("SET_REACT_FLOW_INSTANCE", { value: reactFlowInstance})
+    globalServices.workspaceService.send("SET_REACT_FLOW_INSTANCE", { value: reactFlowInstance })
   }
 
   const handleNodeDragStop = (event: React.MouseEvent, node: ReactFlowNode) => {
@@ -236,6 +265,7 @@ export const Flow = ({ className }: FlowProps) => {
           connectionLineStyle={{ strokeWidth: 4 }}
           onConnectStart={handleConnectStart}
           onConnectEnd={handleConnectEnd}
+          onConnect={handleConnect}
           connectionLineComponent={CustomConnectionLine}
           fitView
           fitViewOptions={{
