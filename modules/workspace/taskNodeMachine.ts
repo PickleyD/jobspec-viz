@@ -1,5 +1,6 @@
 import { isAddress } from "ethers/lib/utils";
 import { createMachine, assign } from "xstate";
+import { sendParent } from "xstate/lib/actions";
 
 export type XYCoords = {
   x: number;
@@ -21,7 +22,7 @@ type TaskNodeEvent =
   | { type: "SET_CUSTOM_ID"; value: string }
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
   | { type: "UPDATE_COORDS"; value: XYCoords }
-  | { type: "SET_PENDING_EXEC" }
+  | { type: "SET_PENDING_RUN" }
   | { type: "TRY_RUN_TASK" };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
@@ -36,6 +37,7 @@ interface TaskNodeContext {
   toml: Array<string>;
   taskSpecific: any;
   isValid: boolean;
+  runResult: any;
 }
 
 const defaultContext: TaskNodeContext = {
@@ -46,7 +48,8 @@ const defaultContext: TaskNodeContext = {
   outgoingNodes: [],
   toml: [],
   taskSpecific: {},
-  isValid: false
+  isValid: false,
+  runResult: undefined
 };
 
 const generateToml = (context: TaskNodeContext) => {
@@ -227,19 +230,44 @@ export const createTaskNodeMachine = (
       states: {
         idle: {
           on: {
-            SET_PENDING_EXEC: {
-              target: "pendingExec"
+            SET_PENDING_RUN: {
+              target: "pendingRun"
             }
           }
         },
-        pendingExec: {
+        pendingRun: {
           on: {
             TRY_RUN_TASK: {
-              target: "processing"
+              target: "running"
             }
           }
         },
-        processing: {}
+        running: {
+          invoke: {
+            src: "runTask",
+            id: "runTask",
+            onDone: {
+              target: "success",
+              actions: [
+                assign((_, event) => ({
+                  runResult: event.data
+                })),
+                sendParent((context, event) => {
+                  console.log("here")
+                  console.log(event)
+                  return {
+                  value: event.data,
+                  // TODO - use non-custom ID to avoid having to update this
+                  nodeId: context.customId,
+                  type: "STORE_TASK_RUN_RESULT"
+                }})
+              ]
+            },
+            onError: { target: "error" }
+          }
+        },
+        success: {},
+        error: {}
       },
       on: {
         ADD_INCOMING_NODE: {
@@ -337,8 +365,32 @@ export const createTaskNodeMachine = (
           isValid: (context, event) => validateTask(context)
         })
       },
+      services: {
+        runTask: (context, event) => {
+          return fetch("/api/task", {
+            method: "POST",
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+              {
+                id: "task-0",
+                name: "http",
+                inputs64: [],
+                options: {
+                  method: "GET",
+                  url: "https://reqres.in/api/users?page=2"
+                }
+              }
+            )
+          })
+            .then(res => res.json())
+            // .then(console.log)
+        }
+      }
       // guards: {
-      //   parentsExecCompleted: (context, event) => {
+      //   parentsRunSuccessful: (context, event) => {
       //     return context.incomingNodes.length === 0
       //   }
       // }

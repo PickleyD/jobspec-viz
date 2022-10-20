@@ -15,11 +15,11 @@ const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
 const isIdleSelector = (state: any) => {
   return state.matches('idle');
 };
-const isPendingExecutionSelector = (state: any) => {
-  return state.matches('pendingExec');
+const isPendingRunSelector = (state: any) => {
+  return state.matches('pendingRun');
 };
-const isProcessingSelector = (state: any) => {
-  return state.matches('processing');
+const isRunningSelector = (state: any) => {
+  return state.matches('running');
 };
 
 type TaskNodeProps = NodeProps & {
@@ -37,8 +37,8 @@ export const TaskNode = ({
   const { machine, deletable } = data;
 
   const isIdle = useSelector(machine, isIdleSelector)
-  const isProcessing = useSelector(machine, isProcessingSelector)
-  const isPendingExecution = useSelector(machine, isPendingExecutionSelector)
+  const isRunning = useSelector(machine, isRunningSelector)
+  const isPendingRun = useSelector(machine, isPendingRunSelector)
 
   const [prevCustomId, setPrevCustomId] = useState<string>();
   const customId = useSelector(machine, customIdSelector);
@@ -161,11 +161,11 @@ export const TaskNode = ({
   return (
     // width divisible by grid snap size
     <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
-      {isPendingExecution && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
+      {isPendingRun && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
         <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-focus via-secondary to-secondary-focus"></div>
       </div>
       }
-      {isProcessing && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
+      {isRunning && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
         <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-base-100 to-secondary"></div>
       </div>
       }
@@ -182,7 +182,7 @@ export const TaskNode = ({
           <div className="absolute top-0 right-0 bottom-0 left-0 transparent z-20">
             <div className="absolute top-0 right-0 bottom-0 left-0 bg-base-100 opacity-50 rounded-md" />
             {
-              isPendingExecution && <div className="relative w-full h-full p-6 flex items-end justify-center">
+              isPendingRun && <div className="relative w-full h-full p-6 flex items-end justify-center">
                 <button
                   onClick={handleTaskRun}
                   className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-800 hover:text-black"

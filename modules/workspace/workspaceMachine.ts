@@ -49,7 +49,8 @@ type WorkspaceEvent =
   }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
   | { type: "CONNECTION_END"; initialCoords: XYCoords }
-  | { type: "ENABLE_TEST_MODE" };
+  | { type: "ENABLE_TEST_MODE" }
+  | { type: "STORE_TASK_RUN_RESULT"; nodeId: string, value: any; };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -62,6 +63,12 @@ interface WorkspaceContext {
   totalNodes: number;
   isConnecting: boolean;
   connectionParams: OnConnectStartParams;
+  taskRunResults: TaskRunResult[];
+}
+
+type TaskRunResult = {
+  id: string;
+  result: any;
 }
 
 type Nodes = {
@@ -155,6 +162,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       },
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
+      taskRunResults: []
     },
     on: {
       "SET_REACT_FLOW_INSTANCE": {
@@ -331,7 +339,17 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       ENABLE_TEST_MODE: {
         actions: (context, event) => context.nodes.tasks.forEach(task => {
           if (task.ref.state.context.incomingNodes.length === 0) {
-            task.ref.send("SET_PENDING_EXEC")
+            task.ref.send("SET_PENDING_RUN")
+          }
+        })
+      },
+      STORE_TASK_RUN_RESULT: {
+        actions: assign((context, event) => {
+          console.log("STORE_TASK_RUN_RESULT")
+          console.log(event)
+
+          return {
+            taskRunResults: [...context.taskRunResults, { id: event.nodeId, result: event.value }]
           }
         })
       }
