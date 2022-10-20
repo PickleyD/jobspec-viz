@@ -216,15 +216,13 @@ export const Flow = ({ className }: FlowProps) => {
       });
     }
 
-    onConnect(newConnection);
+    globalServices.workspaceService.send("ADD_NEW_EDGE", {
+      sourceId: newConnection.source,
+      targetId: newConnection.target,
+      sourceCustomId: sourceTaskCustomId,
+      targetCustomId: targetTaskCustomId
+    })
   };
-
-  const onConnect = useCallback(
-    (connection: any) => {
-      return setEdges((eds) => addEdge({ ...connection, animated: true }, eds))
-    },
-    []
-  );
 
   const handleReactFlowInit = (reactFlowInstance: ReactFlowInstance) => {
     globalServices.workspaceService.send("SET_REACT_FLOW_INSTANCE", { value: reactFlowInstance })

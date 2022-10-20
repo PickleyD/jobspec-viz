@@ -229,6 +229,7 @@ export const createTaskNodeMachine = (
       initial: "idle",
       states: {
         idle: {
+          entry: ["revalidateTask"],
           on: {
             SET_PENDING_RUN: {
               target: "pendingRun"
@@ -252,15 +253,11 @@ export const createTaskNodeMachine = (
                 assign((_, event) => ({
                   runResult: event.data
                 })),
-                sendParent((context, event) => {
-                  console.log("here")
-                  console.log(event)
-                  return {
+                sendParent((context, event) => ({
                   value: event.data,
-                  // TODO - use non-custom ID to avoid having to update this
                   nodeId: context.customId,
                   type: "STORE_TASK_RUN_RESULT"
-                }})
+                }))
               ]
             },
             onError: { target: "error" }
@@ -386,7 +383,6 @@ export const createTaskNodeMachine = (
             )
           })
             .then(res => res.json())
-            // .then(console.log)
         }
       }
       // guards: {
