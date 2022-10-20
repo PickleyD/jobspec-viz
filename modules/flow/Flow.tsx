@@ -217,10 +217,12 @@ export const Flow = ({ className }: FlowProps) => {
     }
 
     globalServices.workspaceService.send("ADD_NEW_EDGE", {
-      sourceId: newConnection.source,
-      targetId: newConnection.target,
-      sourceCustomId: sourceTaskCustomId,
-      targetCustomId: targetTaskCustomId
+      newEdge: {
+        source: newConnection.source,
+        target: newConnection.target,
+        sourceCustomId: sourceTaskCustomId,
+        targetCustomId: targetTaskCustomId
+      }
     })
   };
 

@@ -17,6 +17,7 @@ type TaskNodeEvent =
   | { type: "ADD_INCOMING_NODE"; nodeId: string }
   | { type: "ADD_OUTGOING_NODE"; nodeId: string }
   | { type: "UPDATE_INCOMING_NODE"; nodeId: string; prevNodeId: string; }
+  | { type: "UPDATE_OUTGOING_NODE"; nodeId: string; prevNodeId: string; }
   | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
   | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
   | { type: "SET_CUSTOM_ID"; value: string }
@@ -318,6 +319,16 @@ export const createTaskNodeMachine = (
             assign({
               incomingNodes: (context, event) =>
                 context.incomingNodes.map(incomingNode => incomingNode === event.prevNodeId ? event.nodeId : incomingNode)
+            }),
+            "regenerateToml",
+            "revalidateTask"
+          ]
+        },
+        UPDATE_OUTGOING_NODE: {
+          actions: [
+            assign({
+              outgoingNodes: (context, event) =>
+                context.outgoingNodes.map(outgoingNode => outgoingNode === event.prevNodeId ? event.nodeId : outgoingNode)
             }),
             "regenerateToml",
             "revalidateTask"

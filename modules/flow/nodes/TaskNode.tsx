@@ -12,6 +12,7 @@ const nodesSelector = (state: any) => state.context.nodes;
 
 const customIdSelector = (state: any) => state.context.customId;
 const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
+const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const isIdleSelector = (state: any) => {
   return state.matches('idle');
 };
@@ -43,6 +44,7 @@ export const TaskNode = ({
   const [prevCustomId, setPrevCustomId] = useState<string>();
   const customId = useSelector(machine, customIdSelector);
   const outgoingNodeIds = useSelector(machine, outgoingNodesSelector);
+  const incomingNodeIds = useSelector(machine, incomingNodesSelector);
 
   const globalServices = useContext(GlobalStateContext);
   const nodesFromMachine = useSelector(
@@ -87,12 +89,24 @@ export const TaskNode = ({
     );
 
   const updateExistingConnections = () => {
+
     const outgoingNodes = outgoingNodeIds.map((nodeId: string) =>
       getTaskNodeByCustomId(nodeId)
     );
 
     outgoingNodes.map((outgoingNode: any) => {
       outgoingNode?.ref?.send("UPDATE_INCOMING_NODE", {
+        nodeId: customId,
+        prevNodeId: prevCustomId,
+      });
+    });
+
+    const incomingNodes = incomingNodeIds.map((nodeId: string) =>
+      getTaskNodeByCustomId(nodeId)
+    )
+
+    incomingNodes.map((incomingNode: any) => {
+      incomingNode?.ref?.send("UPDATE_OUTGOING_NODE", {
         nodeId: customId,
         prevNodeId: prevCustomId,
       });
