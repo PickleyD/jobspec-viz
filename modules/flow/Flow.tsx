@@ -33,6 +33,7 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
 import { CustomConnectionLine } from "./CustomConnectionLine";
+import { CustomEdge } from "./CustomEdge";
 import { NEW_NODE_TYPE } from "../workspace/workspaceMachine";
 
 const taskNodesSelector = (state: any) => state.context.nodes.tasks;
@@ -141,7 +142,7 @@ export const Flow = ({ className }: FlowProps) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
-    setEdges(edgesFromMachine);
+    setEdges(edgesFromMachine.map((edge: any) => ({ type: "custom", ...edge })));
   }, [edgesFromMachine]);
 
   useEffect(() => {
@@ -249,6 +250,10 @@ export const Flow = ({ className }: FlowProps) => {
     []
   );
 
+  const edgeTypes = {
+    custom: CustomEdge,
+  };
+
   return (
     <ReactFlowProvider>
       <div className={topLevelStyles}>
@@ -257,6 +262,7 @@ export const Flow = ({ className }: FlowProps) => {
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           snapToGrid={true}
           snapGrid={[15, 15]}
           onNodeDragStop={handleNodeDragStop}
