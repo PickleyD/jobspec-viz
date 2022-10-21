@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   ConnectionLineComponentProps,
   getBezierPath,
   Position,
 } from "react-flow-renderer";
 import { snapToGrid, NODE_WIDTH } from "./Flow";
+import { useSelector } from "@xstate/react";
+import { GlobalStateContext } from "../../context/GlobalStateContext";
+import { useEffect } from "react";
 
 const PLACEHOLDER_HEIGHT = 100;
 const PLACEHOLDER_RADIUS = 8;
 const PLACEHOLDER_STROKE_WIDTH = 4;
+
+const fromNodeTaskRunResultSelector = (state: any, fromNodeId?: string) => {
+  if (!fromNodeId) return
+
+  const fromNodeTaskMachine = state.context.nodes.tasks.find((task: any) => task.ref.id === fromNodeId)?.ref; 
+
+  return fromNodeTaskMachine?.state.context.runResult
+}
 
 export const CustomConnectionLine = ({
   sourceX,
@@ -18,7 +29,20 @@ export const CustomConnectionLine = ({
   targetY,
   targetPosition,
   fromHandle,
+  fromNode
 }: ConnectionLineComponentProps) => {
+
+  const globalServices = useContext(GlobalStateContext);
+
+  const fromNodeTaskRunResult = useSelector(
+    globalServices.workspaceService,
+    (state: any) => fromNodeTaskRunResultSelector(state, fromNode?.id)
+  );
+
+  useEffect(() => {
+    console.log(fromNodeTaskRunResult)
+  }, [fromNodeTaskRunResult])
+
   // If fromHandle.position is bottom this means a connection is being drawn from the bottom of a node
   const isForwardsConnection = fromHandle?.position === Position.Bottom;
 
