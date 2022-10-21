@@ -250,9 +250,12 @@ export const Flow = ({ className }: FlowProps) => {
     []
   );
 
-  const edgeTypes = {
-    custom: CustomEdge,
-  };
+  const edgeTypes = useMemo(
+    () => ({
+      custom: CustomEdge,
+    }),
+    []
+  );
 
   return (
     <ReactFlowProvider>
