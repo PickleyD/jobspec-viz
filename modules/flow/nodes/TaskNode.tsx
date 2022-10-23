@@ -6,7 +6,7 @@ import { TrashIcon } from "@heroicons/react/24/solid";
 import { Squares2X2Icon, XMarkIcon, PlayIcon } from "@heroicons/react/24/outline";
 import { TASK_TYPE, XYCoords } from "../../workspace/taskNodeMachine";
 import { TaskSelector } from "../taskSelector/TaskSelector";
-import { Popover, Transition } from "@headlessui/react"
+import { Popover } from "../../../components";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -255,40 +255,14 @@ export const TaskNode = ({
         <div className="flex flex-row items-center gap-2">
           <p className="text-xl font-bold">{data.type}</p>
           <div className="relative flex flex-col items-center">
-            <Popover>
-              {({ open }) => (
-                <div className="relative flex flex-col items-center">
-                  <Popover.Button className="focus:outline-none">
-                    <label
-                      tabIndex={0}
-                      className={`border-gray-800 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
-                    >
-                      <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
-                      <XMarkIcon className="swap-on h-4 w-4 text-white" />
-                    </label>
-                  </Popover.Button>
-                  <Transition
-                    className="z-10 w-fit absolute top-5 z-10"
-                    enter="transition duration-100 ease-out"
-                    enterFrom="transform scale-95 opacity-0"
-                    enterTo="transform scale-100 opacity-100"
-                    leave="transition duration-75 ease-out"
-                    leaveFrom="transform scale-100 opacity-100"
-                    leaveTo="transform scale-95 opacity-0"
-                  >
-                    <Popover.Panel className="flex flex-col items-center">
-                      <svg width="10" height="10" viewBox="0 0 10 10" className="fill-gray-700">
-                        <polygon points="0,10 5,5 10,10" />
-                      </svg>
-                      <div className={`bg-base-300 rounded-lg border border-gray-700`}>
-                        <TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />
-                      </div>
-                    </Popover.Panel>
-                  </Transition>
-                </div>
-              )}
-
-            </Popover>
+            <Popover label={(open) => <label
+              tabIndex={0}
+              className={`border-gray-800 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+            >
+              <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
+              <XMarkIcon className="swap-on h-4 w-4 text-white" />
+            </label>}
+              content={<TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />} />
           </div>
         </div>
         <div className="form-control w-full max-w-xs">

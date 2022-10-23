@@ -3,6 +3,8 @@ import { EdgeProps, getBezierEdgeCenter, getBezierPath } from 'react-flow-render
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useEffect } from "react";
+import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Popover } from '../../components';
 
 const sourceTaskRunResultSelector = (state: any, sourceId?: string) => {
     if (!sourceId) return
@@ -12,7 +14,7 @@ const sourceTaskRunResultSelector = (state: any, sourceId?: string) => {
     return fromNodeTaskMachine?.state.context.runResult
 }
 
-const foreignObjectSize = 30;
+const foreignObjectSize = 100;
 
 const onEdgeClick = (evt: any, id: string) => {
     evt.stopPropagation();
@@ -74,10 +76,15 @@ export const CustomEdge = ({
                             width={foreignObjectSize}
                             height={foreignObjectSize}
                             transform={`translate(-${foreignObjectSize / 2} -${foreignObjectSize / 2})`}>
-                            <div className="h-full w-full flex items-center justify-center bg-secondary rounded-full">
-                                <button className="edgebutton" onClick={(event) => onEdgeClick(event, id)}>
-                                    ×
-                                </button>
+                            <div className="h-full w-full flex items-center justify-center">
+                                <Popover label={(open) => <label
+                                    tabIndex={0}
+                                    className={`shadow-widget border-gray-800 border-2 focus:border-2 fous:border-secondary hover:border-2 hover:border-secondary focus:border-secondary bg-base-100 h-8 w-8 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+                                >
+                                    <EyeIcon className="swap-off h-5 w-5 text-white" />
+                                    <XMarkIcon className="swap-on h-5 w-5 text-white" />
+                                </label>}
+                                    content={<div className="max-w-sm p-4">the content</div>} />
                             </div>
                         </foreignObject>
                         <animateMotion id="motion" rotate="0" begin="0s" dur="500ms"
@@ -85,8 +92,8 @@ export const CustomEdge = ({
                             <mpath href={`#${id}`} />
                         </animateMotion>
                     </g>
-                </svg>}
-            </svg>
+                </svg >}
+            </svg >
         </>
     );
 }

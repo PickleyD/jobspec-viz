@@ -11,6 +11,7 @@
     "cypress:run": "cypress run"
   },
   "dependencies": {
+    "@headlessui-float/react": "^0.10.0",
     "@headlessui/react": "^1.7.3",
     "@headlessui/tailwindcss": "^0.1.1",
     "@heroicons/react": "^2.0.11",
