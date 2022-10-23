@@ -8,6 +8,14 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        'success-light': "#3ddd78",
+        'success-dark': "#1a9a49",
+        'error-light': "#ef4444",
+        'error-dark': "#bd1010",
+        'secondary-light': "#f7b13c",
+        'secondary-dark': "#c57f08"
+      },
       animation: {
         'spin-slow': 'spin 3s linear infinite',
       },
@@ -47,7 +55,7 @@ module.exports = {
           info: "#3ABFF8",
           success: "#22c55e",
           warning: "#FBBD23",
-          error: "#ef4444",
+          error: "#eb1515",
         },
       },
     ],

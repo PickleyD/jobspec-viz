@@ -22,6 +22,12 @@ const isPendingRunSelector = (state: any) => {
 const isRunningSelector = (state: any) => {
   return state.matches('running');
 };
+const isSuccessSelector = (state: any) => {
+  return state.matches('success');
+};
+const isErrorSelector = (state: any) => {
+  return state.matches('error');
+};
 
 type TaskNodeProps = NodeProps & {
   useDefaultHandles?: boolean;
@@ -40,6 +46,8 @@ export const TaskNode = ({
   const isIdle = useSelector(machine, isIdleSelector)
   const isRunning = useSelector(machine, isRunningSelector)
   const isPendingRun = useSelector(machine, isPendingRunSelector)
+  const isSuccess = useSelector(machine, isSuccessSelector)
+  const isError = useSelector(machine, isErrorSelector)
 
   const [prevCustomId, setPrevCustomId] = useState<string>();
   const customId = useSelector(machine, customIdSelector);
@@ -176,11 +184,19 @@ export const TaskNode = ({
     // width divisible by grid snap size
     <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
       {isPendingRun && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
-        <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-focus via-secondary to-secondary-focus"></div>
+        <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-light via-secondary via-secondary-dark via-secondary to-secondary-light"></div>
       </div>
       }
       {isRunning && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
         <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-base-100 to-secondary"></div>
+      </div>
+      }
+      {isSuccess && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
+        <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-success-light via-success via-success-dark via-success to-success-light"></div>
+      </div>
+      }
+      {isError && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
+        <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-error-light via-error via-error-dark via-error to-error-light"></div>
       </div>
       }
       <div className="relative w-full h-full p-3 bg-base-100 rounded-md z-10">
