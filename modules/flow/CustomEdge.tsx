@@ -75,7 +75,7 @@ export const CustomEdge = ({
                             width={foreignObjectSize}
                             height={foreignObjectSize}
                             transform={`translate(-${foreignObjectSize / 2} -${foreignObjectSize / 2})`}>
-                            <div xmlns="http://www.w3.org/1999/xhtml" className="h-full w-full flex items-center justify-center bg-secondary rounded-full">
+                            <div data-xmlns="http://www.w3.org/1999/xhtml" className="h-full w-full flex items-center justify-center bg-secondary rounded-full">
                                 <button className="edgebutton" onClick={(event) => onEdgeClick(event, id)}>
                                     ×
                                 </button>
