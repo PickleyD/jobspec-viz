@@ -12,6 +12,7 @@ import {
   CodeBracketIcon,
   QuestionMarkCircleIcon,
   BookOpenIcon,
+  BeakerIcon
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { GlobalStateContext } from "../context/GlobalStateContext";
@@ -87,7 +88,6 @@ const Home: NextPage = () => {
         </div>
       )} */}
 
-      {/* <DndProvider backend={HTML5Backend}> */}
       <main className="w-full h-full relative">
         <div className="w-full h-full fixed z-0">
           <Flow />
@@ -134,12 +134,17 @@ const Home: NextPage = () => {
             <LayoutGroup>
               <Configurator className="pointer-events-none w-fit" />
               <Codegen className="pointer-events-none w-fit" />
-              <div className="pointer-events-auto h-8 w-8 bg-red-500 cursor-pointer" onClick={handleToggleTestMode}>test mode</div>
+              <label
+                tabIndex={0}
+                onClick={handleToggleTestMode}
+                className={`pointer-events-auto z-10 btn border-0 hover:border-2 hover:border-secondary btn-circle`}
+              >
+                <BeakerIcon className="fill-current h-5 w-5" />
+              </label>
             </LayoutGroup>
           </div>
         </div>
       </main>
-      {/* </DndProvider> */}
     </div>
   );
 };
