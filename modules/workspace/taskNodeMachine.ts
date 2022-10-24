@@ -24,7 +24,8 @@ type TaskNodeEvent =
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
   | { type: "UPDATE_COORDS"; value: XYCoords }
   | { type: "SET_PENDING_RUN" }
-  | { type: "TRY_RUN_TASK" };
+  | { type: "TRY_RUN_TASK" }
+  | { type: "RESET" };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
@@ -362,6 +363,12 @@ export const createTaskNodeMachine = (
             })
           ],
         },
+        RESET: {
+          target: "idle",
+          actions: assign((_, event) => ({
+            runResult: undefined
+          }))
+        }
       },
     },
     {

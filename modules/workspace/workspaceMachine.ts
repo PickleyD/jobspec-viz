@@ -49,7 +49,7 @@ type WorkspaceEvent =
   }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
   | { type: "CONNECTION_END"; initialCoords: XYCoords }
-  | { type: "ENABLE_TEST_MODE" }
+  | { type: "TOGGLE_TEST_MODE" }
   | { type: "STORE_TASK_RUN_RESULT"; nodeId: string, value: any; }
   | { type: "ADD_NEW_EDGE"; newEdge: Omit<CustomEdge, "id"> };
 
@@ -66,6 +66,7 @@ interface WorkspaceContext {
   isConnecting: boolean;
   connectionParams: OnConnectStartParams;
   taskRunResults: TaskRunResult[];
+  testMode: boolean;
 }
 
 type TaskRunResult = {
@@ -165,7 +166,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       },
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
-      taskRunResults: []
+      taskRunResults: [],
+      testMode: false
     },
     on: {
       "SET_REACT_FLOW_INSTANCE": {
@@ -348,12 +350,23 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           "addTaskNode",
         ],
       },
-      ENABLE_TEST_MODE: {
-        actions: (context, event) => context.nodes.tasks.forEach(task => {
-          if (task.ref.state.context.incomingNodes.length === 0) {
-            task.ref.send("SET_PENDING_RUN")
-          }
-        })
+      TOGGLE_TEST_MODE: {
+        actions: [
+          (context, event) => context.testMode ?
+            context.nodes.tasks.forEach(task => {
+              task.ref.send("RESET")
+            })
+            :
+            context.nodes.tasks.forEach(task => {
+              if (task.ref.state.context.incomingNodes.length === 0) {
+                task.ref.send("SET_PENDING_RUN")
+              }
+            }),
+          assign((context, event) => ({
+            testMode: !context.testMode,
+            taskRunResults: []
+          })),
+        ]
       },
       STORE_TASK_RUN_RESULT: {
         actions: assign((context, event) => {

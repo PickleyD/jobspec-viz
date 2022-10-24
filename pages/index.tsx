@@ -22,8 +22,8 @@ const Home: NextPage = () => {
 
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
 
-  const handleEnterTestMode = () => {
-    return globalServices.workspaceService.send("ENABLE_TEST_MODE")
+  const handleToggleTestMode = () => {
+    return globalServices.workspaceService.send("TOGGLE_TEST_MODE")
   }
 
   return (
@@ -134,7 +134,7 @@ const Home: NextPage = () => {
             <LayoutGroup>
               <Configurator className="pointer-events-none w-fit" />
               <Codegen className="pointer-events-none w-fit" />
-              <div className="pointer-events-auto h-8 w-8 bg-red-500 cursor-pointer" onClick={handleEnterTestMode}>test mode</div>
+              <div className="pointer-events-auto h-8 w-8 bg-red-500 cursor-pointer" onClick={handleToggleTestMode}>test mode</div>
             </LayoutGroup>
           </div>
         </div>
