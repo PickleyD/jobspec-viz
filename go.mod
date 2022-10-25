@@ -5,7 +5,8 @@ go 1.18
 require (
 	github.com/ethereum/go-ethereum v1.10.25
 	github.com/golang/gddo v0.0.0-20210115222349-20d68f94ee1f
-	github.com/pickleyd/chainlink v1.8.2-0.20221010182224-15cb6a8eed0a
+	github.com/pickleyd/chainlink v1.8.2-0.20221025131401-5dea1c36539e
+	github.com/shopspring/decimal v1.3.1
 )
 
 require (
@@ -56,7 +57,6 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.22.9 // indirect
-	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.9.2 // indirect
@@ -78,6 +78,7 @@ require (
 	golang.org/x/exp v0.0.0-20221006183845-316c7553db56 // indirect
 	golang.org/x/sys v0.0.0-20221010170243-090e33056c14 // indirect
 	golang.org/x/text v0.3.7 // indirect
+	gonum.org/v1/gonum v0.12.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/guregu/null.v4 v4.0.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
