@@ -13,9 +13,14 @@ type Input struct {
 	Spec string
 }
 
+type TaskDependency struct {
+	Id              string `json:"id"`
+	PropagateResult bool   `json:"propagateResult"`
+}
+
 type Task struct {
-	Id     string   `json:"id"`
-	Inputs []string `json:"inputs"`
+	Id     string           `json:"id"`
+	Inputs []TaskDependency `json:"inputs"`
 }
 
 type Response struct {
@@ -37,10 +42,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	for _, element := range parsed.Tasks {
 		task := Task{
 			Id:     element.DotID(),
-			Inputs: []string{},
+			Inputs: []TaskDependency{},
 		}
 		for _, input := range element.Inputs() {
-			task.Inputs = append(task.Inputs, input.InputTask.DotID())
+			task.Inputs = append(task.Inputs, TaskDependency{
+				Id:              input.InputTask.DotID(),
+				PropagateResult: input.PropagateResult,
+			})
 		}
 		taskArr = append(taskArr, task)
 	}
