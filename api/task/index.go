@@ -24,11 +24,11 @@ type Task struct {
 }
 
 type Response struct {
-	Value  string
-	Val64  string
-	Vars   map[string]interface{}
-	Vars64 string
-	Error  string
+	Value  string                 `json:"value"`
+	Val64  string                 `json:"val64"`
+	Vars   map[string]interface{} `json:"vars"`
+	Vars64 string                 `json:"vars64"`
+	Error  string                 `json:"error"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {

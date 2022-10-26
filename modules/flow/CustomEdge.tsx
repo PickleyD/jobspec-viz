@@ -74,7 +74,7 @@ export const CustomEdge = ({
                                 <EyeIcon className="swap-off h-5 w-5 text-white" />
                                 <XMarkIcon className="swap-on h-5 w-5 text-white" />
                             </label>}
-                                content={<VarsDisplay vars={sourceTaskRunResult.Vars}/>} />
+                                content={<VarsDisplay vars={sourceTaskRunResult.vars}/>} />
                         </div>
                     </foreignObject>
                     <animateMotion id="motion" rotate="0" begin="0s" dur="500ms"

@@ -29,9 +29,9 @@ type Input struct {
 }
 
 type Response struct {
-	Vars64   string
-	Inputs64 []string
-	Want64   string
+	Vars64   string   `json:"vars64"`
+	Inputs64 []string `json:"inputs64"`
+	Want64   string   `json:"want64"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {

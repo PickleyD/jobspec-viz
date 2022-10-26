@@ -14,12 +14,12 @@ type Input struct {
 }
 
 type Task struct {
-	Id     string
-	Inputs []string
+	Id     string   `json:"id"`
+	Inputs []string `json:"inputs"`
 }
 
 type Response struct {
-	Tasks []Task
+	Tasks []Task `json:"tasks"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {

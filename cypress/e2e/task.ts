@@ -19,7 +19,7 @@ export type Test = {
 export const generateTest = (test: Test, inputs64Override?: Array<string>) => {
     return handleVarsConversion(test.vars, test.inputs)
         .then((response) => {
-            return performTask(test, response.body.Vars64, inputs64Override || response.body.Inputs64)
+            return performTask(test, response.body.vars64, inputs64Override || response.body.inputs64)
         })
 }
 
@@ -60,17 +60,15 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
                 },
             ).then((varHelperResponse) => {
                 if (test.want64) {
-                    expect(taskResponse.body.Val64).to.eq(test.want64)
+                    expect(taskResponse.body.val64).to.eq(test.want64)
                 }
                 else if (test.want) {
-                    expect(taskResponse.body.Val64).to.eq(varHelperResponse.body.Want64)
+                    expect(taskResponse.body.val64).to.eq(varHelperResponse.body.want64)
                 }
 
                 if (test.expectError) {
-                    expect(taskResponse.body.Error).to.not.empty
+                    expect(taskResponse.body.error).to.not.empty
                 }
-
-                // expect(taskResponse.body.Vars64).to.eq(varHelperResponse.body.Vars64)
 
                 return taskResponse.body
             })

@@ -18,7 +18,7 @@ const tasks: Array<Test> = [
 
 const recursiveExecute = (tasks: Array<Test>, currInput: Array<any> = []): any => {
     return generateTest(tasks[0], currInput).then(response => {
-        tasks.length > 1 && recursiveExecute(tasks.slice(1), [response.Val64])
+        tasks.length > 1 && recursiveExecute(tasks.slice(1), [response.val64])
     })
 }
 
