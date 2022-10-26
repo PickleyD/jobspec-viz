@@ -25,7 +25,8 @@ type TaskNodeEvent =
   | { type: "UPDATE_COORDS"; value: XYCoords }
   | { type: "SET_PENDING_RUN" }
   | { type: "TRY_RUN_TASK" }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "TEST_MODE_UPDATE" };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
@@ -233,8 +234,9 @@ export const createTaskNodeMachine = (
         idle: {
           entry: ["revalidateTask"],
           on: {
-            SET_PENDING_RUN: {
-              target: "pendingRun"
+            TEST_MODE_UPDATE: {
+              target: "pendingRun",
+              cond: "hasNoIncomingNodes"
             }
           }
         },
@@ -265,8 +267,12 @@ export const createTaskNodeMachine = (
             onError: { target: "error" }
           }
         },
-        success: {},
-        error: {}
+        success: {
+          type: "final"
+        },
+        error: {
+          type: "final"
+        }
       },
       on: {
         ADD_INCOMING_NODE: {
@@ -368,7 +374,7 @@ export const createTaskNodeMachine = (
           actions: assign((_, event) => ({
             runResult: undefined
           }))
-        }
+        },
       },
     },
     {
@@ -402,12 +408,12 @@ export const createTaskNodeMachine = (
           })
             .then(res => res.json())
         }
+      },
+      guards: {
+        hasNoIncomingNodes: (context, event) => {
+          return context.incomingNodes.length === 0
+        }
       }
-      // guards: {
-      //   parentsRunSuccessful: (context, event) => {
-      //     return context.incomingNodes.length === 0
-      //   }
-      // }
     },
   );
 };

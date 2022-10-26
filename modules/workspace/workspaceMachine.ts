@@ -67,6 +67,7 @@ interface WorkspaceContext {
   connectionParams: OnConnectStartParams;
   taskRunResults: TaskRunResult[];
   testMode: boolean;
+  toml: Array<TomlLine>;
 }
 
 type TaskRunResult = {
@@ -77,6 +78,11 @@ type TaskRunResult = {
 type Nodes = {
   tasks: Array<any>;
 };
+
+type TomlLine = {
+  value: string;
+  valid?: boolean;
+}
 
 export type JOB_TYPE = "cron" | "directrequest";
 
@@ -167,7 +173,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
       taskRunResults: [],
-      testMode: false
+      testMode: false,
+      toml: []
     },
     on: {
       "SET_REACT_FLOW_INSTANCE": {
@@ -238,85 +245,104 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 ]
                 : context.edges
             }),
-            send({ type: isForwardConnection ? "ADD_OUTGOING_NODE" : "ADD_INCOMING_NODE", nodeId: newNodePresentationId }, { to: fromNodeId })
+            send({ type: isForwardConnection ? "ADD_OUTGOING_NODE" : "ADD_INCOMING_NODE", nodeId: newNodePresentationId }, { to: fromNodeId }),
+            "regenerateToml"
           ]
         })
       },
       DELETE_TASK_NODE: {
-        actions: assign({
-          nodes: (context, event) => ({
-            ...context.nodes,
-            tasks: [
-              ...context.nodes.tasks.filter(
-                (task) => task.ref.state.context.customId !== event.nodeId
+        actions: [
+          assign({
+            nodes: (context, event) => ({
+              ...context.nodes,
+              tasks: [
+                ...context.nodes.tasks.filter(
+                  (task) => task.ref.state.context.customId !== event.nodeId
+                ),
+              ],
+            }),
+            edges: (context, event) =>
+              context.edges.filter(
+                (edge) =>
+                  edge.sourceCustomId !== event.nodeId &&
+                  edge.targetCustomId !== event.nodeId
               ),
-            ],
           }),
-          edges: (context, event) =>
-            context.edges.filter(
-              (edge) =>
-                edge.sourceCustomId !== event.nodeId &&
-                edge.targetCustomId !== event.nodeId
-            ),
-        }),
+          "regenerateToml"
+        ]
       },
       REPLACE_TASK_NODE: {
-        actions: assign({
-          nodes: (context, event) => ({
-            ...context.nodes,
-            tasks: [
-              ...context.nodes.tasks.filter(
-                (task) => task.ref.state.context.customId !== event.nodeId
-              ),
-              {
-                // add a new taskNodeMachine actor with a unique name
-                ref: spawn(
-                  createTaskNodeMachine({
-                    coords: event.existing.coords,
-                    taskType: event.newType,
-                    customId: event.existing.customId,
-                    incomingNodes: event.existing.incomingNodes,
-                    outgoingNodes: event.existing.outgoingNodes
-                  }),
-                  event.nodeId
+        actions: [
+          assign({
+            nodes: (context, event) => ({
+              ...context.nodes,
+              tasks: [
+                ...context.nodes.tasks.filter(
+                  (task) => task.ref.state.context.customId !== event.nodeId
                 ),
-              },
-            ],
+                {
+                  // add a new taskNodeMachine actor with a unique name
+                  ref: spawn(
+                    createTaskNodeMachine({
+                      coords: event.existing.coords,
+                      taskType: event.newType,
+                      customId: event.existing.customId,
+                      incomingNodes: event.existing.incomingNodes,
+                      outgoingNodes: event.existing.outgoingNodes
+                    }),
+                    event.nodeId
+                  ),
+                },
+              ],
+            }),
           }),
-        }),
+          "regenerateToml"
+        ]
       },
       UPDATE_EDGES_WITH_NODE_ID: {
-        actions: assign({
-          edges: (context, event) =>
-            context.edges.map((edge) => ({
-              ...edge,
-              sourceCustomId:
-                edge.sourceCustomId === event.prevNodeId
-                  ? event.nodeId
-                  : edge.sourceCustomId,
-              targetCustomId:
-                edge.targetCustomId === event.prevNodeId
-                  ? event.nodeId
-                  : edge.targetCustomId,
-            })),
-        }),
+        actions: [
+          assign({
+            edges: (context, event) =>
+              context.edges.map((edge) => ({
+                ...edge,
+                sourceCustomId:
+                  edge.sourceCustomId === event.prevNodeId
+                    ? event.nodeId
+                    : edge.sourceCustomId,
+                targetCustomId:
+                  edge.targetCustomId === event.prevNodeId
+                    ? event.nodeId
+                    : edge.targetCustomId,
+              })),
+          }),
+          "regenerateToml"
+        ]
       },
       SET_JOB_TYPE: {
-        actions: assign({
-          type: (context, event) => event.value,
-        }),
+        actions: [
+          assign({
+            type: (context, event) => event.value,
+          }),
+          "regenerateToml"
+        ]
       },
       SET_NAME: {
-        actions: assign({
-          name: (context, event) => {
-            return event.value;
-          },
-        }),
+        actions: [
+          assign({
+            name: (context, event) => {
+              return event.value;
+            },
+          }),
+          "regenerateToml"
+        ]
       },
       SET_EXTERNAL_JOB_ID: {
-        actions: assign({
-          externalJobId: (context, event) => event.value,
-        }),
+        actions: [
+          assign({
+            externalJobId: (context, event) => event.value,
+          }),
+          "regenerateToml"
+        ]
       },
       SET_JOB_TYPE_SPECIFIC_PROPS: {
         actions: [
@@ -334,6 +360,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             },
           }),
           "validateJobTypeSpecificProps",
+          "regenerateToml"
         ],
       },
       CONNECTION_START: {
@@ -348,25 +375,26 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             isConnecting: (_context, _event) => false,
           }),
           "addTaskNode",
+          "regenerateToml"
         ],
       },
       TOGGLE_TEST_MODE: {
-        actions: [
-          (context, event) => context.testMode ?
-            context.nodes.tasks.forEach(task => {
-              task.ref.send("RESET")
-            })
-            :
-            context.nodes.tasks.forEach(task => {
-              if (task.ref.state.context.incomingNodes.length === 0) {
-                task.ref.send("SET_PENDING_RUN")
-              }
-            }),
-          assign((context, event) => ({
-            testMode: !context.testMode,
-            taskRunResults: []
-          })),
-        ]
+        // @ts-ignore
+        actions: actions.pure((context: WorkspaceContext, event) => {
+
+          const isTestMode = context.testMode
+
+          return [
+            ...context.nodes.tasks.map(task => send(
+              { type: isTestMode ? "RESET" : "TEST_MODE_UPDATE" },
+              { to: task.ref.id }
+            )),
+            assign((context, event) => ({
+              testMode: !isTestMode,
+              taskRunResults: []
+            })),
+          ]
+        })
       },
       STORE_TASK_RUN_RESULT: {
         actions: assign((context, event) => {
@@ -379,17 +407,20 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         })
       },
       ADD_NEW_EDGE: {
-        actions: assign((context, event) => {
-          const toAdd = {
-            id: `edge-${context.totalEdgesAdded}`,
-            ...event.newEdge
-          }
+        actions: [
+          assign((context, event) => {
+            const toAdd = {
+              id: `edge-${context.totalEdgesAdded}`,
+              ...event.newEdge
+            }
 
-          return {
-            edges: [...context.edges, toAdd],
-            totalEdgesAdded: context.totalEdgesAdded + 1
-          }
-        })
+            return {
+              edges: [...context.edges, toAdd],
+              totalEdgesAdded: context.totalEdgesAdded + 1
+            }
+          }),
+          "regenerateToml"
+        ]
       }
     },
   },
@@ -429,6 +460,47 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           },
         };
       }),
+      regenerateToml: assign((context, event) => {
+
+        const { type: jobType, name, externalJobId } = context
+
+        const lines: Array<TomlLine> = []
+
+        lines.push({ value: `type = "${jobType}"` }, { value: `schemaVersion = 1` })
+        name && lines.push({ value: `name = "${name}"` })
+        externalJobId && lines.push({ value: `externalJobId = "${externalJobId}"` })
+
+        switch (jobType) {
+          case "cron":
+            {
+              const { value, valid } = context.jobTypeSpecific.cron.schedule
+              lines.push({ value: `schedule = "CRON_TZ=UTC ${value}"`, valid })
+              break
+            }
+          case "directrequest":
+            {
+              const { value: contractAddress, valid: contractAddressValid } = context.jobTypeSpecific.directRequest.contractAddress
+              const { value: minContractPaymentLinkJuels, valid: minContractPaymentLinkJuelsValid } = context.jobTypeSpecific.directRequest.minContractPaymentLinkJuels
+              const { value: minIncomingConfirmations, valid: minIncomingConfirmationsValid } = context.jobTypeSpecific.directRequest.minIncomingConfirmations
+              lines.push({ value: `contractAddress = "${contractAddress}"`, valid: contractAddressValid })
+              minContractPaymentLinkJuels !== "" && lines.push({ value: `minContractPaymentLinkJuels = "${minContractPaymentLinkJuels}"`, valid: minContractPaymentLinkJuelsValid })
+              minIncomingConfirmations !== "" && lines.push({ value: `minIncomingConfirmations = ${minIncomingConfirmations}`, valid: minIncomingConfirmationsValid })
+              break
+            }
+          default:
+            break
+        }
+
+        lines.push({ value: `observationSource = """` })
+
+        lines.push({ value: `"""` })
+
+        console.log(lines.map(line => line.value).join('\n'))
+
+        return {
+          toml: lines
+        }
+      })
     },
   }
 );
