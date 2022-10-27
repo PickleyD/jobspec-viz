@@ -13,7 +13,7 @@ export type TaskNodeOptions = {
   taskType: TASK_TYPE;
 };
 
-type TaskNodeEvent =
+export type TaskNodeEvent =
   | { type: "ADD_INCOMING_NODE"; nodeId: string }
   | { type: "ADD_OUTGOING_NODE"; nodeId: string }
   | { type: "UPDATE_INCOMING_NODE"; nodeId: string; prevNodeId: string; }
@@ -31,7 +31,7 @@ type TaskNodeEvent =
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
 
-interface TaskNodeContext {
+export interface TaskNodeContext {
   customId?: string;
   coords: XYCoords;
   taskType: TASK_TYPE;
@@ -284,6 +284,7 @@ export const createTaskNodeMachine = (
               ],
             }),
             "regenerateToml",
+            sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
         },
@@ -295,7 +296,8 @@ export const createTaskNodeMachine = (
                 event.nodeId,
               ],
             }),
-            "regenerateToml"
+            "regenerateToml",
+            sendParent("REGENERATE_TOML"),
           ],
         },
         REMOVE_INCOMING_NODE: {
@@ -307,6 +309,7 @@ export const createTaskNodeMachine = (
                 ),
             }),
             "regenerateToml",
+            sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
         },
@@ -319,6 +322,7 @@ export const createTaskNodeMachine = (
                 ),
             }),
             "regenerateToml",
+            sendParent("REGENERATE_TOML"),
           ],
         },
         UPDATE_INCOMING_NODE: {
@@ -328,6 +332,7 @@ export const createTaskNodeMachine = (
                 context.incomingNodes.map(incomingNode => incomingNode === event.prevNodeId ? event.nodeId : incomingNode)
             }),
             "regenerateToml",
+            sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ]
         },
@@ -338,6 +343,7 @@ export const createTaskNodeMachine = (
                 context.outgoingNodes.map(outgoingNode => outgoingNode === event.prevNodeId ? event.nodeId : outgoingNode)
             }),
             "regenerateToml",
+            sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ]
         },
@@ -347,6 +353,7 @@ export const createTaskNodeMachine = (
               customId: (context, event) => event.value,
             }),
             "regenerateToml",
+            sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
         },
@@ -359,6 +366,7 @@ export const createTaskNodeMachine = (
               }),
             }),
             "regenerateToml",
+            sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
         },

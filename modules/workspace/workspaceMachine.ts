@@ -1,7 +1,9 @@
-import { createMachine, spawn, assign, send, actions } from "xstate";
+import { createMachine, spawn, assign, send, actions, ActorRefFrom, StateMachine } from "xstate";
 import {
   createTaskNodeMachine,
   TaskNodeOptions,
+  TaskNodeContext,
+  TaskNodeEvent,
   TASK_TYPE,
   XYCoords,
 } from "./taskNodeMachine";
@@ -51,7 +53,8 @@ type WorkspaceEvent =
   | { type: "CONNECTION_END"; initialCoords: XYCoords }
   | { type: "TOGGLE_TEST_MODE" }
   | { type: "STORE_TASK_RUN_RESULT"; nodeId: string, value: any; }
-  | { type: "ADD_NEW_EDGE"; newEdge: Omit<CustomEdge, "id"> };
+  | { type: "ADD_NEW_EDGE"; newEdge: Omit<CustomEdge, "id"> }
+  | { type: "REGENERATE_TOML" };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -76,7 +79,9 @@ type TaskRunResult = {
 }
 
 type Nodes = {
-  tasks: Array<any>;
+  tasks: Array<{
+    ref: ActorRefFrom<StateMachine<TaskNodeContext, any, TaskNodeEvent>>
+  }>;
 };
 
 type TomlLine = {
@@ -187,7 +192,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: actions.pure((context, event) => {
           const { fromHandleId, fromNodeId, newNodeType } = event.edgeDetails
 
-          const fromNodeCustomId = context.nodes.tasks.find(task => task.ref.id === fromNodeId)?.ref.state.context.customId
+          const fromNodeCustomId = context.nodes.tasks.find(task => task.ref.id === fromNodeId)?.ref.state.context.customId || ""
 
           const isFirstNode = !fromHandleId || !newNodeType
           const isForwardConnection = newNodeType === "target";
@@ -421,6 +426,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           }),
           "regenerateToml"
         ]
+      },
+      REGENERATE_TOML: {
+        actions: "regenerateToml"
       }
     },
   },
@@ -492,6 +500,95 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         }
 
         lines.push({ value: `observationSource = """` })
+
+        context.nodes.tasks.forEach(task => {
+
+          const { customId, taskType, taskSpecific, incomingNodes } = task.ref.state.context
+
+          const spacer = new Array(customId ? customId.length + 1 : 0).join(" ")
+
+          switch (taskType) {
+            case "HTTP": {
+              const processedRequestData = taskSpecific.requestData ? taskSpecific.requestData.replace(/\s/g, "").replace(/"/g, '\\\\"') : ""
+
+              lines.push(
+                { value: `${customId} [type="http"` },
+                { value: `${spacer}  method=${taskSpecific.method || "GET"}` },
+                { value: `${spacer}  url="${taskSpecific.url || ""}"` },
+                { value: `${spacer}  requestData="${processedRequestData}"]` }
+              )
+              break;
+            }
+            case "JSONPARSE": {
+              lines.push(
+                { value: `${customId} [type="jsonparse"` },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"` },
+                { value: `${spacer}  path="${taskSpecific.path || ""}"]` },
+              )
+              break;
+            }
+            case "ETHTX": {
+              lines.push(
+                { value: `${customId} [type="ethtx"` },
+                { value: `${spacer}  to="${taskSpecific.to || ""}"` },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"]` },
+              )
+              break;
+            }
+            case "SUM": {
+              lines.push(
+                { value: `${customId} [type="sum"` },
+                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>]` },
+              )
+              break;
+            }
+            case "MULTIPLY": {
+              lines.push(
+                { value: `${customId} [type="multiply"` },
+                { value: `${spacer}  input="${taskSpecific.input || ""}"` },
+                { value: `${spacer}  times="${taskSpecific.times || ""}"]` },
+              )
+              break;
+            }
+            case "DIVIDE": {
+              lines.push(
+                { value: `${customId} [type="divide"` },
+                { value: `${spacer}  input="${taskSpecific.input || ""}"` },
+                { value: `${spacer}  divisor="${taskSpecific.divisor || ""}"` },
+                { value: `${spacer}  precision="${taskSpecific.precision || ""}"]` },
+              )
+              break;
+            }
+            case "ANY": {
+              lines.push(
+                { value: `${customId} [type="any"` },
+              )
+              break;
+            }
+            case "MEAN": {
+              lines.push(
+                { value: `${customId} [type="mean"` },
+                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>` },
+                { value: `${spacer}  precision=${taskSpecific.precision || 2}]` },
+              )
+              break;
+            }
+            case "MODE": {
+              lines.push(
+                { value: `${customId} [type="mode"` },
+                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>` },
+              )
+              break;
+            }
+            case "MEDIAN": {
+              lines.push(
+                { value: `${customId} [type="median"` },
+                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>` },
+              )
+              break;
+            }
+          }
+        })
 
         lines.push({ value: `"""` })
 
