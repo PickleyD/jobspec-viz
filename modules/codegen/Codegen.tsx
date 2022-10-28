@@ -14,9 +14,9 @@ export interface CodegenProps {
 
 const nodesSelector = (state: any) => state.context.nodes;
 const edgesSelector = (state: any) => state.context.edges;
-const jobTypeSelector = (state: any) => state.context.type
-const nameSelector = (state: any) => state.context.name
-const externalJobIdSelector = (state: any) => state.context.externalJobId
+const jobTypeSelector = (state: any) => state.context.type;
+const nameSelector = (state: any) => state.context.name;
+const externalJobIdSelector = (state: any) => state.context.externalJobId;
 
 export const Codegen = ({ className = "" }: CodegenProps) => {
   const globalServices = useContext(GlobalStateContext);
@@ -28,18 +28,12 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     globalServices.workspaceService,
     edgesSelector
   );
-  const jobType = useSelector(
-    globalServices.workspaceService,
-    jobTypeSelector
-  )
-  const name = useSelector(
-    globalServices.workspaceService,
-    nameSelector
-  )
+  const jobType = useSelector(globalServices.workspaceService, jobTypeSelector);
+  const name = useSelector(globalServices.workspaceService, nameSelector);
   const externalJobId = useSelector(
     globalServices.workspaceService,
     externalJobIdSelector
-  )
+  );
 
   // const tasks = [
   //   ...Array.from(
@@ -65,30 +59,32 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
   const renderJobTypeSpecifics = () => {
     switch (jobType) {
       case "cron":
-        return <CronFields />
+        return <CronFields />;
       case "directrequest":
-        return <DirectRequestFields />
+        return <DirectRequestFields />;
       default:
-        return <></>
+        return <></>;
     }
-  }
+  };
 
-  const codeRef = useRef<HTMLDivElement>(null)
+  const codeRef = useRef<HTMLDivElement>(null);
 
-  const [showCheckIcon, setShowCheckIcon] = useState<boolean>(false)
+  const [showCheckIcon, setShowCheckIcon] = useState<boolean>(false);
 
   const handleCopyToClipboard = () => {
-    const selection = selectElementText(codeRef.current)
+    const selection = selectElementText(codeRef.current);
 
     // Deprecated command but does the job
-    document.execCommand("copy")
+    document.execCommand("copy");
 
-    setShowCheckIcon(true)
-    setTimeout(() => setShowCheckIcon(false), 1000)
-  }
+    setShowCheckIcon(true);
+    setTimeout(() => setShowCheckIcon(false), 1000);
+  };
 
   const selectElementText = (el: any) => {
-    let doc = window.document, sel, range;
+    let doc = window.document,
+      sel,
+      range;
     if (window.getSelection && doc.createRange) {
       sel = window.getSelection();
       range = doc.createRange();
@@ -97,74 +93,86 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
       sel?.addRange(range);
     }
 
-    return sel
-  }
+    return sel;
+  };
 
   return (
     <div className={`${className} relative transition-all ${isOpen ? "" : ""}`}>
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
-          }`}
+        className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${
+          isOpen ? "swap-active" : ""
+        }`}
       >
         <CodeBracketIcon className="swap-off fill-current h-5 w-5 text-white" />
         <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
       </label>
 
       <motion.div
-        className={`${isOpen ? "pointer-events-auto" : "pointer-events-none"
-          } overflow-hidden relative z-0 bg-base-300 rounded rounded-tr-3xl`}
+        className={`${
+          isOpen ? "pointer-events-auto" : "pointer-events-none"
+        } overflow-hidden relative z-0 bg-base-100 rounded-lg pr-2 rounded-tr-3xl`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",
           opacity: isOpen ? 1 : 0,
         }}
+        transition={{duration: .2, type: "tween"}}
         initial={false}
       >
-        <div className="mockup-code text-sm bg-base-300 max-h-80 overflow-y-auto relative" ref={codeRef}>
+        <div
+          className="mockup-code text-sm bg-base-100 relative"
+          ref={codeRef}
+        >
           <label
             onClick={handleCopyToClipboard}
             tabIndex={0}
-            className={`${showCheckIcon ? "swap-active" : ""} swap swap-rotate pointer-events-auto btn btn-circle btn-sm absolute top-2.5 left-20 hover:border hover:border-white`}
+            className={`${
+              showCheckIcon ? "swap-active" : ""
+            } swap swap-rotate pointer-events-auto btn btn-circle btn-sm absolute top-2.5 left-20 hover:border hover:border-white`}
           >
             <DocumentDuplicateIcon className="h-5 w-5 swap-off" />
             <CheckIcon className="h-5 w-5 swap-on" />
           </label>
-          <pre data-prefix=">">
-            <code>type = "{jobType}"</code>
-          </pre>
-          <pre data-prefix=">">
-            <code>schemaVersion = 1</code>
-          </pre>
-          {name && <pre data-prefix=">">
-            <code>name = "{name}"</code>
-          </pre>}
-          {externalJobId && <pre data-prefix=">">
-            <code>externalJobId = "{externalJobId}"</code>
-          </pre>}
-          {
-            renderJobTypeSpecifics()
-          }
-          <pre data-prefix=">">
-            <code>observationSource = """</code>
-          </pre>
-          {nodesFromMachine.tasks.map((taskNode: any, index: number) => (
-            <ObservationSrcTask key={index} taskNode={taskNode.ref} />
-          ))}
-          <pre data-prefix=">">
-            <code>"""</code>
-          </pre>
-          {
-            edgesFromMachine.length > 0 && <pre data-prefix=">">
-              <code></code>
+          <div className="max-h-96 max-w-3xl overflow-auto pr-6">
+            <pre data-prefix=">">
+              <code>type = "{jobType}"</code>
             </pre>
-          }
-          {
-            edgesFromMachine.map((edge: any, index: number) => <pre key={index} data-prefix=">">
-              <code>{`${edge.sourceCustomId} -> ${edge.targetCustomId}`}</code>
-            </pre>)
-          }
+            <pre data-prefix=">">
+              <code>schemaVersion = 1</code>
+            </pre>
+            {name && (
+              <pre data-prefix=">">
+                <code>name = "{name}"</code>
+              </pre>
+            )}
+            {externalJobId && (
+              <pre data-prefix=">">
+                <code>externalJobId = "{externalJobId}"</code>
+              </pre>
+            )}
+            {renderJobTypeSpecifics()}
+            <pre data-prefix=">">
+              <code>observationSource = """</code>
+            </pre>
+            {nodesFromMachine.tasks.map((taskNode: any, index: number) => (
+              <ObservationSrcTask key={index} taskNode={taskNode.ref} />
+            ))}
+            <pre data-prefix=">">
+              <code>"""</code>
+            </pre>
+            {edgesFromMachine.length > 0 && (
+              <pre data-prefix=">">
+                <code></code>
+              </pre>
+            )}
+            {edgesFromMachine.map((edge: any, index: number) => (
+              <pre key={index} data-prefix=">">
+                <code>{`${edge.sourceCustomId} -> ${edge.targetCustomId}`}</code>
+              </pre>
+            ))}
+          </div>
         </div>
       </motion.div>
     </div>

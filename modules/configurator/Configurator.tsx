@@ -57,15 +57,16 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
       <motion.div
         className={`${isOpen ? "pointer-events-auto" : "pointer-events-none"
-          } overflow-hidden relative z-0 bg-base-300 rounded rounded-tr-3xl`}
+          } overflow-hidden relative z-0 bg-base-100 rounded-lg rounded-tr-3xl pr-8`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",
           opacity: isOpen ? 1 : 0,
         }}
+        transition={{duration: .2, type: "tween"}}
         initial={false}
       >
-        <div className="p-2">
+        <div className="p-4">
           <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
             Config
           </div>
