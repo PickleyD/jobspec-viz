@@ -1,12 +1,12 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext, useEffect, useRef } from "react";
-import { CodeBracketIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { useContext, useRef } from "react";
+import { CodeBracketIcon } from "@heroicons/react/24/solid";
 import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { ObservationSrcTask } from "./ObservationSrcTask";
 import { CronFields, DirectRequestFields } from "./jobTypes";
+import { ExpanderPanel } from "../../components";
 
 export interface CodegenProps {
   className?: string;
@@ -34,27 +34,6 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     globalServices.workspaceService,
     externalJobIdSelector
   );
-
-  // const tasks = [
-  //   ...Array.from(
-  //     new Set([
-  //       ...edgesFromMachine
-  //         .map((edge: Edge) => edge.source)
-  //         .filter(
-  //           (value: string, index: number, self: Array<string>) =>
-  //             self.indexOf(value) === index
-  //         ),
-  //       ...edgesFromMachine
-  //         .map((edge: Edge) => edge.target)
-  //         .filter(
-  //           (value: string, index: number, self: Array<string>) =>
-  //             self.indexOf(value) === index
-  //         ),
-  //     ])
-  //   ),
-  // ];
-
-  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const renderJobTypeSpecifics = () => {
     switch (jobType) {
@@ -97,30 +76,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
   };
 
   return (
-    <div className={`${className} relative transition-all ${isOpen ? "" : ""}`}>
-      <label
-        tabIndex={0}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${
-          isOpen ? "swap-active" : ""
-        }`}
-      >
-        <CodeBracketIcon className="swap-off fill-current h-5 w-5 text-white" />
-        <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
-      </label>
-
-      <motion.div
-        className={`${
-          isOpen ? "pointer-events-auto" : "pointer-events-none"
-        } overflow-hidden relative z-0 bg-base-100 rounded-lg pr-2 rounded-tr-3xl`}
-        layout="size"
-        animate={{
-          height: isOpen ? "auto" : "48px",
-          opacity: isOpen ? 1 : 0,
-        }}
-        transition={{duration: .2, type: "tween"}}
-        initial={false}
-      >
+    <ExpanderPanel className={className} icon={CodeBracketIcon}>
         <div
           className="mockup-code text-sm bg-base-100 relative"
           ref={codeRef}
@@ -174,7 +130,6 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             ))}
           </div>
         </div>
-      </motion.div>
-    </div>
+    </ExpanderPanel>
   );
 };

@@ -1,10 +1,10 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useState } from "react";
-import { CogIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { motion } from "framer-motion";
+import { CogIcon } from "@heroicons/react/24/solid";
 import { CronFields, DirectRequestFields } from "./jobTypes"
 import { JOB_TYPE } from "../workspace/workspaceMachine"
+import { ExpanderPanel } from "../../components";
 
 export interface ConfiguratorProps {
   className?: string;
@@ -41,32 +41,9 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
     externalJobIdSelector
   )
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
   return (
-    <div className={`${className} relative transition-all ${isOpen ? "" : ""}`}>
-      <label
-        tabIndex={0}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto absolute z-10 right-0 top-0 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${isOpen ? "swap-active" : ""
-          }`}
-      >
-        <CogIcon className="swap-off fill-current h-5 w-5 text-white" />
-        <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
-      </label>
-
-      <motion.div
-        className={`${isOpen ? "pointer-events-auto" : "pointer-events-none"
-          } overflow-hidden relative z-0 bg-base-100 rounded-lg rounded-tr-3xl pr-8`}
-        layout="size"
-        animate={{
-          height: isOpen ? "auto" : "48px",
-          opacity: isOpen ? 1 : 0,
-        }}
-        transition={{duration: .2, type: "tween"}}
-        initial={false}
-      >
-        <div className="p-4">
+    <ExpanderPanel className={className} icon={CogIcon}>
+        <div className="p-4 pr-6">
           <div className="mr-16 text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
             Config
           </div>
@@ -125,7 +102,6 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
             </div>
           </div>
         </div>
-      </motion.div>
-    </div>
+    </ExpanderPanel>
   );
 };

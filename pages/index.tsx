@@ -12,20 +12,20 @@ import {
   CodeBracketIcon,
   QuestionMarkCircleIcon,
   BookOpenIcon,
-  BeakerIcon
+  BeakerIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { GlobalStateContext } from "../context/GlobalStateContext";
+import { Simulator } from "../modules/simulator/Simulator";
 
 const Home: NextPage = () => {
-
-  const globalServices = useContext(GlobalStateContext)
+  const globalServices = useContext(GlobalStateContext);
 
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
 
   const handleToggleTestMode = () => {
-    return globalServices.workspaceService.send("TOGGLE_TEST_MODE")
-  }
+    return globalServices.workspaceService.send("TOGGLE_TEST_MODE");
+  };
 
   return (
     <div className="bg-primary h-screen w-screen">
@@ -130,17 +130,11 @@ const Home: NextPage = () => {
               </label>
             </a>
           </div>
-          <div className="p-8 absolute right-0 flex flex-col items-end gap-2">
+          <div className="p-8 absolute right-0 flex flex-col items-end gap-4">
             <LayoutGroup>
               <Configurator className="pointer-events-none w-fit" />
               <Codegen className="pointer-events-none w-fit" />
-              <label
-                tabIndex={0}
-                onClick={handleToggleTestMode}
-                className={`pointer-events-auto z-10 btn border-0 hover:border-2 hover:border-secondary btn-circle`}
-              >
-                <BeakerIcon className="fill-current h-5 w-5" />
-              </label>
+              <Simulator className="pointer-events-none w-fit" />
             </LayoutGroup>
           </div>
         </div>
