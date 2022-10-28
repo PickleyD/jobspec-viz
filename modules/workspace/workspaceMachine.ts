@@ -71,6 +71,7 @@ interface WorkspaceContext {
   taskRunResults: TaskRunResult[];
   testMode: boolean;
   toml: Array<TomlLine>;
+  parsedTaskOrder: Array<string>;
 }
 
 type TaskRunResult = {
@@ -87,6 +88,7 @@ type Nodes = {
 type TomlLine = {
   value: string;
   valid?: boolean;
+  isObservationSrc?: boolean;
 }
 
 export type JOB_TYPE = "cron" | "directrequest";
@@ -94,11 +96,11 @@ export type JOB_TYPE = "cron" | "directrequest";
 const getNextUniqueTaskId = (tasks: Array<any>) => {
   const tasksCustomIdsWithDefaultFormat = tasks
     .map((task) => task.ref.state.context.customId)
-    .filter((customId) => customId.startsWith("task-"));
+    .filter((customId) => customId.startsWith("task_"));
 
   let id = 0;
 
-  while (tasksCustomIdsWithDefaultFormat.includes(`task-${id.toString()}`)) {
+  while (tasksCustomIdsWithDefaultFormat.includes(`task_${id.toString()}`)) {
     id++;
   }
 
@@ -140,7 +142,54 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
     id: "workspace",
     initial: "idle",
     states: {
-      idle: {},
+      idle: {
+        on: {
+          TOGGLE_TEST_MODE: {
+            target: "testModeLoading"
+          }
+        }
+      },
+      testModeLoading: {
+        invoke: {
+          src: "parseSpec",
+          id: "parseSpec",
+          onDone: {
+            target: "testMode",
+            actions: assign((_, event) => {
+              console.log(event.data)
+              return {
+                parsedTaskOrder: event.data.tasks.map((task: any) => task.id)
+              }
+            }),
+          },
+          onError: {
+            target: "error"
+          }
+        }
+      },
+      testMode: {
+        on: {
+          TOGGLE_TEST_MODE: {
+            // @ts-ignore
+            actions: actions.pure((context: WorkspaceContext, event) => {
+
+              const isTestMode = context.testMode
+
+              return [
+                ...context.nodes.tasks.map(task => send(
+                  { type: isTestMode ? "RESET" : "TEST_MODE_UPDATE" },
+                  { to: task.ref.id }
+                )),
+                assign((context, event) => ({
+                  testMode: !isTestMode,
+                  taskRunResults: []
+                })),
+              ]
+            })
+          },
+        }
+      },
+      error: {}
     },
     context: {
       reactFlowInstance: null,
@@ -179,7 +228,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       connectionParams: { nodeId: null, handleId: null, handleType: null },
       taskRunResults: [],
       testMode: false,
-      toml: []
+      toml: [],
+      parsedTaskOrder: []
     },
     on: {
       "SET_REACT_FLOW_INSTANCE": {
@@ -197,8 +247,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           const isFirstNode = !fromHandleId || !newNodeType
           const isForwardConnection = newNodeType === "target";
 
-          const newNodeId = `task-${event.options.id ?? context.totalNodesAdded}`
-          const newNodePresentationId = `task-${event.options.id ?? getNextUniqueTaskId(context.nodes.tasks)}`;
+          const newNodeId = `task_${event.options.id ?? context.totalNodesAdded}`
+          const newNodePresentationId = `task_${event.options.id ?? getNextUniqueTaskId(context.nodes.tasks)}`;
 
           const fromId = isForwardConnection
             ? fromNodeId
@@ -241,7 +291,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 ? [
                   ...context.edges,
                   {
-                    id: `edge-${context.totalEdgesAdded}`,
+                    id: `edge_${context.totalEdgesAdded}`,
                     source: fromId,
                     sourceCustomId: fromPresentationId,
                     target: toId,
@@ -383,24 +433,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           "regenerateToml"
         ],
       },
-      TOGGLE_TEST_MODE: {
-        // @ts-ignore
-        actions: actions.pure((context: WorkspaceContext, event) => {
-
-          const isTestMode = context.testMode
-
-          return [
-            ...context.nodes.tasks.map(task => send(
-              { type: isTestMode ? "RESET" : "TEST_MODE_UPDATE" },
-              { to: task.ref.id }
-            )),
-            assign((context, event) => ({
-              testMode: !isTestMode,
-              taskRunResults: []
-            })),
-          ]
-        })
-      },
       STORE_TASK_RUN_RESULT: {
         actions: assign((context, event) => {
           console.log("STORE_TASK_RUN_RESULT")
@@ -415,7 +447,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: [
           assign((context, event) => {
             const toAdd = {
-              id: `edge-${context.totalEdgesAdded}`,
+              id: `edge_${context.totalEdgesAdded}`,
               ...event.newEdge
             }
 
@@ -433,6 +465,25 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
     },
   },
   {
+    services: {
+      parseSpec: (context, event) => {
+        return fetch("/api/graph", {
+          method: "POST",
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(
+            {
+              spec: `${context.toml.filter(line => line.isObservationSrc).map(line => line.value).join("\n")}`
+            }
+          )
+        })
+          .then(res => res.json().then(json => {
+            return res.ok ? json : Promise.reject(json);
+          }))
+      }
+    },
     actions: {
       validateJobTypeSpecificProps: assign({
         jobTypeSpecific: (context, event) =>
@@ -501,6 +552,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
         lines.push({ value: `observationSource = """` })
 
+        const observationSrcLines: Array<TomlLine> = [];
+
         context.nodes.tasks.forEach(task => {
 
           const { customId, taskType, taskSpecific, incomingNodes } = task.ref.state.context
@@ -511,7 +564,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             case "HTTP": {
               const processedRequestData = taskSpecific.requestData ? taskSpecific.requestData.replace(/\s/g, "").replace(/"/g, '\\\\"') : ""
 
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="http"` },
                 { value: `${spacer}  method=${taskSpecific.method || "GET"}` },
                 { value: `${spacer}  url="${taskSpecific.url || ""}"` },
@@ -520,7 +573,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "JSONPARSE": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="jsonparse"` },
                 { value: `${spacer}  data="${taskSpecific.data || ""}"` },
                 { value: `${spacer}  path="${taskSpecific.path || ""}"]` },
@@ -528,7 +581,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "ETHTX": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="ethtx"` },
                 { value: `${spacer}  to="${taskSpecific.to || ""}"` },
                 { value: `${spacer}  data="${taskSpecific.data || ""}"]` },
@@ -536,14 +589,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "SUM": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="sum"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>]` },
+                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>]` },
               )
               break;
             }
             case "MULTIPLY": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="multiply"` },
                 { value: `${spacer}  input="${taskSpecific.input || ""}"` },
                 { value: `${spacer}  times="${taskSpecific.times || ""}"]` },
@@ -551,7 +604,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "DIVIDE": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="divide"` },
                 { value: `${spacer}  input="${taskSpecific.input || ""}"` },
                 { value: `${spacer}  divisor="${taskSpecific.divisor || ""}"` },
@@ -560,35 +613,37 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "ANY": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="any"` },
               )
               break;
             }
             case "MEAN": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="mean"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>` },
+                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>` },
                 { value: `${spacer}  precision=${taskSpecific.precision || 2}]` },
               )
               break;
             }
             case "MODE": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="mode"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>` },
+                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>` },
               )
               break;
             }
             case "MEDIAN": {
-              lines.push(
+              observationSrcLines.push(
                 { value: `${customId} [type="median"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.join(", ")} ]>` },
+                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>` },
               )
               break;
             }
           }
         })
+
+        lines.push(...observationSrcLines.map(line => ({ ...line, isObservationSrc: true })))
 
         lines.push({ value: `"""` })
 
@@ -602,7 +657,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
   }
 );
 
-
+const wrapVariable = (input: string) => `$(${input})`
 
 const adjustNewSourceNodeHeightByTypeDefault = (
   initialCoords: { x: number; y: number },

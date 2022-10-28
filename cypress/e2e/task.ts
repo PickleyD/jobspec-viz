@@ -39,7 +39,7 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
         'POST',
         'api/task',
         {
-            id: "task-0",
+            id: "task_0",
             name: test.task,
             options: test.options,
             ...inputs64 && { inputs64: inputs64 },
@@ -52,7 +52,7 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
                 "api/var-helper",
                 {
                     // vars: {
-                    //     ...test.vars, "task-0": {
+                    //     ...test.vars, "task_0": {
                     //         keep: test.want?.value
                     //     }
                     // },

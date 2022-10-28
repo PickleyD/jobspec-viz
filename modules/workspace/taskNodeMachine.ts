@@ -55,6 +55,8 @@ const defaultContext: TaskNodeContext = {
   runResult: undefined
 };
 
+const wrapVariable = (input: string) => `$(${input})`
+
 const generateToml = (context: TaskNodeContext) => {
   let result = [];
 
@@ -91,7 +93,7 @@ const generateToml = (context: TaskNodeContext) => {
     case "SUM": {
       result = [
         `${context.customId} [type="sum"`,
-        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>]`
+        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>]`
       ];
       break;
     }
@@ -121,7 +123,7 @@ const generateToml = (context: TaskNodeContext) => {
     case "MEAN": {
       result = [
         `${context.customId} [type="mean"`,
-        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>`,
+        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>`,
         `${spacer}  precision=${context.taskSpecific.precision || 2}]`
       ];
       break;
@@ -129,14 +131,14 @@ const generateToml = (context: TaskNodeContext) => {
     case "MODE": {
       result = [
         `${context.customId} [type="mode"`,
-        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>]`
+        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>]`
       ];
       break;
     }
     case "MEDIAN": {
       result = [
         `${context.customId} [type="median"`,
-        `${spacer}  values=<[ ${context.incomingNodes.join(", ")} ]>]`
+        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>]`
       ];
       break;
     }
@@ -404,7 +406,9 @@ export const createTaskNodeMachine = (
             },
             body: JSON.stringify(
               {
-                id: "task-0",
+                // id: context.customId,
+                // name: context.taskType.toLowerCase(),
+                id: "task_0",
                 name: "http",
                 inputs64: [],
                 options: {
@@ -414,7 +418,9 @@ export const createTaskNodeMachine = (
               }
             )
           })
-            .then(res => res.json())
+            .then(res => res.json().then(json => {
+              return res.ok ? json : Promise.reject(json);
+            }))
         }
       },
       guards: {
