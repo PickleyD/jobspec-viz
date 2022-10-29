@@ -8,6 +8,11 @@ body {
   margin: 0;
 }
 
+/* Avoids a bug where flow edges are clipped when they extend outside the 'viewport' element */
+.react-flow svg {
+  overflow: visible;
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 8px;
