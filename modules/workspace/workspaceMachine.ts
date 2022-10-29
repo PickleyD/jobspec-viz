@@ -70,7 +70,12 @@ interface WorkspaceContext {
   connectionParams: OnConnectStartParams;
   taskRunResults: TaskRunResult[];
   toml: Array<TomlLine>;
-  parsedTaskOrder: Array<string>;
+  parsedTaskOrder: Array<TaskInstructions>;
+}
+
+type TaskInstructions = {
+  id: string;
+  inputs: Array<string>;
 }
 
 type TaskRunResult = {
@@ -155,9 +160,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           onDone: {
             target: "testMode",
             actions: assign((_, event) => {
-              console.log(event.data)
               return {
-                parsedTaskOrder: event.data.tasks.map((task: any) => task.id)
+                parsedTaskOrder: event.data.tasks
               }
             }),
           },
