@@ -69,7 +69,6 @@ interface WorkspaceContext {
   isConnecting: boolean;
   connectionParams: OnConnectStartParams;
   taskRunResults: TaskRunResult[];
-  testMode: boolean;
   toml: Array<TomlLine>;
   parsedTaskOrder: Array<string>;
 }
@@ -170,18 +169,16 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       testMode: {
         on: {
           TOGGLE_TEST_MODE: {
+            target: "idle",
             // @ts-ignore
             actions: actions.pure((context: WorkspaceContext, event) => {
 
-              const isTestMode = context.testMode
-
               return [
                 ...context.nodes.tasks.map(task => send(
-                  { type: isTestMode ? "RESET" : "TEST_MODE_UPDATE" },
+                  { type: "RESET" },
                   { to: task.ref.id }
                 )),
                 assign((context, event) => ({
-                  testMode: !isTestMode,
                   taskRunResults: []
                 })),
               ]
@@ -227,7 +224,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
       taskRunResults: [],
-      testMode: false,
       toml: [],
       parsedTaskOrder: []
     },

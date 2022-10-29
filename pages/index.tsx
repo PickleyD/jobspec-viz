@@ -4,28 +4,16 @@ import { Flow } from "../modules/flow";
 import { Configurator } from "../modules/configurator";
 import { Codegen } from "../modules/codegen";
 import { LayoutGroup } from "framer-motion";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import {
-  XMarkIcon,
-  CogIcon,
-  PlusIcon,
-  CodeBracketIcon,
-  QuestionMarkCircleIcon,
   BookOpenIcon,
-  BeakerIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { GlobalStateContext } from "../context/GlobalStateContext";
 import { Simulator } from "../modules/simulator/Simulator";
 
 const Home: NextPage = () => {
-  const globalServices = useContext(GlobalStateContext);
 
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
-
-  const handleToggleTestMode = () => {
-    return globalServices.workspaceService.send("TOGGLE_TEST_MODE");
-  };
 
   return (
     <div className="bg-primary h-screen w-screen">
