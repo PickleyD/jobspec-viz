@@ -272,10 +272,8 @@ export const createTaskNodeMachine = (
           ]
         },
         success: {
-          type: "final"
         },
         error: {
-          type: "final"
         }
       },
       on: {

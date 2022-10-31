@@ -26,6 +26,7 @@ import {
   DivideTaskNode,
   MultiplyTaskNode,
   MeanTaskNode,
+  SumTaskNode,
 } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
@@ -112,6 +113,9 @@ export const Flow = ({ className }: FlowProps) => {
         break;
       case "MEAN":
         flowElement.type = "meanTask";
+        break;
+      case "SUM":
+        flowElement.type = "sumTask";
         break;
       default:
         flowElement.type = "task";
@@ -246,6 +250,7 @@ export const Flow = ({ className }: FlowProps) => {
       divideTask: DivideTaskNode,
       multiplyTask: MultiplyTaskNode,
       meanTask: MeanTaskNode,
+      sumTask: SumTaskNode
     }),
     []
   );

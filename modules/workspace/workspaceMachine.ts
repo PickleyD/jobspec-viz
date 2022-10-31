@@ -240,13 +240,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               const currentTaskId = getTaskNodeByCustomId(context, currentTaskCustomId)?.ref.id
 
               const input64s = currentTask.inputs
-              .filter(input => input.propagateResult === true)
-              .map(input => context.taskRunResults.find(trr => trr.id === input.id)?.result.val64)
+                .filter(input => input.propagateResult === true)
+                .map(input => context.taskRunResults.find(trr => trr.id === input.id)?.result.val64)
 
               const vars64 = context.taskRunResults.length > 0 ? context.taskRunResults[context.taskRunResults.length - 1].result.vars64 : ""
 
               return [
-                send({ type: "TRY_RUN_TASK", input64s, vars64}, { to: currentTaskId })
+                send({ type: "TRY_RUN_TASK", input64s, vars64 }, { to: currentTaskId })
               ]
             })
           },
@@ -674,7 +674,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             case "SUM": {
               observationSrcLines.push(
                 { value: `${customId} [type="sum"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>]` },
+                // { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>]` },
+                { value: `${spacer}  values=<${taskSpecific.values}>${taskSpecific.allowedFaults ? "" : "]"}` },
+              )
+              taskSpecific.allowedFaults && observationSrcLines.push(
+                { value: `${spacer}  allowedFaults=${taskSpecific.allowedFaults}]` },
               )
               break;
             }
