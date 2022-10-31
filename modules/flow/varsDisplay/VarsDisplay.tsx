@@ -18,7 +18,7 @@ export const VarsDisplay = ({ vars }: VarsDisplayProps) => {
         <ul className="text-xs flex flex-col gap-2">
             {Object.keys(vars).map(key => {
 
-                const showTruncator = vars[key].length > SHOW_TRUNCATOR_CHARS_LIMIT
+                const showTruncator = vars[key] && vars[key].length > SHOW_TRUNCATOR_CHARS_LIMIT
 
                 return <li className="flex flex-col gap-1">
                     <p className="font-bold text-secondary whitespace-nowrap">{key}:</p>

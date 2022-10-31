@@ -54,7 +54,10 @@ type WorkspaceEvent =
   | { type: "TOGGLE_TEST_MODE" }
   | { type: "STORE_TASK_RUN_RESULT"; nodeId: string, value: any; }
   | { type: "ADD_NEW_EDGE"; newEdge: Omit<CustomEdge, "id"> }
-  | { type: "REGENERATE_TOML" };
+  | { type: "REGENERATE_TOML" }
+  | { type: "SIMULATOR_PREV_TASK" }
+  | { type: "TRY_RUN_CURRENT_TASK" }
+  | { type: "SIMULATOR_NEXT_TASK" };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -71,11 +74,15 @@ interface WorkspaceContext {
   taskRunResults: TaskRunResult[];
   toml: Array<TomlLine>;
   parsedTaskOrder: Array<TaskInstructions>;
+  currentTaskIndex: number;
 }
 
 type TaskInstructions = {
   id: string;
-  inputs: Array<string>;
+  inputs: Array<{
+    id: string;
+    propagateResult: boolean;
+  }>;
 }
 
 type TaskRunResult = {
@@ -171,6 +178,16 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         }
       },
       testMode: {
+        initial: "revalidating",
+        states: {
+          revalidating: {
+            entry: ["setCurrentTaskPendingRun"],
+            always: [
+              { target: "idle" },
+            ]
+          },
+          idle: {}
+        },
         on: {
           TOGGLE_TEST_MODE: {
             target: "idle",
@@ -182,10 +199,64 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   { type: "RESET" },
                   { to: task.ref.id }
                 )),
-                assign((context, event) => ({
+                assign({
                   taskRunResults: []
-                })),
+                }),
               ]
+            })
+          },
+          SIMULATOR_PREV_TASK: {
+            target: ".revalidating",
+            // @ts-ignore
+            actions: actions.pure((context: WorkspaceContext, event) => {
+
+              if (context.currentTaskIndex === 0) return
+
+              const newIndex = context.currentTaskIndex - 1
+
+              const newTaskCustomId = context.parsedTaskOrder[newIndex].id
+
+              const newTaskId = getTaskNodeByCustomId(context, newTaskCustomId)?.ref.id
+
+              return [
+                assign({
+                  currentTaskIndex: newIndex,
+                  taskRunResults: context.taskRunResults.filter(trr => trr.id !== newTaskCustomId)
+                }),
+                send({ type: "REWIND" }, { to: newTaskId }),
+              ]
+            })
+          },
+          TRY_RUN_CURRENT_TASK: {
+            // @ts-ignore
+            actions: actions.pure((context: WorkspaceContext, event) => {
+
+              if (context.currentTaskIndex >= context.parsedTaskOrder.length) return
+
+              // Try to execute the current task and then proceed if successful
+              const currentTask = context.parsedTaskOrder[context.currentTaskIndex]
+              const currentTaskCustomId = currentTask.id
+
+              const currentTaskId = getTaskNodeByCustomId(context, currentTaskCustomId)?.ref.id
+
+              const input64s = currentTask.inputs
+              .filter(input => input.propagateResult === true)
+              .map(input => context.taskRunResults.find(trr => trr.id === input.id)?.result.val64)
+
+              const vars64 = context.taskRunResults.length > 0 ? context.taskRunResults[context.taskRunResults.length - 1].result.vars64 : ""
+
+              return [
+                send({ type: "TRY_RUN_TASK", input64s, vars64}, { to: currentTaskId })
+              ]
+            })
+          },
+          SIMULATOR_NEXT_TASK: {
+            target: ".revalidating",
+            actions: assign((context, event) => {
+              const newIndex = context.currentTaskIndex + 1
+              return {
+                currentTaskIndex: newIndex <= context.parsedTaskOrder.length ? context.currentTaskIndex + 1 : context.currentTaskIndex
+              }
             })
           },
         }
@@ -229,7 +300,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       connectionParams: { nodeId: null, handleId: null, handleType: null },
       taskRunResults: [],
       toml: [],
-      parsedTaskOrder: []
+      parsedTaskOrder: [],
+      currentTaskIndex: 0
     },
     on: {
       "SET_REACT_FLOW_INSTANCE": {
@@ -435,9 +507,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       },
       STORE_TASK_RUN_RESULT: {
         actions: assign((context, event) => {
-          console.log("STORE_TASK_RUN_RESULT")
-          console.log(event)
-
           return {
             taskRunResults: [...context.taskRunResults, { id: event.nodeId, result: event.value }]
           }
@@ -485,6 +554,20 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       }
     },
     actions: {
+      // @ts-ignore
+      setCurrentTaskPendingRun: actions.pure((context, _) => {
+
+        if (context.currentTaskIndex >= context.parsedTaskOrder.length) return
+
+        const currentTask = context.parsedTaskOrder[context.currentTaskIndex]
+        const currentTaskCustomId = currentTask.id
+
+        const currentTaskId = getTaskNodeByCustomId(context, currentTaskCustomId)?.ref.id
+
+        return [
+          send({ type: "SET_PENDING_RUN" }, { to: currentTaskId })
+        ]
+      }),
       validateJobTypeSpecificProps: assign({
         jobTypeSpecific: (context, event) =>
           validateJobTypeSpecifics(context.jobTypeSpecific, event),
@@ -656,6 +739,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
     },
   }
 );
+
+const getTaskNodeByCustomId = (context: WorkspaceContext, nodeId: string) =>
+  context.nodes.tasks.find(
+    (taskNode: any) => taskNode.ref.state.context.customId === nodeId
+  );
 
 const wrapVariable = (input: string) => `$(${input})`
 

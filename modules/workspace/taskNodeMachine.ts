@@ -24,9 +24,8 @@ export type TaskNodeEvent =
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
   | { type: "UPDATE_COORDS"; value: XYCoords }
   | { type: "SET_PENDING_RUN" }
-  | { type: "TRY_RUN_TASK" }
-  | { type: "RESET" }
-  | { type: "TEST_MODE_UPDATE" };
+  | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
+  | { type: "RESET" };
 
 export const tasks = ["HTTP", "JSONPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
@@ -235,12 +234,6 @@ export const createTaskNodeMachine = (
       states: {
         idle: {
           entry: ["revalidateTask"],
-          on: {
-            TEST_MODE_UPDATE: {
-              target: "pendingRun",
-              cond: "hasNoIncomingNodes"
-            }
-          }
         },
         pendingRun: {
           on: {
@@ -263,6 +256,9 @@ export const createTaskNodeMachine = (
                   value: event.data,
                   nodeId: context.customId,
                   type: "STORE_TASK_RUN_RESULT"
+                })),
+                sendParent(() => ({
+                  type: "SIMULATOR_NEXT_TASK"
                 }))
               ]
             },
@@ -385,6 +381,12 @@ export const createTaskNodeMachine = (
             runResult: undefined
           }))
         },
+        SET_PENDING_RUN: {
+          target: "pendingRun",
+          actions: assign((_, event) => ({
+            runResult: undefined
+          }))
+        },
       },
     },
     {
@@ -398,6 +400,7 @@ export const createTaskNodeMachine = (
       },
       services: {
         runTask: (context, event) => {
+
           return fetch("/api/task", {
             method: "POST",
             headers: {
@@ -406,14 +409,12 @@ export const createTaskNodeMachine = (
             },
             body: JSON.stringify(
               {
-                // id: context.customId,
-                // name: context.taskType.toLowerCase(),
-                id: "task_0",
-                name: "http",
-                inputs64: [],
+                id: context.customId,
+                name: context.taskType.toLowerCase(),
+                inputs64: 'input64s' in event ? [...event.input64s] : [],
+                vars64: 'vars64' in event ? event.vars64 : "",
                 options: {
-                  method: "GET",
-                  url: "https://reqres.in/api/users?page=2"
+                  ...context.taskSpecific
                 }
               }
             )

@@ -1,12 +1,13 @@
 import { ExpanderPanel } from "../../components"
 import { BeakerIcon, ChevronRightIcon, ChevronLeftIcon, CheckCircleIcon } from "@heroicons/react/24/outline"
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 
 const testModeSelector = (state: any) => state.matches("testMode");
 const testModeLoadingSelector = (state: any) => state.matches("testModeLoading");
 const taskInstructionsSelector = (state: any) => state.context.parsedTaskOrder
+const currentTaskIndexSelector = (state: any) => state.context.currentTaskIndex
 
 export interface SimulatorProps {
   className?: string;
@@ -31,6 +32,11 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
     taskInstructionsSelector
   );
 
+  const currentTaskIndex = useSelector(
+    globalServices.workspaceService,
+    currentTaskIndexSelector
+  )
+
   const handleToggleTestMode = () => {
     setProgress(0)
     return globalServices.workspaceService.send("TOGGLE_TEST_MODE");
@@ -38,23 +44,23 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
 
   const [progress, setProgress] = useState<number>(0)
 
-  const [currentTaskIndex, setCurrentTaskIndex] = useState<number>(0)
-
   const handlePrevIndex = () => {
     const nextCurrentIndex = currentTaskIndex - 1
     if (nextCurrentIndex >= 0) {
-      setCurrentTaskIndex(nextCurrentIndex)
-      setProgress((100 / taskInstructions.length) * (nextCurrentIndex))
+      globalServices.workspaceService.send("SIMULATOR_PREV_TASK")
     }
   }
 
   const handleNextIndex = () => {
     const nextCurrentIndex = currentTaskIndex + 1
     if (nextCurrentIndex <= taskInstructions.length) {
-      setCurrentTaskIndex(nextCurrentIndex)
-      setProgress((100 / taskInstructions.length) * (nextCurrentIndex))
+      globalServices.workspaceService.send("TRY_RUN_CURRENT_TASK")
     }
   }
+
+  useEffect(() => {
+    setProgress((100 / taskInstructions.length) * (currentTaskIndex))
+  }, [currentTaskIndex])
 
   const getTaskId = (index: number) => {
     return taskInstructions[index]?.id
