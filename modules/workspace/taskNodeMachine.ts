@@ -247,7 +247,7 @@ export const createTaskNodeMachine = (
             src: "runTask",
             id: "runTask",
             onDone: {
-              target: "success",
+              target: "inspectingResult",
               actions: [
                 assign((_, event) => ({
                   runResult: event.data
@@ -264,6 +264,12 @@ export const createTaskNodeMachine = (
             },
             onError: { target: "error" }
           }
+        },
+        inspectingResult: {
+          always: [
+            { target: "error", cond: "resultHasError" },
+            { target: "success" }
+          ]
         },
         success: {
           type: "final"
@@ -427,6 +433,9 @@ export const createTaskNodeMachine = (
       guards: {
         hasNoIncomingNodes: (context, event) => {
           return context.incomingNodes.length === 0
+        },
+        resultHasError: (context, event) => {
+          return context.runResult.error.length > 0
         }
       }
     },
