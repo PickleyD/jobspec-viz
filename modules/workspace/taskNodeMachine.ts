@@ -36,7 +36,6 @@ export interface TaskNodeContext {
   taskType: TASK_TYPE;
   incomingNodes: Array<string>;
   outgoingNodes: Array<string>;
-  toml: Array<string>;
   taskSpecific: any;
   isValid: boolean;
   runResult: any;
@@ -48,102 +47,9 @@ const defaultContext: TaskNodeContext = {
   taskType: "SUM",
   incomingNodes: [],
   outgoingNodes: [],
-  toml: [],
   taskSpecific: {},
   isValid: false,
   runResult: undefined
-};
-
-const wrapVariable = (input: string) => `$(${input})`
-
-const generateToml = (context: TaskNodeContext) => {
-  let result = [];
-
-  const spacer = new Array(context.customId ? context.customId.length + 1 : 0).join(" ")
-
-  switch (context.taskType) {
-    case "HTTP": {
-      const processedRequestData = context.taskSpecific.requestData ? context.taskSpecific.requestData.replace(/\s/g, "").replace(/"/g, '\\\\"') : ""
-
-      result = [
-        `${context.customId} [type="http"`,
-        `${spacer}  method=${context.taskSpecific.method || "GET"}`,
-        `${spacer}  url="${context.taskSpecific.url || ""}"`,
-        `${spacer}  requestData="${processedRequestData}"]`
-      ];
-      break;
-    }
-    case "JSONPARSE": {
-      result = [
-        `${context.customId} [type="jsonparse"`,
-        `${spacer}  data="${context.taskSpecific.data || ""}"`,
-        `${spacer}  path="${context.taskSpecific.path || ""}"]`,
-      ];
-      break;
-    }
-    case "ETHTX": {
-      result = [
-        `${context.customId} [type="ethtx"`,
-        `${spacer}  to="${context.taskSpecific.to || ""}"`,
-        `${spacer}  data="${context.taskSpecific.data || ""}"]`,
-      ];
-      break;
-    }
-    case "SUM": {
-      result = [
-        `${context.customId} [type="sum"`,
-        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>]`
-      ];
-      break;
-    }
-    case "MULTIPLY": {
-      result = [
-        `${context.customId} [type="multiply"`,
-        `${spacer}  input="${context.taskSpecific.input || ""}"`,
-        `${spacer}  times="${context.taskSpecific.times || ""}"]`,
-      ];
-      break;
-    }
-    case "DIVIDE": {
-      result = [
-        `${context.customId} [type="divide"`,
-        `${spacer}  input="${context.taskSpecific.input || ""}"`,
-        `${spacer}  divisor="${context.taskSpecific.divisor || ""}"`,
-        `${spacer}  precision="${context.taskSpecific.precision || ""}"]`
-      ];
-      break;
-    }
-    case "ANY": {
-      result = [
-        `${context.customId} [type="any"]`
-      ];
-      break;
-    }
-    case "MEAN": {
-      result = [
-        `${context.customId} [type="mean"`,
-        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>`,
-        `${spacer}  precision=${context.taskSpecific.precision || 2}]`
-      ];
-      break;
-    }
-    case "MODE": {
-      result = [
-        `${context.customId} [type="mode"`,
-        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>]`
-      ];
-      break;
-    }
-    case "MEDIAN": {
-      result = [
-        `${context.customId} [type="median"`,
-        `${spacer}  values=<[ ${context.incomingNodes.map(wrapVariable).join(", ")} ]>]`
-      ];
-      break;
-    }
-  }
-
-  return result;
 };
 
 const validateAddress = (input: string) => isAddress(input)
@@ -173,7 +79,8 @@ const validateTask = (context: TaskNodeContext) => {
       break;
     }
     case "SUM": {
-      result = context.incomingNodes.length > 0
+      // TODO: Think how to validate tasks where 'propagateResult' may be false on inputs when parsing pipeline
+      result = context.incomingNodes.length > 0 || context.taskSpecific.values.length > 0
       break;
     }
     case "MULTIPLY": {
@@ -227,8 +134,7 @@ export const createTaskNodeMachine = (
     {
       id: "taskNode",
       context: {
-        ...fullInitialContext,
-        toml: generateToml(fullInitialContext),
+        ...fullInitialContext
       },
       initial: "idle",
       states: {
@@ -285,7 +191,6 @@ export const createTaskNodeMachine = (
                 event.nodeId,
               ],
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
@@ -298,7 +203,6 @@ export const createTaskNodeMachine = (
                 event.nodeId,
               ],
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
           ],
         },
@@ -310,7 +214,6 @@ export const createTaskNodeMachine = (
                   (incomingNode: string) => incomingNode !== event.nodeId
                 ),
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
@@ -323,7 +226,6 @@ export const createTaskNodeMachine = (
                   (outgoingNode: string) => outgoingNode !== event.nodeId
                 ),
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
           ],
         },
@@ -333,7 +235,6 @@ export const createTaskNodeMachine = (
               incomingNodes: (context, event) =>
                 context.incomingNodes.map(incomingNode => incomingNode === event.prevNodeId ? event.nodeId : incomingNode)
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ]
@@ -344,7 +245,6 @@ export const createTaskNodeMachine = (
               outgoingNodes: (context, event) =>
                 context.outgoingNodes.map(outgoingNode => outgoingNode === event.prevNodeId ? event.nodeId : outgoingNode)
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ]
@@ -354,7 +254,6 @@ export const createTaskNodeMachine = (
             assign({
               customId: (context, event) => event.value,
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
@@ -367,7 +266,6 @@ export const createTaskNodeMachine = (
                 ...event.value,
               }),
             }),
-            "regenerateToml",
             sendParent("REGENERATE_TOML"),
             "revalidateTask"
           ],
@@ -395,9 +293,6 @@ export const createTaskNodeMachine = (
     },
     {
       actions: {
-        regenerateToml: assign({
-          toml: (context, event) => generateToml(context),
-        }),
         revalidateTask: assign({
           isValid: (context, event) => validateTask(context)
         })

@@ -4,47 +4,21 @@ import { useContext, useRef } from "react";
 import { CodeBracketIcon } from "@heroicons/react/24/solid";
 import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { ObservationSrcTask } from "./ObservationSrcTask";
-import { CronFields, DirectRequestFields } from "./jobTypes";
 import { ExpanderPanel } from "../../components";
+import { TomlLine } from "../workspace/workspaceMachine";
 
 export interface CodegenProps {
   className?: string;
 }
 
-const nodesSelector = (state: any) => state.context.nodes;
-const edgesSelector = (state: any) => state.context.edges;
-const jobTypeSelector = (state: any) => state.context.type;
-const nameSelector = (state: any) => state.context.name;
-const externalJobIdSelector = (state: any) => state.context.externalJobId;
+const tomlSelector = (state: any) => state.context.toml;
 
 export const Codegen = ({ className = "" }: CodegenProps) => {
   const globalServices = useContext(GlobalStateContext);
-  const nodesFromMachine = useSelector(
+  const toml: Array<TomlLine> = useSelector(
     globalServices.workspaceService,
-    nodesSelector
-  );
-  const edgesFromMachine = useSelector(
-    globalServices.workspaceService,
-    edgesSelector
-  );
-  const jobType = useSelector(globalServices.workspaceService, jobTypeSelector);
-  const name = useSelector(globalServices.workspaceService, nameSelector);
-  const externalJobId = useSelector(
-    globalServices.workspaceService,
-    externalJobIdSelector
-  );
-
-  const renderJobTypeSpecifics = () => {
-    switch (jobType) {
-      case "cron":
-        return <CronFields />;
-      case "directrequest":
-        return <DirectRequestFields />;
-      default:
-        return <></>;
-    }
-  };
+    tomlSelector
+  )
 
   const codeRef = useRef<HTMLDivElement>(null);
 
@@ -92,42 +66,11 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             <CheckIcon className="h-5 w-5 swap-on" />
           </label>
           <div className="max-h-96 max-w-3xl overflow-auto pr-6">
-            <pre data-prefix=">">
-              <code>type = "{jobType}"</code>
-            </pre>
-            <pre data-prefix=">">
-              <code>schemaVersion = 1</code>
-            </pre>
-            {name && (
-              <pre data-prefix=">">
-                <code>name = "{name}"</code>
-              </pre>
-            )}
-            {externalJobId && (
-              <pre data-prefix=">">
-                <code>externalJobId = "{externalJobId}"</code>
-              </pre>
-            )}
-            {renderJobTypeSpecifics()}
-            <pre data-prefix=">">
-              <code>observationSource = """</code>
-            </pre>
-            {nodesFromMachine.tasks.map((taskNode: any, index: number) => (
-              <ObservationSrcTask key={index} taskNode={taskNode.ref} />
-            ))}
-            <pre data-prefix=">">
-              <code>"""</code>
-            </pre>
-            {edgesFromMachine.length > 0 && (
-              <pre data-prefix=">">
-                <code></code>
-              </pre>
-            )}
-            {edgesFromMachine.map((edge: any, index: number) => (
-              <pre key={index} data-prefix=">">
-                <code>{`${edge.sourceCustomId} -> ${edge.targetCustomId}`}</code>
-              </pre>
-            ))}
+            {
+              toml.map(line => <pre data-prefix=">" className={`${line.valid === undefined ? "" : (line.valid === true ? "text-success" : "text-error")}`}>
+              <code>{line.value}</code>
+            </pre>)
+            }
           </div>
         </div>
     </ExpanderPanel>

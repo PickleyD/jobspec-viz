@@ -96,7 +96,7 @@ type Nodes = {
   }>;
 };
 
-type TomlLine = {
+export type TomlLine = {
   value: string;
   valid?: boolean;
   isObservationSrc?: boolean;
@@ -633,13 +633,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             break
         }
 
+        lines.push({ value: `` })
+
         lines.push({ value: `observationSource = """` })
 
         const observationSrcLines: Array<TomlLine> = [];
 
         context.nodes.tasks.forEach(task => {
 
-          const { customId, taskType, taskSpecific, incomingNodes } = task.ref.state.context
+          const { customId, taskType, taskSpecific, incomingNodes, isValid } = task.ref.state.context
 
           const spacer = new Array(customId ? customId.length + 1 : 0).join(" ")
 
@@ -648,93 +650,96 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               const processedRequestData = taskSpecific.requestData ? taskSpecific.requestData.replace(/\s/g, "").replace(/"/g, '\\\\"') : ""
 
               observationSrcLines.push(
-                { value: `${customId} [type="http"` },
-                { value: `${spacer}  method=${taskSpecific.method || "GET"}` },
-                { value: `${spacer}  url="${taskSpecific.url || ""}"` },
-                { value: `${spacer}  requestData="${processedRequestData}"]` }
+                { value: `${customId} [type="http"`, valid: isValid },
+                { value: `${spacer}  method=${taskSpecific.method || "GET"}`, valid: isValid },
+                { value: `${spacer}  url="${taskSpecific.url || ""}"`, valid: isValid },
+                { value: `${spacer}  requestData="${processedRequestData}"]`, valid: isValid }
               )
               break;
             }
             case "JSONPARSE": {
               observationSrcLines.push(
-                { value: `${customId} [type="jsonparse"` },
-                { value: `${spacer}  data="${taskSpecific.data || ""}"` },
-                { value: `${spacer}  path="${taskSpecific.path || ""}"]` },
+                { value: `${customId} [type="jsonparse"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"`, valid: isValid },
+                { value: `${spacer}  path="${taskSpecific.path || ""}"]`, valid: isValid },
               )
               break;
             }
             case "ETHTX": {
               observationSrcLines.push(
-                { value: `${customId} [type="ethtx"` },
-                { value: `${spacer}  to="${taskSpecific.to || ""}"` },
-                { value: `${spacer}  data="${taskSpecific.data || ""}"]` },
+                { value: `${customId} [type="ethtx"`, valid: isValid },
+                { value: `${spacer}  to="${taskSpecific.to || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"]`, valid: isValid },
               )
               break;
             }
             case "SUM": {
               observationSrcLines.push(
-                { value: `${customId} [type="sum"` },
-                // { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>]` },
-                { value: `${spacer}  values=<${taskSpecific.values}>${taskSpecific.allowedFaults ? "" : "]"}` },
+                { value: `${customId} [type="sum"`, valid: isValid },
+                { value: `${spacer}  values=<${taskSpecific.values || ""}>${taskSpecific.allowedFaults ? "" : "]"}`, valid: isValid },
               )
               taskSpecific.allowedFaults && observationSrcLines.push(
-                { value: `${spacer}  allowedFaults=${taskSpecific.allowedFaults}]` },
+                { value: `${spacer}  allowedFaults=${taskSpecific.allowedFaults}]`, valid: isValid },
               )
               break;
             }
             case "MULTIPLY": {
               observationSrcLines.push(
-                { value: `${customId} [type="multiply"` },
-                { value: `${spacer}  input="${taskSpecific.input || ""}"` },
-                { value: `${spacer}  times="${taskSpecific.times || ""}"]` },
+                { value: `${customId} [type="multiply"`, valid: isValid },
+                { value: `${spacer}  input="${taskSpecific.input || ""}"`, valid: isValid },
+                { value: `${spacer}  times="${taskSpecific.times || ""}"]`, valid: isValid },
               )
               break;
             }
             case "DIVIDE": {
               observationSrcLines.push(
-                { value: `${customId} [type="divide"` },
-                { value: `${spacer}  input="${taskSpecific.input || ""}"` },
-                { value: `${spacer}  divisor="${taskSpecific.divisor || ""}"` },
-                { value: `${spacer}  precision="${taskSpecific.precision || ""}"]` },
+                { value: `${customId} [type="divide"`, valid: isValid },
+                { value: `${spacer}  input="${taskSpecific.input || ""}"`, valid: isValid },
+                { value: `${spacer}  divisor="${taskSpecific.divisor || ""}"`, valid: isValid },
+                { value: `${spacer}  precision="${taskSpecific.precision || ""}"]`, valid: isValid },
               )
               break;
             }
             case "ANY": {
               observationSrcLines.push(
-                { value: `${customId} [type="any"` },
+                { value: `${customId} [type="any"`, valid: isValid },
               )
               break;
             }
             case "MEAN": {
               observationSrcLines.push(
-                { value: `${customId} [type="mean"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>` },
-                { value: `${spacer}  precision=${taskSpecific.precision || 2}]` },
+                { value: `${customId} [type="mean"`, valid: isValid },
+                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>`, valid: isValid },
+                { value: `${spacer}  precision=${taskSpecific.precision || 2}]`, valid: isValid },
               )
               break;
             }
             case "MODE": {
               observationSrcLines.push(
-                { value: `${customId} [type="mode"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>` },
+                { value: `${customId} [type="mode"`, valid: isValid },
+                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>`, valid: isValid },
               )
               break;
             }
             case "MEDIAN": {
               observationSrcLines.push(
-                { value: `${customId} [type="median"` },
-                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>` },
+                { value: `${customId} [type="median"`, valid: isValid },
+                { value: `${spacer}  values=<[ ${incomingNodes.map(wrapVariable).join(", ")} ]>`, valid: isValid },
               )
               break;
             }
           }
         })
 
+        context.edges.length > 0 && observationSrcLines.push({ value: `` })
+
+        context.edges.map(edge => {
+          observationSrcLines.push({ value: `${edge.sourceCustomId} -> ${edge.targetCustomId}` })
+        })
+
         lines.push(...observationSrcLines.map(line => ({ ...line, isObservationSrc: true })))
 
         lines.push({ value: `"""` })
-
-        console.log(lines.map(line => line.value).join('\n'))
 
         return {
           toml: lines
