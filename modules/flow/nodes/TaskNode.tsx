@@ -177,7 +177,7 @@ export const TaskNode = ({
   }
 
   const handleTaskRun = () => {
-    machine.send("TRY_RUN_TASK")
+    globalServices.workspaceService.send("TRY_RUN_CURRENT_TASK")
   }
 
   return (
