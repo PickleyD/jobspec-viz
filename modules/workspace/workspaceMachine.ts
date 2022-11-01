@@ -87,7 +87,15 @@ type TaskInstructions = {
 
 type TaskRunResult = {
   id: string;
-  result: any;
+  result: Result;
+}
+
+type Result = {
+  value: string;
+  error: string;
+  val64: string;
+  vars64: string;
+  vars: {[key: string]: any};
 }
 
 type Nodes = {
