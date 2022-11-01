@@ -5,7 +5,7 @@ import { useContext } from "react";
 import pipelineVarsData from "../../../../data/jobTypeSpecificPipelineVars.json"
 import { JOB_TYPE } from "../../../workspace/workspaceMachine";
 
-export interface PowerTextAreaProps {
+export interface PowerTextArrayFieldProps {
     label: string;
     value: string;
     onChange: (newValue: string) => void;
@@ -16,14 +16,14 @@ export interface PowerTextAreaProps {
 
 const jobTypeSelector = (state: any) => state.context.type
 
-export const PowerTextArea = ({
+export const PowerTextArrayField = ({
     label,
     value,
     onChange,
     incomingNodes,
-    placeholder = "",
+    placeholder = "Enter each item on a new line",
     optional = false
-}: PowerTextAreaProps) => {
+}: PowerTextArrayFieldProps) => {
 
     const globalServices = useContext(GlobalStateContext);
 
@@ -35,11 +35,12 @@ export const PowerTextArea = ({
     const jobTypeSpecificPipelineVars = pipelineVarsData[jobType]
 
     const handleItemSelected = (item: string) => {
-        onChange(`${value || ""}$(${item})`)
+        const newVal = `${value || ""}$(${item})`
+        onChange(`[${newVal.split('\n').join(",")}]`)
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        onChange(event.target.value)
+        onChange(`[${event.target.value.split('\n').join(",")}]`)
     }
 
     const items = [
@@ -58,7 +59,7 @@ export const PowerTextArea = ({
             <textarea
                 onChange={handleChange}
                 placeholder={placeholder}
-                value={value}
+                value={convertValueToNewlines(value)}
                 className="textarea textarea-bordered h-24"
             />
             <div className="dropdown">
@@ -80,4 +81,8 @@ export const PowerTextArea = ({
             </div>
         </div>
     </div>
+}
+
+const convertValueToNewlines = (value: string) => {
+    return value ? value.slice(1, -1).split(",").join("\n") : ""
 }

@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField } from "./fields";
+import { PowerTextField, PowerTextArrayField } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const valuesSelector = (state: any) => state.context.taskSpecific.values;
@@ -18,7 +18,7 @@ export const SumTaskNode = (nodeProps: NodeProps) => {
 
     return (
         <TaskNode {...nodeProps}>
-            <PowerTextField
+            <PowerTextArrayField
                 label="Values"
                 value={values}
                 onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { values: newValue } })}

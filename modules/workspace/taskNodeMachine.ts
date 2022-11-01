@@ -80,7 +80,7 @@ const validateTask = (context: TaskNodeContext) => {
     }
     case "SUM": {
       // TODO: Think how to validate tasks where 'propagateResult' may be false on inputs when parsing pipeline
-      result = context.incomingNodes.length > 0 || context.taskSpecific.values.length > 0
+      result = true //context.incomingNodes.length > 0 || (context.taskSpecific.values && context.taskSpecific.values.length > 0)
       break;
     }
     case "MULTIPLY": {
