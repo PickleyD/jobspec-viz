@@ -189,7 +189,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         initial: "revalidating",
         states: {
           revalidating: {
-            entry: ["setCurrentTaskPendingRun"],
+            entry: ["setCurrentTaskPendingRun", "resetNextTask"],
             always: [
               { target: "idle" },
             ]
@@ -208,6 +208,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   { to: task.ref.id }
                 )),
                 assign({
+                  parsedTaskOrder: [],
+                  currentTaskIndex: 0,
                   taskRunResults: []
                 }),
               ]
@@ -224,14 +226,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
               const newTaskCustomId = context.parsedTaskOrder[newIndex].id
 
-              const newTaskId = getTaskNodeByCustomId(context, newTaskCustomId)?.ref.id
-
               return [
                 assign({
                   currentTaskIndex: newIndex,
                   taskRunResults: context.taskRunResults.filter(trr => trr.id !== newTaskCustomId)
-                }),
-                send({ type: "REWIND" }, { to: newTaskId }),
+                })
               ]
             })
           },
@@ -574,6 +573,22 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
         return [
           send({ type: "SET_PENDING_RUN" }, { to: currentTaskId })
+        ]
+      }),
+      // @ts-ignore
+      resetNextTask: actions.pure((context, _) => {
+
+        const nextTaskIndex = context.currentTaskIndex + 1
+
+        if (nextTaskIndex >= context.parsedTaskOrder.length) return
+
+        const nextTask = context.parsedTaskOrder[context.currentTaskIndex + 1]
+        const nextTaskCustomId = nextTask.id
+
+        const nextTaskId = getTaskNodeByCustomId(context, nextTaskCustomId)?.ref.id
+
+        return [
+          send({ type: "RESET" }, { to: nextTaskId })
         ]
       }),
       validateJobTypeSpecificProps: assign({
