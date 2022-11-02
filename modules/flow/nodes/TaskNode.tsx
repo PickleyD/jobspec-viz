@@ -228,7 +228,7 @@ export const TaskNode = ({
                 isPendingRun && <div className="relative w-full h-full p-6 flex items-end justify-center">
                   <button
                     onClick={handleTaskRun}
-                    className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-800 hover:text-black"
+                    className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-700 hover:text-black"
                   >
                     <span className="px-2">Run Task</span>
                     <PlayIcon className="fill-current w-6 h-6" />
@@ -270,7 +270,7 @@ export const TaskNode = ({
             <div className="relative flex flex-col items-center">
               <Popover label={(open) => <label
                 tabIndex={0}
-                className={`border-gray-800 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+                className={`border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
               >
                 <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
                 <XMarkIcon className="swap-on h-4 w-4 text-white" />

@@ -69,7 +69,7 @@ export const CustomEdge = ({
                         <div className="h-full w-full flex items-center justify-center">
                             <Popover label={(open) => <label
                                 tabIndex={0}
-                                className={`shadow-widget border-gray-800 border-2 focus:border-2 fous:border-secondary hover:border-2 hover:border-secondary focus:border-secondary bg-base-100 h-8 w-8 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+                                className={`shadow-widget border-gray-700 border-2 focus:border-2 fous:border-secondary hover:border-2 hover:border-secondary focus:border-secondary bg-base-100 h-8 w-8 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
                             >
                                 <EyeIcon className="swap-off h-5 w-5 text-white" />
                                 <XMarkIcon className="swap-on h-5 w-5 text-white" />

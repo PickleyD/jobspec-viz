@@ -1,4 +1,4 @@
-import { ExpanderPanel } from "../../components"
+import { ExpanderPanel, Tooltip } from "../../components"
 import { BeakerIcon, ChevronRightIcon, ChevronLeftIcon, CheckCircleIcon } from "@heroicons/react/24/outline"
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useState } from "react";
@@ -77,17 +77,22 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
   return <ExpanderPanel className={className} icon={BeakerIcon}>
     <div className="flex items-center justify-center p-4">
       <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[14rem]">
-        <label className="label cursor-pointer flex gap-2">
-          <span className="label-text">Test Mode</span>
-          <input type="checkbox" className="toggle toggle-secondary" checked={testMode || testModeLoading} onChange={handleToggleTestMode} />
-        </label>
+        <div className="flex gap-1 items-center">
+          <label className="label cursor-pointer flex gap-2 items-center">
+            <span className="label-text">Test Mode</span>
+            <input type="checkbox" className="toggle toggle-secondary" checked={testMode || testModeLoading} onChange={handleToggleTestMode} />
+          </label>
+          <Tooltip className="text-sm text-gray-300" placement="bottom-end">
+            <p>Here is the generated TOML job spec. Copy and paste it into your Chainlink node UI when setting up your job!</p>
+          </Tooltip>
+        </div>
         <div className="flex flex-col gap-2">
           <div className="btn-group flex flex-row w-full">
-            <button onClick={handlePrevIndex} disabled={!testMode || currentTaskIndex === 0} className={`${testMode ? "" : "btn-disabled"} btn border-gray-800 hover:border-secondary focus:border-secondary btn-sm`}><ChevronLeftIcon className="w-5 h-5" /></button>
+            <button onClick={handlePrevIndex} disabled={!testMode || currentTaskIndex === 0} className={`${testMode ? "" : "btn-disabled"} btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}><ChevronLeftIcon className="w-5 h-5" /></button>
             <div className={`${testMode ? "" : "btn-disabled"} btn grow pointer-events-none cursor-default btn-sm normal-case`}>{testModeLoading ? "Loading..." : (currentTaskIndex >= taskInstructions.length || !testMode) ? <CheckCircleIcon className="w-5 h-5" /> : getTaskId(currentTaskIndex)}</div>
-            <button onClick={handleNextIndex} disabled={!testMode || currentTaskIndex >= taskInstructions.length} className={`${testMode ? "" : "btn-disabled"} btn border-gray-800 hover:border-secondary focus:border-secondary btn-sm`}><ChevronRightIcon className="w-5 h-5" /></button>
+            <button onClick={handleNextIndex} disabled={!testMode || currentTaskIndex >= taskInstructions.length} className={`${testMode ? "" : "btn-disabled"} btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}><ChevronRightIcon className="w-5 h-5" /></button>
           </div>
-          <progress className={`${testMode ? "" : "disabled"} progress bg-gray-800 ${testModeLoading ? "" : "progress-secondary"} w-56`} value={testModeLoading ? undefined : progress} max="100"></progress>
+          <progress className={`${testMode ? "" : "disabled"} progress bg-gray-700 ${testModeLoading ? "" : "progress-secondary"} w-56`} value={testModeLoading ? undefined : progress} max="100"></progress>
         </div>
         <div className="flex flex-col gap-1 w-full">
           {(latestTaskRunResult.value || latestTaskRunResult.error) && <p className="text-xs text-gray-300">Current Result:</p>}

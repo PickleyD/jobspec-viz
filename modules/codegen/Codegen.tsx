@@ -6,6 +6,7 @@ import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { ExpanderPanel } from "../../components";
 import { TomlLine } from "../workspace/workspaceMachine";
+import { Tooltip } from "../../components";
 
 export interface CodegenProps {
   className?: string;
@@ -51,32 +52,36 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
 
   return (
     <ExpanderPanel className={className} icon={CodeBracketIcon}>
-        <div
-          className="mockup-code text-sm bg-base-100 relative"
-          ref={codeRef}
-        >
+      <div
+        className="mockup-code text-sm bg-base-100 relative"
+        ref={codeRef}
+      >
+        <div className="absolute top-3.5 left-20 flex items-center gap-2">
           <label
             onClick={handleCopyToClipboard}
             tabIndex={0}
-            className={`${
-              showCheckIcon ? "swap-active" : ""
-            } swap swap-rotate pointer-events-auto btn btn-circle btn-sm absolute top-2.5 left-20 hover:border hover:border-white`}
+            className={`${showCheckIcon ? "swap-active" : ""
+              } swap swap-rotate pointer-events-auto btn btn-circle h-6 w-6 min-h-0 border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary`}
           >
-            <DocumentDuplicateIcon className="h-5 w-5 swap-off" />
-            <CheckIcon className="h-5 w-5 swap-on" />
+            <DocumentDuplicateIcon className="h-4 w-4 swap-off" />
+            <CheckIcon className="h-4 w-4 swap-on" />
           </label>
-          <div className="max-h-96 max-w-3xl overflow-auto pr-6">
-            {
-              toml.map((line, index) => <pre key={index} data-prefix=">" 
-              // Disable red/green validity indication unless can think of a way to handle 'propagateResult' of false on inputs,
-              // which is unknown without calling the graph endpoint
-              // className={`${line.valid === undefined ? "" : (line.valid === true ? "text-success" : "text-error")}`}
-              >
+          <Tooltip className="text-sm text-gray-300">
+            <p>Here is the generated TOML job spec. Copy and paste it into your Chainlink node UI when setting up your job!</p>
+          </Tooltip>
+        </div>
+        <div className="max-h-96 max-w-3xl overflow-auto pr-6">
+          {
+            toml.map((line, index) => <pre key={index} data-prefix=">"
+            // Disable red/green validity indication unless can think of a way to handle 'propagateResult' of false on inputs,
+            // which is unknown without calling the graph endpoint
+            // className={`${line.valid === undefined ? "" : (line.valid === true ? "text-success" : "text-error")}`}
+            >
               <code>{line.value}</code>
             </pre>)
-            }
-          </div>
+          }
         </div>
+      </div>
     </ExpanderPanel>
   );
 };
