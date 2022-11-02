@@ -50,7 +50,8 @@ type WorkspaceEvent =
     valid?: boolean;
   }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
-  | { type: "CONNECTION_END"; initialCoords: XYCoords }
+  | { type: "CONNECTION_END" }
+  | { type: "CONNECTION_SUCCESS"; initialCoords: XYCoords }
   | { type: "TOGGLE_TEST_MODE" }
   | { type: "STORE_TASK_RUN_RESULT"; nodeId: string, value: any; }
   | { type: "ADD_NEW_EDGE"; newEdge: Omit<CustomEdge, "id"> }
@@ -507,7 +508,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: [
           assign({
             isConnecting: (_context, _event) => false,
-          }),
+          })
+        ],
+      },
+      CONNECTION_SUCCESS: {
+        actions: [
           "addTaskNode",
           "regenerateToml"
         ],

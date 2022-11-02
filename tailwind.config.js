@@ -24,6 +24,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
+        hand: ["PatrickHand", "cursive"],
       },
       boxShadow: {
         widget: [

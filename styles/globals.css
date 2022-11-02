@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "PatrickHand";
+  src: url("../public/fonts/PatrickHand.ttf");
+}
+
 html,
 body {
   padding: 0;

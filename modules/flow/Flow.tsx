@@ -89,7 +89,8 @@ export const Flow = ({ className }: FlowProps) => {
       data: {
         type: taskType,
         machine: node.ref,
-        deletable: numNodes > 1
+        deletable: numNodes > 1,
+        numNodes: numNodes
       },
       position: coords,
       dragHandle: ".custom-drag-handle",
@@ -177,6 +178,8 @@ export const Flow = ({ className }: FlowProps) => {
 
   const handleConnectEnd: OnConnectEnd = (event) => {
 
+    globalServices.workspaceService.send("CONNECTION_END")
+
     // @ts-ignore
     const toExistingNodeId = event?.target?.dataset?.nodeid
 
@@ -194,7 +197,7 @@ export const Flow = ({ className }: FlowProps) => {
       y: (event.clientY - viewport.y) / viewport.zoom,
     });
 
-    globalServices.workspaceService.send("CONNECTION_END", {
+    globalServices.workspaceService.send("CONNECTION_SUCCESS", {
       initialCoords: { x: snappedCoords.snappedX, y: snappedCoords.snappedY },
     });
   };
