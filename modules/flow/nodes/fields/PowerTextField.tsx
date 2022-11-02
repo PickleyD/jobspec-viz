@@ -56,7 +56,7 @@ export const PowerTextField = ({
         </label>
         <div className="flex items-center gap-1">
             <input
-                value={value}
+                value={value || ""}
                 onChange={handleChange}
                 type="text"
                 className="input input-bordered w-full max-w-xs"

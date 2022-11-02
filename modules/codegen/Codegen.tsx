@@ -67,7 +67,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           </label>
           <div className="max-h-96 max-w-3xl overflow-auto pr-6">
             {
-              toml.map(line => <pre data-prefix=">" 
+              toml.map((line, index) => <pre key={index} data-prefix=">" 
               // Disable red/green validity indication unless can think of a way to handle 'propagateResult' of false on inputs,
               // which is unknown without calling the graph endpoint
               // className={`${line.valid === undefined ? "" : (line.valid === true ? "text-success" : "text-error")}`}

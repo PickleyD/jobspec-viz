@@ -65,7 +65,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
   }
 
   useEffect(() => {
-    setProgress((100 / taskInstructions.length) * (currentTaskIndex))
+    setProgress(taskInstructions.length > 0 ? (100 / taskInstructions.length) * (currentTaskIndex) : 0)
   }, [currentTaskIndex])
 
   const getTaskId = (index: number) => {
