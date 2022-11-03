@@ -685,7 +685,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               )
               break;
             }
-            case "HTTP": {
+            case "BRIDGE": {
               const processedRequestData = taskSpecific.requestData ? taskSpecific.requestData.replace(/\s/g, "").replace(/"/g, '\\\\"') : ""
 
               observationSrcLines.push(
