@@ -35,8 +35,8 @@ export const CborParseTaskNode = (nodeProps: NodeProps) => {
                     value={mode}
                     onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { mode: event.target.value } })}
                 >
-                    <option value="diet">diet</option>
-                    <option value="standard">standard</option>
+                    <option value="diet">Diet</option>
+                    <option value="standard">Standard</option>
                 </select>
             </div>
         </TaskNode>

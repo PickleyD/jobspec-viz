@@ -27,7 +27,7 @@ export type TaskNodeEvent =
   | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
   | { type: "RESET" };
 
-export const tasks = ["HTTP", "JSONPARSE", "CBORPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
+export const tasks = ["HTTP", "BRIDGE", "JSONPARSE", "CBORPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
 
 export interface TaskNodeContext {
@@ -61,6 +61,11 @@ const validateTask = (context: TaskNodeContext) => {
     case "HTTP": {
       result = context.taskSpecific.url
         && context.taskSpecific.url.length > 0
+      break;
+    }
+    case "BRIDGE": {
+      result = context.taskSpecific.name
+        && context.taskSpecific.name.length > 0
       break;
     }
     case "JSONPARSE": {

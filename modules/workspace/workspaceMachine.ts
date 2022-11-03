@@ -685,6 +685,17 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               )
               break;
             }
+            case "HTTP": {
+              const processedRequestData = taskSpecific.requestData ? taskSpecific.requestData.replace(/\s/g, "").replace(/"/g, '\\\\"') : ""
+
+              observationSrcLines.push(
+                { value: `${customId} [type="bridge"`, valid: isValid },
+                { value: `${spacer}  name="${taskSpecific.name || ""}"`, valid: isValid },
+                { value: `${spacer}  requestData="${processedRequestData}"`, valid: isValid },
+                { value: `${spacer}  async="${taskSpecific.async || "no"}"]`, valid: isValid },
+              )
+              break;
+            }
             case "JSONPARSE": {
               observationSrcLines.push(
                 { value: `${customId} [type="jsonparse"`, valid: isValid },

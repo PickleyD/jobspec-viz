@@ -1,5 +1,6 @@
 export * from "./TaskNode"
 export * from "./HttpTaskNode"
+export * from "./BridgeTaskNode"
 export * from "./DivideTaskNode"
 export * from "./MultiplyTaskNode"
 export * from "./MeanTaskNode"

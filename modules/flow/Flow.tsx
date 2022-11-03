@@ -21,6 +21,7 @@ const Background = dynamic<BackgroundProps>(
 import {
   TaskNode,
   HttpTaskNode,
+  BridgeTaskNode,
   JsonParseTaskNode,
   CborParseTaskNode,
   EthTxTaskNode,
@@ -100,6 +101,9 @@ export const Flow = ({ className }: FlowProps) => {
     switch (taskType) {
       case "HTTP":
         flowElement.type = "httpTask";
+        break;
+      case "BRIDGE":
+        flowElement.type = "bridgeTask";
         break;
       case "JSONPARSE":
         flowElement.type = "jsonParseTask";
@@ -252,6 +256,7 @@ export const Flow = ({ className }: FlowProps) => {
     () => ({
       task: TaskNode,
       httpTask: HttpTaskNode,
+      bridgeTask: BridgeTaskNode,
       jsonParseTask: JsonParseTaskNode,
       cborParseTask: CborParseTaskNode,
       ethTxTask: EthTxTaskNode,
