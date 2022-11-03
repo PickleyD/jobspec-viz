@@ -693,6 +693,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               )
               break;
             }
+            case "CBORPARSE": {
+              observationSrcLines.push(
+                { value: `${customId} [type="cborparse"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"`, valid: isValid },
+                { value: `${spacer}  mode="${taskSpecific.mode || "diet"}"]`, valid: isValid },
+              )
+              break;
+            }
             case "ETHTX": {
               observationSrcLines.push(
                 { value: `${customId} [type="ethtx"`, valid: isValid },

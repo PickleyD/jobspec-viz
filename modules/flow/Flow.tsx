@@ -22,6 +22,7 @@ import {
   TaskNode,
   HttpTaskNode,
   JsonParseTaskNode,
+  CborParseTaskNode,
   EthTxTaskNode,
   DivideTaskNode,
   MultiplyTaskNode,
@@ -102,6 +103,9 @@ export const Flow = ({ className }: FlowProps) => {
         break;
       case "JSONPARSE":
         flowElement.type = "jsonParseTask";
+        break;
+      case "CBORPARSE":
+        flowElement.type = "cborParseTask";
         break;
       case "ETHTX":
         flowElement.type = "ethTxTask";
@@ -249,6 +253,7 @@ export const Flow = ({ className }: FlowProps) => {
       task: TaskNode,
       httpTask: HttpTaskNode,
       jsonParseTask: JsonParseTaskNode,
+      cborParseTask: CborParseTaskNode,
       ethTxTask: EthTxTaskNode,
       divideTask: DivideTaskNode,
       multiplyTask: MultiplyTaskNode,

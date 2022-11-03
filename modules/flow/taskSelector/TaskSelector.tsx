@@ -13,7 +13,7 @@ const categories: Array<Category> = [
     },
     {
         name: "Parsing",
-        tasks: ["JSONPARSE"]
+        tasks: ["JSONPARSE", "CBORPARSE"]
     },
     {
         name: "Math",
