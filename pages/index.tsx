@@ -15,6 +15,10 @@ const Home: NextPage = () => {
 
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
 
+  const [newProjectHeroDisplayed, setNewProjectHeroDisplayed] = useState<boolean>(true);
+
+  const handleNewEmptyProject = () => setNewProjectHeroDisplayed(false)
+
   return (
     <div className="bg-primary h-screen w-screen">
       <Head>
@@ -25,34 +29,42 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      { true &&
-      <div className="absolute z-50 h-full w-full pointer-events-auto backdrop-blur-sm flex items-center justify-center p-8">
-        <div className="bg-base-100 relative shadow-widget h-full w-full max-w-[800px] max-h-[500px] rounded-lg flex flex-col items-start justify-start gap-8">
-          <div className="absolute top-4 right-4 h-96 w-96 z-10">
-            <div className="relative h-96 w-96">
-              <Image src="/blob.svg" layout="fill" />
-              <div className="absolute top-12 h-40 w-full">
-                <div className="relative h-full w-full">
-                  <Image src="/illustration.svg" layout="fill" />
+      {newProjectHeroDisplayed &&
+        <div className="absolute z-50 h-full w-full pointer-events-auto backdrop-blur-sm flex items-center justify-center p-8">
+          <div className="bg-base-100 relative shadow-widget h-full w-full max-w-[800px] max-h-[500px] rounded-lg flex flex-col items-start justify-start gap-8">
+            <div className="absolute top-4 right-4 h-96 w-96 z-10">
+              <div className="relative h-96 w-96">
+                <Image src="/blob.svg" layout="fill" />
+                <div className="absolute top-12 h-40 w-full">
+                  <div className="relative h-full w-full">
+                    <Image src="/illustration.svg" layout="fill" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="z-20 flex flex-col items-start justify-center gap-6 p-8">
+              <div className="flex flex-col items-start justify-center gap-8 py-4">
+                <div className="relative h-20 w-[141px]">
+                  <Image src="/linkit.svg" alt="linkit logo" layout="fill" />
+                </div>
+                <h2 className="text-gray-300 text-sm font-bold max-w-sm">Learn, create, and test your next Chainlink job spec for free - <span className="text-secondary">directly from your web browser</span></h2>
+              </div>
+              <div className="divider max-w-[400px]" />
+              <div className="flex flex-col gap-2">
+                <div className="">
+                  <p className="text-gray-300 text-sm font-bold max-w-sm">Start a new empty project or pick from a handful of examples to give yourself a headstart</p>
+                </div>
+                <div className="z-20 flex items-center justify-center h-28">
+                  <div className="btn btn-outline" onClick={handleNewEmptyProject}>New Empty Project</div>
+                  <div className="divider divider-horizontal"></div>
+                  <div className="p-8">Something else</div>
+                  <div className="divider divider-horizontal"></div>
+                  <div className="p-8">Something else</div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="z-20 flex flex-col items-start justify-center gap-4 px-8 py-12">
-            <div className="relative h-20 w-[141px]">
-              <Image src="/linkit.svg" layout="fill" />
-            </div>
-            <h2 className="text-sm italic bold max-w-md text-center">Create, test and debug your next Chainlink job</h2>
-          </div>
-          <div className="z-20 flex items-center justify-center h-28">
-            <div className="p-8">Step 1</div>
-            <div className="divider divider-horizontal"></div>
-            <div className="p-8">Step 2</div>
-            <div className="divider divider-horizontal"></div>
-            <div className="p-8">Step 3</div>
-          </div>
         </div>
-      </div>
       }
       {/* 
       {helpMsgDisplayed && (
