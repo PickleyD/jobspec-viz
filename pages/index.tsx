@@ -25,11 +25,13 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="absolute z-50 h-full w-full pointer-events-none backdrop-blur-sm flex items-center justify-center p-8">
+      <div className="absolute z-50 h-full w-full pointer-events-auto backdrop-blur-sm flex items-center justify-center p-8">
         <div className="bg-base-300 shadow-widget h-full w-full max-w-[800px] max-h-[500px] rounded-lg flex flex-col items-center justify-center gap-8">
           <div className="flex flex-col items-center justify-center gap-4">
-          <h1 className="text-3xl">Chainlink Job Playground</h1>
-          <h2 className="text-xl italic max-w-md text-center">The fun and easy way to create, learn and test Chainlink job specs</h2>
+            <div className="relative h-20 w-full">
+              <Image src="/linkit.svg" layout="fill" />
+            </div>
+            <h2 className="text-sm italic bold max-w-md text-center">Create, test and debug your next Chainlink job</h2>
           </div>
           <div className="flex items-center justify-center h-28">
             <div className="p-8">Step 1</div>
