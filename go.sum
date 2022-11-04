@@ -289,6 +289,8 @@ github.com/pelletier/go-toml/v2 v2.0.5 h1:ipoSadvV8oGUjnUbMub59IDPPwfxF694nG/jwb
 github.com/pelletier/go-toml/v2 v2.0.5/go.mod h1:OMHamSCAODeSsVrwwvcJOaoN0LIUIaFVNZzmWyNfXas=
 github.com/pickleyd/chainlink v1.8.2-0.20221025131401-5dea1c36539e h1:p62Str0W3xQ8hnJGdp0NZ5fY++lhNTj4PUYVxTUQKPY=
 github.com/pickleyd/chainlink v1.8.2-0.20221025131401-5dea1c36539e/go.mod h1:GSfnyXvJUao/JbIGspNz8FI5Sn/VYv6DTSBuo6X8Ltk=
+github.com/pickleyd/chainlink v1.8.2-0.20221104000401-bd9f2befcb70 h1:ViW35ZOO6RFeY1gzM14Z7JjL3F+HwIGrtwemsLbcFrE=
+github.com/pickleyd/chainlink v1.8.2-0.20221104000401-bd9f2befcb70/go.mod h1:GSfnyXvJUao/JbIGspNz8FI5Sn/VYv6DTSBuo6X8Ltk=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
