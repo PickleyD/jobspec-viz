@@ -47,7 +47,7 @@ const Home: NextPage = () => {
                 <div className="relative h-20 w-[141px]">
                   <Image src="/linkit.svg" alt="linkit logo" layout="fill" />
                 </div>
-                <h2 className="text-gray-300 text-sm font-bold max-w-sm">Learn, create, and test your next Chainlink job spec for free — <span className="text-secondary">directly from your web browser</span></h2>
+                <h2 className="text-gray-300 text-sm font-bold max-w-sm">Learn, create, and test your next Chainlink job spec — <span className="text-secondary">directly from your web browser</span></h2>
               </div>
               <div className="divider max-w-[400px]" />
               <div className="flex flex-col gap-2">
