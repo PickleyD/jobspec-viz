@@ -2,11 +2,12 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField, PowerTextArea, TaskConfigTabs } from "./fields";
+import { PowerTextField, PowerTextArea, TaskConfigTabs, TextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const nameSelector = (state: any) => state.context.taskSpecific.name;
 const requestDataSelector = (state: any) => state.context.taskSpecific.requestData;
+const mockResponseDataSelector = (state: any) => state.context.mock.mockResponseData;
 const asyncSelector = (state: any) => state.context.taskSpecific.async;
 
 export const BridgeTaskNode = (nodeProps: NodeProps) => {
@@ -15,6 +16,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
   const name = useSelector(machine, nameSelector);
   const requestData = useSelector(machine, requestDataSelector);
   const async = useSelector(machine, asyncSelector);
+  const mockResponseData = useSelector(machine, mockResponseDataSelector);
 
   const incomingNodes = useSelector(machine, incomingNodesSelector);
 
@@ -52,7 +54,13 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
           </div>
         </>}
         test={<>
-        Test section
+          <TextArea
+            className="h-48"
+            label="Mock Response"
+            placeholder="Provide a mock bridge response to test the rest of your pipeline with"
+            value={mockResponseData}
+            onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseData: newValue } })}
+          />
         </>}
       />
     </TaskNode>

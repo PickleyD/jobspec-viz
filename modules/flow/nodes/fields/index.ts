@@ -1,4 +1,5 @@
 export * from "./PowerTextField"
+export * from "./TextArea"
 export * from "./PowerTextArea"
 export * from "./PowerTextArrayField"
 export * from "./TaskConfigTabs"

@@ -30,6 +30,10 @@ export type TaskNodeEvent =
 export const tasks = ["HTTP", "BRIDGE", "JSONPARSE", "CBORPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN"] as const
 export type TASK_TYPE = typeof tasks[number]
 
+type TaskMock = {
+  mockResponseData?: any;
+}
+
 export interface TaskNodeContext {
   customId?: string;
   coords: XYCoords;
@@ -37,6 +41,7 @@ export interface TaskNodeContext {
   incomingNodes: Array<string>;
   outgoingNodes: Array<string>;
   taskSpecific: any;
+  mock: TaskMock;
   isValid: boolean;
   runResult: any;
 }
@@ -48,6 +53,7 @@ const defaultContext: TaskNodeContext = {
   incomingNodes: [],
   outgoingNodes: [],
   taskSpecific: {},
+  mock: {},
   isValid: false,
   runResult: undefined
 };

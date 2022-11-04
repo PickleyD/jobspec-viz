@@ -12,6 +12,7 @@ export interface PowerTextAreaProps {
     incomingNodes: Array<string>;
     placeholder?: string;
     optional?: boolean;
+    className?: string;
 }
 
 const jobTypeSelector = (state: any) => state.context.type
@@ -22,7 +23,8 @@ export const PowerTextArea = ({
     onChange,
     incomingNodes,
     placeholder = "",
-    optional = false
+    optional = false,
+    className = ""
 }: PowerTextAreaProps) => {
 
     const globalServices = useContext(GlobalStateContext);
@@ -47,7 +49,7 @@ export const PowerTextArea = ({
         ...(incomingNodes ?? [])
     ]
 
-    return <div className="form-control w-full max-w-xs">
+    return <div className={`${className} form-control w-full max-w-xs`}>
         <label className="label pb-0">
             <span className="label-text">{label}</span>
             {
@@ -59,7 +61,7 @@ export const PowerTextArea = ({
                 onChange={handleChange}
                 placeholder={placeholder}
                 value={value}
-                className="textarea textarea-bordered h-24"
+                className="textarea textarea-bordered h-full"
             />
             <div className="dropdown">
                 <label tabIndex={0} className="m-1">
