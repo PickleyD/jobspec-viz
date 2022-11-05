@@ -14,6 +14,7 @@ export type Test = {
     want?: Var;
     want64?: string;
     expectError?: boolean;
+    mockResponse?: any;
 }
 
 export const generateTest = (test: Test, inputs64Override?: Array<string>) => {
@@ -29,7 +30,7 @@ const handleVarsConversion = (vars: Test["vars"], inputs: Test["inputs"]) => {
         "api/var-helper",
         {
             ...vars && { vars: vars },
-            ...inputs && { inputs: inputs }
+            ...inputs && { inputs: inputs },
         },
     )
 }
@@ -43,7 +44,8 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
             name: test.task,
             options: test.options,
             ...inputs64 && { inputs64: inputs64 },
-            ...vars64 && { vars64: vars64 }
+            ...vars64 && { vars64: vars64 },
+            ...test.mockResponse && { mockResponse: test.mockResponse }
         }
     ).then(
         (taskResponse) => {

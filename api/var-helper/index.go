@@ -23,15 +23,17 @@ type Var struct {
 }
 
 type Input struct {
-	Vars   map[string]Var
-	Inputs []Var
-	Want   Var
+	Vars         map[string]Var
+	Inputs       []Var
+	Want         Var
+	MockResponse Var
 }
 
 type Response struct {
-	Vars64   string   `json:"vars64"`
-	Inputs64 []string `json:"inputs64"`
-	Want64   string   `json:"want64"`
+	Vars64         string   `json:"vars64"`
+	Inputs64       []string `json:"inputs64"`
+	Want64         string   `json:"want64"`
+	MockResponse64 string   `json:"mockResponse64"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -59,14 +61,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Want
 	wantBase64 := ""
-	if i.Want.Value != "" || i.Want.Values != nil {
+	if i.Want.Value != "" || i.Want.Values != nil || i.Want.Keep != nil {
 		wantBase64 = customToBase64(convertBasedOnTypeParam(i.Want))
 	}
 
+	// Mock Response
+	mockResponseBase64 := ""
+	if i.MockResponse.Value != "" || i.MockResponse.Values != nil || i.MockResponse.Keep != nil {
+		mockResponseBase64 = customToBase64(convertBasedOnTypeParam(i.MockResponse))
+	}
+
 	response := Response{
-		Vars64:   varsBase64,
-		Inputs64: inputsBase64,
-		Want64:   wantBase64,
+		Vars64:         varsBase64,
+		Inputs64:       inputsBase64,
+		Want64:         wantBase64,
+		MockResponse64: mockResponseBase64,
 	}
 
 	jDataResponse, errJsonResponse := json.Marshal(response)

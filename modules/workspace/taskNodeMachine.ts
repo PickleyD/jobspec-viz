@@ -315,29 +315,29 @@ export const createTaskNodeMachine = (
       },
       services: {
         runTask: (context, event) => {
-
-          return fetch("/api/task", {
-            method: "POST",
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(
-              {
-                id: context.customId,
-                name: context.taskType.toLowerCase(),
-                inputs64: 'input64s' in event ? [...event.input64s] : [],
-                vars64: 'vars64' in event ? event.vars64 : "",
-                options: {
-                  ...context.taskSpecific
+            return fetch("/api/task", {
+              method: "POST",
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(
+                {
+                  id: context.customId,
+                  name: context.taskType.toLowerCase(),
+                  inputs64: 'input64s' in event ? [...event.input64s] : [],
+                  vars64: 'vars64' in event ? event.vars64 : "",
+                  options: {
+                    ...context.taskSpecific
+                  },
+                  mockResponse: context.mock.mockResponseData
                 }
-              }
-            )
-          })
-            .then(res => res.json().then(json => {
-              return res.ok ? json : Promise.reject(json);
-            }))
-        }
+              )
+            })
+              .then(res => res.json().then(json => {
+                return res.ok ? json : Promise.reject(json);
+              }))
+          }
       },
       guards: {
         hasNoIncomingNodes: (context, event) => {

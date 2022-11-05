@@ -18,9 +18,10 @@ type Task struct {
 	Id   string
 	Name string
 	// Inputs  []interface{}
-	Inputs64 []string
-	Options  map[string]interface{}
-	Vars64   string
+	Inputs64     []string
+	Options      map[string]interface{}
+	Vars64       string
+	MockResponse interface{}
 }
 
 type Response struct {
@@ -47,46 +48,63 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		vars = inputVars.Val.(map[string]interface{})
 	}
-	pipelineVars := pipeline.NewVarsFrom(vars)
 
-	task, taskErr := getTask(TaskType(t.Name), t.Options)
+	response := Response{}
 
-	if taskErr != nil {
-		// TODO: Define and return different error types
-		msg := "Bad request"
-		http.Error(w, msg, http.StatusBadRequest)
-	}
+	if t.MockResponse != nil {
+		vars[t.Id] = t.MockResponse
 
-	inputs := make([]pipeline.Result, 0, len(t.Inputs64))
-	for _, r := range t.Inputs64 {
-		inputsDec, _ := base64.StdEncoding.DecodeString(r)
+		varsEnc := customToBase64(vars)
 
-		inputsTemp := pipeline.JSONSerializable{}
-		inputsTemp.UnmarshalJSON(inputsDec)
+		response = Response{
+			Value:  fmt.Sprintf("%v", t.MockResponse),
+			Val64:  customToBase64(t.MockResponse),
+			Vars:   vars,
+			Vars64: varsEnc,
+			Error:  "",
+		}
+	} else {
+		pipelineVars := pipeline.NewVarsFrom(vars)
 
-		inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
-	}
+		task, taskErr := getTask(TaskType(t.Name), t.Options)
 
-	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
+		if taskErr != nil {
+			// TODO: Define and return different error types
+			msg := "Bad request"
+			http.Error(w, msg, http.StatusBadRequest)
+		}
 
-	// Append the result to the vars
-	// TODO - existence check?
-	vars[t.Id] = result.Value
+		inputs := make([]pipeline.Result, 0, len(t.Inputs64))
+		for _, r := range t.Inputs64 {
+			inputsDec, _ := base64.StdEncoding.DecodeString(r)
 
-	varsEnc := customToBase64(vars)
-	resultValEnc := customToBase64(result.Value)
+			inputsTemp := pipeline.JSONSerializable{}
+			inputsTemp.UnmarshalJSON(inputsDec)
 
-	resultErr := ""
-	if result.Error != nil {
-		resultErr = result.Error.Error()
-	}
+			inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
+		}
 
-	response := Response{
-		Value:  fmt.Sprintf("%v", result.Value),
-		Val64:  resultValEnc,
-		Vars:   vars,
-		Vars64: varsEnc,
-		Error:  resultErr,
+		result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
+
+		// Append the result to the vars
+		// TODO - existence check?
+		vars[t.Id] = result.Value
+
+		varsEnc := customToBase64(vars)
+		resultValEnc := customToBase64(result.Value)
+
+		resultErr := ""
+		if result.Error != nil {
+			resultErr = result.Error.Error()
+		}
+
+		response = Response{
+			Value:  fmt.Sprintf("%v", result.Value),
+			Val64:  resultValEnc,
+			Vars:   vars,
+			Vars64: varsEnc,
+			Error:  resultErr,
+		}
 	}
 
 	jsonSer := pipeline.JSONSerializable{
@@ -101,6 +119,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jData)
+
 }
 
 func customToBase64(input interface{}) string {
