@@ -22,6 +22,7 @@ export type TaskNodeEvent =
   | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
   | { type: "SET_CUSTOM_ID"; value: string }
   | { type: "SET_TASK_SPECIFIC_PROPS"; value: object }
+  | { type: "SET_MOCK_RESPONSE"; value: object }
   | { type: "UPDATE_COORDS"; value: XYCoords }
   | { type: "SET_PENDING_RUN" }
   | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
@@ -286,6 +287,14 @@ export const createTaskNodeMachine = (
             "revalidateTask"
           ],
         },
+        SET_MOCK_RESPONSE: {
+          actions: assign({
+            mock: (context, event) => ({
+              ...context.mock,
+              ...event.value,
+            }),
+          }),
+        },
         UPDATE_COORDS: {
           actions: [
             assign({
@@ -315,29 +324,29 @@ export const createTaskNodeMachine = (
       },
       services: {
         runTask: (context, event) => {
-            return fetch("/api/task", {
-              method: "POST",
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(
-                {
-                  id: context.customId,
-                  name: context.taskType.toLowerCase(),
-                  inputs64: 'input64s' in event ? [...event.input64s] : [],
-                  vars64: 'vars64' in event ? event.vars64 : "",
-                  options: {
-                    ...context.taskSpecific
-                  },
-                  mockResponse: context.mock.mockResponseData
-                }
-              )
-            })
-              .then(res => res.json().then(json => {
-                return res.ok ? json : Promise.reject(json);
-              }))
-          }
+          return fetch("/api/task", {
+            method: "POST",
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+              {
+                id: context.customId,
+                name: context.taskType.toLowerCase(),
+                inputs64: 'input64s' in event ? [...event.input64s] : [],
+                vars64: 'vars64' in event ? event.vars64 : "",
+                options: {
+                  ...context.taskSpecific
+                },
+                mockResponse: context.mock.mockResponseData
+              }
+            )
+          })
+            .then(res => res.json().then(json => {
+              return res.ok ? json : Promise.reject(json);
+            }))
+        }
       },
       guards: {
         hasNoIncomingNodes: (context, event) => {
