@@ -9,7 +9,7 @@ const methodSelector = (state: any) => state.context.taskSpecific.method;
 const urlSelector = (state: any) => state.context.taskSpecific.url;
 const requestDataSelector = (state: any) => state.context.taskSpecific.requestData;
 const enabledMockSelector = (state: any) => state.context.mock.enabled;
-const mockResponseDataSelector = (state: any) => state.context.mock.mockResponseData;
+const mockResponseDataInputSelector = (state: any) => state.context.mock.mockResponseDataInput;
 
 export const HttpTaskNode = (nodeProps: NodeProps) => {
   const { machine } = nodeProps.data;
@@ -17,7 +17,7 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
   const method = useSelector(machine, methodSelector);
   const url = useSelector(machine, urlSelector);
   const requestData = useSelector(machine, requestDataSelector);
-  const mockResponseData = useSelector(machine, mockResponseDataSelector);
+  const mockResponseDataInput = useSelector(machine, mockResponseDataInputSelector);
   const enabledMock = useSelector(machine, enabledMockSelector);
 
   const incomingNodes = useSelector(machine, incomingNodesSelector);
@@ -73,8 +73,9 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
             disabled={!enabledMock}
             className="h-48"
             placeholder="Provide a mock bridge response to test the rest of your pipeline with"
-            value={mockResponseData}
-            onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseData: newValue } })}
+            value={mockResponseDataInput}
+            onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseDataInput: newValue } })}
+            onValidJsonChange={(newJson) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseData: newJson } })}
           />
         </>
         }

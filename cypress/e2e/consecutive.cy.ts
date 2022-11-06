@@ -4,9 +4,10 @@ const tasks: Array<Test> = [
     {
         task: "http", name: "http request", inputs: [], options: {
             method: "GET",
-            url: "https://reqres.in/api/users?page=2",
+            url: "http://dummy.url",
             allowUnrestrictedNetworkAccess: "true"
         },
+        mockResponse: "{\"page\":2,\"per_page\":6}"
     },
     {
         task: "jsonparse", name: "jsonparse the http response", inputs: [], options: {

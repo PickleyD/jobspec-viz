@@ -40,7 +40,7 @@ export const PowerTextArrayField = ({
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        onChange(`[${event.target.value.split('\n').join(",")}]`)
+        onChange(event.target.value.length > 0 ? `[${event.target.value.split('\n').join(",")}]` : "")
     }
 
     const items = [

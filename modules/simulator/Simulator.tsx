@@ -98,7 +98,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
           {(latestTaskRunResult.value || latestTaskRunResult.error) && <p className="text-xs text-gray-300">Current Result:</p>}
           <div className="flex flex-col gap-1">
             {
-              latestTaskRunResult.value && <div className="flex flex-col">
+              taskRunResults.length > 0 && <div className="flex flex-col">
                 <p className="text-sm text-gray-300">Value:</p>
                 <p className="text-sm text-secondary overflow-auto max-h-[10rem]">{latestTaskRunResult.value}</p>
               </div>

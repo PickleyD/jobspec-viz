@@ -56,6 +56,7 @@ const defaultContext: TaskNodeContext = {
   outgoingNodes: [],
   taskSpecific: {},
   mock: {
+    mockResponseData: undefined,
     enabled: true
   },
   isValid: false,
@@ -342,7 +343,7 @@ export const createTaskNodeMachine = (
                 options: {
                   ...context.taskSpecific
                 },
-                mockResponse: context.mock.enabled ? context.mock.mockResponseData : undefined
+                ...context.mock.enabled && { mockResponse: context.mock.mockResponseData }
               }
             )
           })

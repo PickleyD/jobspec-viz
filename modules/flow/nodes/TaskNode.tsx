@@ -221,10 +221,10 @@ export const TaskNode = ({
               <TrashIcon className="fill-current w-6" />
             </div>
           }
-          {!isIdle &&
+          {!isIdle && !isPendingRun &&
             <div className="absolute top-0 right-0 bottom-0 left-0 transparent z-20">
               <div className="absolute top-0 right-0 bottom-0 left-0 bg-base-100 opacity-50 rounded-md" />
-              {
+              {/* {
                 isPendingRun && <div className="relative w-full h-full p-6 flex items-end justify-center">
                   <button
                     onClick={handleTaskRun}
@@ -234,7 +234,7 @@ export const TaskNode = ({
                     <PlayIcon className="fill-current w-6 h-6" />
                   </button>
                 </div>
-              }
+              } */}
             </div>
           }
           <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
