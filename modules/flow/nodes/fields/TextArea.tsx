@@ -1,7 +1,7 @@
 import React from "react";
 
-export interface TextAreaProps {
-    label: string;
+export interface TextAreaProps extends Omit<React.ComponentProps<"textarea">, "onChange"> {
+    label?: string;
     value: string;
     onChange: (newValue: string) => void;
     placeholder?: string;
@@ -15,7 +15,8 @@ export const TextArea = ({
     onChange,
     placeholder = "",
     optional = false,
-    className = ""
+    className = "",
+    ...rest
 }: TextAreaProps) => {
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -23,17 +24,19 @@ export const TextArea = ({
     }
 
     return <div className={`${className} form-control w-full max-w-xs`}>
-        <label className="label pb-0">
+        {label && <label className="label pb-0">
             <span className="label-text">{label}</span>
             {
                 optional && <span className="label-text-alt">(optional)</span>
             }
         </label>
+        }
         <textarea
             onChange={handleChange}
             placeholder={placeholder}
             value={value}
             className={`textarea textarea-bordered h-full`}
+            {...rest}
         />
     </div>
 }

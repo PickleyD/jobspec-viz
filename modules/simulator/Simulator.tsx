@@ -79,7 +79,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
       <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[14rem]">
         <div className="flex gap-1 items-center">
           <label className="label cursor-pointer flex gap-2 items-center">
-            <span className="label-text">Test Mode</span>
+            <span className={`label-text ${testMode || testModeLoading ? "" : "text-gray-500"}`}>Test Mode</span>
             <input type="checkbox" className="toggle toggle-secondary" checked={testMode || testModeLoading} onChange={handleToggleTestMode} />
           </label>
           <Tooltip className="text-sm text-gray-300" placement="bottom-end">

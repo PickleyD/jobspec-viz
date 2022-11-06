@@ -33,6 +33,7 @@ export type TASK_TYPE = typeof tasks[number]
 
 type TaskMock = {
   mockResponseData?: any;
+  enabled: boolean;
 }
 
 export interface TaskNodeContext {
@@ -54,7 +55,9 @@ const defaultContext: TaskNodeContext = {
   incomingNodes: [],
   outgoingNodes: [],
   taskSpecific: {},
-  mock: {},
+  mock: {
+    enabled: true
+  },
   isValid: false,
   runResult: undefined
 };
@@ -339,7 +342,7 @@ export const createTaskNodeMachine = (
                 options: {
                   ...context.taskSpecific
                 },
-                mockResponse: context.mock.mockResponseData
+                mockResponse: context.mock.enabled ? context.mock.mockResponseData : undefined
               }
             )
           })
