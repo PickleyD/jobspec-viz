@@ -5,7 +5,7 @@ export interface TextAreaProps extends Omit<React.ComponentProps<"textarea">, "o
     label?: string;
     value: string;
     onChange: (newValue: string) => void;
-    onValidJsonChange: (newJson: any) => void;
+    onValidJsonChange?: (newJson: string) => void;
     placeholder?: string;
     optional?: boolean;
     className?: string;
@@ -16,7 +16,7 @@ export const TextArea = ({
     label,
     value,
     onChange,
-    onValidJsonChange,
+    onValidJsonChange = (_: string) => {},
     placeholder = "",
     optional = false,
     className = "",

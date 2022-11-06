@@ -49,6 +49,13 @@ type WorkspaceEvent =
     value?: string;
     valid?: boolean;
   }
+  | {
+    type: "SET_JOB_TYPE_SPECIFIC_VARIABLES";
+    jobType: string;
+    variable: string;
+    value?: string;
+    valid?: boolean;
+  }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
   | { type: "CONNECTION_END" }
   | { type: "CONNECTION_SUCCESS"; initialCoords: XYCoords }
@@ -68,6 +75,7 @@ interface WorkspaceContext {
   edges: CustomEdge[];
   nodes: Nodes;
   jobTypeSpecific: any;
+  jobTypeVariables: any;
   totalNodesAdded: number;
   totalEdgesAdded: number;
   isConnecting: boolean;
@@ -304,6 +312,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           },
         },
       },
+      jobTypeVariables: {
+        directRequest: {
+          logTopics: {
+            value: "",
+            valid: true
+          }
+        }
+      },
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
       taskRunResults: [],
@@ -496,6 +512,25 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           }),
           "validateJobTypeSpecificProps",
           "regenerateToml"
+        ],
+      },
+      SET_JOB_TYPE_SPECIFIC_VARIABLES: {
+        actions: [
+          assign({
+            jobTypeVariables: (context, event) => {
+              let current = { ...context.jobTypeVariables };
+
+              if (event.value !== undefined)
+                current[event.jobType][event.variable].value = event.value;
+
+              // if (event.valid !== undefined)
+              //   current[event.jobType][event.variable].valid = event.valid;
+
+              return current;
+            },
+          }),
+          // "validateJobTypeSpecificProps",
+          // "regenerateToml"
         ],
       },
       CONNECTION_START: {

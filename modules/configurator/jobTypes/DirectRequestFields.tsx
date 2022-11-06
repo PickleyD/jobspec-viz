@@ -6,11 +6,11 @@ const contractAddressValueSelector = (state: any) => state.context.jobTypeSpecif
 const minContractPaymentLinkJuelsSelector = (state: any) => state.context.jobTypeSpecific.directRequest.minContractPaymentLinkJuels.value;
 const minIncomingConfirmationsSelector = (state: any) => state.context.jobTypeSpecific.directRequest.minIncomingConfirmations.value;
 
-export interface WebhokFieldsProps {
+export interface DirectRequestFieldsProps {
   className?: string;
 }
 
-export const DirectRequestFields = ({ className = "" }) => {
+export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps) => {
 
   const globalServices = useContext(GlobalStateContext);
 

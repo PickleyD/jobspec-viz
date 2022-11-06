@@ -9,7 +9,7 @@ export interface CronFieldsProps {
   className?: string;
 }
 
-export const CronFields = ({ className = "" }) => {
+export const CronFields = ({ className = "" }: CronFieldsProps) => {
 
   const globalServices = useContext(GlobalStateContext);
 
