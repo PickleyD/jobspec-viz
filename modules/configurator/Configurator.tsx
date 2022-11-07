@@ -14,6 +14,7 @@ export interface ConfiguratorProps {
 const jobTypeSelector = (state: any) => state.context.type;
 const nameSelector = (state: any) => state.context.name;
 const externalJobIdSelector = (state: any) => state.context.externalJobId;
+const testModeSelector = (state: any) => state.matches("testMode") || state.matches("testModeLoading")
 
 const renderJobTypeSpecificFields = (jobType: JOB_TYPE) => {
   switch (jobType) {
@@ -26,12 +27,12 @@ const renderJobTypeSpecificFields = (jobType: JOB_TYPE) => {
   }
 }
 
-const renderJobTypeSpecificVariableSetters = (jobType: JOB_TYPE) => {
+const renderJobTypeSpecificVariableSetters = (jobType: JOB_TYPE, props: any) => {
   switch (jobType) {
     // case "cron":
     //   return <CronVariableSetters />
     case "directrequest":
-      return <DirectRequestVariableSetters />
+      return <DirectRequestVariableSetters {...props} />
     default:
       return null
   }
@@ -53,6 +54,13 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
     externalJobIdSelector
   )
 
+  const testMode = useSelector(
+    globalServices.workspaceService,
+    testModeSelector
+  )
+
+  const disabled = testMode
+
   return (
     <ExpanderPanel className={className} icon={CogIcon}>
       <div className="p-4 pr-6">
@@ -71,6 +79,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
             <span className="label-text text-xs">Job Type</span>
           </label>
           <select
+            disabled={disabled}
             className="select select-bordered select-sm"
             value={jobType}
             onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
@@ -95,6 +104,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
                     <span className="label-text-alt text-xs">(optional)</span>
                   </label>
                   <input
+                    disabled={disabled}
                     type="text"
                     placeholder="Type here"
                     className="input input-bordered input-sm w-full max-w-xs"
@@ -109,6 +119,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
                     <span className="label-text-alt text-xs">(optional)</span>
                   </label>
                   <input
+                    disabled={disabled}
                     type="text"
                     placeholder="Type here"
                     className="input input-bordered input-sm w-full max-w-xs"
@@ -126,7 +137,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           }
           test={<>
             {
-              renderJobTypeSpecificVariableSetters(jobType)
+              renderJobTypeSpecificVariableSetters(jobType, { disabled })
             }
             {/* <div className="form-control w-full max-w-xs">
               <label className="label">

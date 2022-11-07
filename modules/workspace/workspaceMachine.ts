@@ -44,14 +44,14 @@ type WorkspaceEvent =
   | { type: "SET_EXTERNAL_JOB_ID"; value: string }
   | {
     type: "SET_JOB_TYPE_SPECIFIC_PROPS";
-    jobType: string;
+    jobType: JOB_TYPE;
     prop: string;
     value?: string;
     valid?: boolean;
   }
   | {
     type: "SET_JOB_TYPE_SPECIFIC_VARIABLES";
-    jobType: string;
+    jobType: JOB_TYPE;
     variable: string;
     value?: string;
     valid?: boolean;
@@ -74,8 +74,8 @@ interface WorkspaceContext {
   externalJobId: string;
   edges: CustomEdge[];
   nodes: Nodes;
-  jobTypeSpecific: any;
-  jobTypeVariables: any;
+  jobTypeSpecific: JobTypeFieldMap;
+  jobTypeVariables: JobTypeFieldMap;
   totalNodesAdded: number;
   totalEdgesAdded: number;
   isConnecting: boolean;
@@ -84,6 +84,14 @@ interface WorkspaceContext {
   toml: Array<TomlLine>;
   parsedTaskOrder: Array<TaskInstructions>;
   currentTaskIndex: number;
+  jobLevelVars64?: string;
+}
+
+type JobTypeFieldMap = { [key in JOB_TYPE]: { [key: string]: Field } }
+
+type Field = {
+  value: string;
+  valid: boolean;
 }
 
 type TaskInstructions = {
@@ -104,7 +112,7 @@ type Result = {
   error: string;
   val64: string;
   vars64: string;
-  vars: {[key: string]: any};
+  vars: { [key: string]: any };
 }
 
 type Nodes = {
@@ -145,20 +153,20 @@ const validateJobTypeSpecifics = (jobTypeSpecifics: any, event: any) => {
   switch (jobType) {
     case "cron":
       break;
-    case "directRequest":
-      validatedJobTypeSpecifics.directRequest.contractAddress.valid =
+    case "directrequest":
+      validatedJobTypeSpecifics.directrequest.contractAddress.valid =
         validateAddress(
-          validatedJobTypeSpecifics.directRequest.contractAddress.value
+          validatedJobTypeSpecifics.directrequest.contractAddress.value
         );
-      validatedJobTypeSpecifics.directRequest.minContractPaymentLinkJuels.valid =
-        validatedJobTypeSpecifics.directRequest.minContractPaymentLinkJuels
+      validatedJobTypeSpecifics.directrequest.minContractPaymentLinkJuels.valid =
+        validatedJobTypeSpecifics.directrequest.minContractPaymentLinkJuels
           .value !== "" &&
-        validatedJobTypeSpecifics.directRequest.minContractPaymentLinkJuels
+        validatedJobTypeSpecifics.directrequest.minContractPaymentLinkJuels
           .value >= 0;
-      validatedJobTypeSpecifics.directRequest.minIncomingConfirmations.valid =
-        validatedJobTypeSpecifics.directRequest.minIncomingConfirmations
+      validatedJobTypeSpecifics.directrequest.minIncomingConfirmations.valid =
+        validatedJobTypeSpecifics.directrequest.minIncomingConfirmations
           .value !== "" &&
-        validatedJobTypeSpecifics.directRequest.minIncomingConfirmations
+        validatedJobTypeSpecifics.directrequest.minIncomingConfirmations
           .value >= 1;
   }
 
@@ -178,20 +186,40 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         }
       },
       testModeLoading: {
-        invoke: {
-          src: "parseSpec",
-          id: "parseSpec",
-          onDone: {
-            target: "testMode",
-            actions: assign((_, event) => {
-              return {
-                parsedTaskOrder: event.data.tasks
+        initial: "parsingDag",
+        states: {
+          parsingDag: {
+            invoke: {
+              src: "parseSpec",
+              id: "parseSpec",
+              onDone: {
+                target: "processingJobLevelVariables",
+                actions: assign((_, event) => {
+                  return {
+                    parsedTaskOrder: event.data.tasks
+                  }
+                }),
+              },
+              onError: {
+                target: "#workspace.error"
               }
-            }),
+            }
           },
-          onError: {
-            target: "error"
-          }
+          processingJobLevelVariables: {
+            invoke: {
+              src: "processJobLevelVariables",
+              id: "processJobLevelVariables",
+              onDone: {
+                target: "#workspace.testMode",
+                actions: [
+                  assign((_, event) => ({
+                    jobLevelVars64: event.data.vars64
+                  }))
+                ]
+              },
+              onError: { target: "#workspace.error" }
+            }
+          },
         }
       },
       testMode: {
@@ -203,7 +231,19 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               { target: "idle" },
             ]
           },
-          idle: {}
+          idle: {
+            on: {
+              TRY_RUN_CURRENT_TASK: { target: "processingCurrentTask" }
+            }
+          },
+          processingCurrentTask: {
+            entry: ['processCurrentTask'],
+            always: [
+              { target: "idle" }
+            ]
+          },
+          error: {
+          }
         },
         on: {
           TOGGLE_TEST_MODE: {
@@ -219,7 +259,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 assign({
                   parsedTaskOrder: [],
                   currentTaskIndex: 0,
-                  taskRunResults: []
+                  taskRunResults: [],
+                  jobLevelVars64: undefined
                 }),
               ]
             })
@@ -243,29 +284,29 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               ]
             })
           },
-          TRY_RUN_CURRENT_TASK: {
-            // @ts-ignore
-            actions: actions.pure((context: WorkspaceContext, event) => {
+          // TRY_RUN_CURRENT_TASK: {
+          //   // @ts-ignore
+          //   actions: actions.pure((context: WorkspaceContext, event) => {
 
-              if (context.currentTaskIndex >= context.parsedTaskOrder.length) return
+          //     if (context.currentTaskIndex >= context.parsedTaskOrder.length) return
 
-              // Try to execute the current task and then proceed if successful
-              const currentTask = context.parsedTaskOrder[context.currentTaskIndex]
-              const currentTaskCustomId = currentTask.id
+          //     // Try to execute the current task and then proceed if successful
+          //     const currentTask = context.parsedTaskOrder[context.currentTaskIndex]
+          //     const currentTaskCustomId = currentTask.id
 
-              const currentTaskId = getTaskNodeByCustomId(context, currentTaskCustomId)?.ref.id
+          //     const currentTaskId = getTaskNodeByCustomId(context, currentTaskCustomId)?.ref.id
 
-              const input64s = currentTask.inputs
-                .filter(input => input.propagateResult === true)
-                .map(input => context.taskRunResults.find(trr => trr.id === input.id)?.result.val64)
+          //     const input64s = currentTask.inputs
+          //       .filter(input => input.propagateResult === true)
+          //       .map(input => context.taskRunResults.find(trr => trr.id === input.id)?.result.val64)
 
-              const vars64 = context.taskRunResults.length > 0 ? context.taskRunResults[context.taskRunResults.length - 1].result.vars64 : ""
+          //     const vars64 = context.taskRunResults.length > 0 ? context.taskRunResults[context.taskRunResults.length - 1].result.vars64 : ""
 
-              return [
-                send({ type: "TRY_RUN_TASK", input64s, vars64 }, { to: currentTaskId })
-              ]
-            })
-          },
+          //     return [
+          //       send({ type: "TRY_RUN_TASK", input64s, vars64 }, { to: currentTaskId })
+          //     ]
+          //   })
+          // },
           SIMULATOR_NEXT_TASK: {
             target: ".revalidating",
             actions: assign((context, event) => {
@@ -297,7 +338,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             valid: true,
           },
         },
-        directRequest: {
+        directrequest: {
           contractAddress: {
             value: "",
             valid: false,
@@ -313,19 +354,25 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         },
       },
       jobTypeVariables: {
-        directRequest: {
+        directrequest: {
           logTopics: {
             value: "",
             valid: true
+          },
+          logData: {
+            value: "",
+            valid: true
           }
-        }
+        },
+        cron: {}
       },
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
       taskRunResults: [],
       toml: [],
       parsedTaskOrder: [],
-      currentTaskIndex: 0
+      currentTaskIndex: 0,
+      jobLevelVars64: undefined
     },
     on: {
       "SET_REACT_FLOW_INSTANCE": {
@@ -518,10 +565,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: [
           assign({
             jobTypeVariables: (context, event) => {
-              let current = { ...context.jobTypeVariables };
+              let current = context.jobTypeVariables;
 
               if (event.value !== undefined)
-                current[event.jobType][event.variable].value = event.value;
+                context.jobTypeVariables[event.jobType][event.variable].value = event.value;
 
               // if (event.valid !== undefined)
               //   current[event.jobType][event.variable].valid = event.valid;
@@ -598,6 +645,24 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           .then(res => res.json().then(json => {
             return res.ok ? json : Promise.reject(json);
           }))
+      },
+      processJobLevelVariables: (context, event) => {
+        return fetch("/api/var-helper", {
+          method: "POST",
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(
+            {
+              // TODO: Need to prepend with jobSpec instead of jobRun for non job-specific variables
+              jobRun: Object.fromEntries(Object.entries(context.jobTypeVariables[context.type]).map(([k, v]) => [k, ({ value: v.value, type: "string" })]))
+            }
+          )
+        })
+          .then(res => res.json().then(json => {
+            return res.ok ? json : Promise.reject(json);
+          }))
       }
     },
     actions: {
@@ -665,6 +730,30 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           },
         };
       }),
+      // @ts-ignore
+      processCurrentTask: actions.pure((context: WorkspaceContext, event) => {
+
+        if (context.currentTaskIndex >= context.parsedTaskOrder.length) return
+
+        // Try to execute the current task and then proceed if successful
+        const currentTask = context.parsedTaskOrder[context.currentTaskIndex]
+        const currentTaskCustomId = currentTask.id
+
+        const currentTaskId = getTaskNodeByCustomId(context, currentTaskCustomId)?.ref.id
+
+        const input64s = currentTask.inputs
+          .filter(input => input.propagateResult === true)
+          .map(input => context.taskRunResults.find(trr => trr.id === input.id)?.result.val64)
+
+        const vars64 = context.taskRunResults.length > 0 ?
+          context.taskRunResults[context.taskRunResults.length - 1].result.vars64
+          :
+          context.jobLevelVars64
+
+        return [
+          send({ type: "TRY_RUN_TASK", input64s, vars64 }, { to: currentTaskId })
+        ]
+      }),
       regenerateToml: assign((context, event) => {
 
         const { type: jobType, name, externalJobId } = context
@@ -684,9 +773,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             }
           case "directrequest":
             {
-              const { value: contractAddress, valid: contractAddressValid } = context.jobTypeSpecific.directRequest.contractAddress
-              const { value: minContractPaymentLinkJuels, valid: minContractPaymentLinkJuelsValid } = context.jobTypeSpecific.directRequest.minContractPaymentLinkJuels
-              const { value: minIncomingConfirmations, valid: minIncomingConfirmationsValid } = context.jobTypeSpecific.directRequest.minIncomingConfirmations
+              const { value: contractAddress, valid: contractAddressValid } = context.jobTypeSpecific.directrequest.contractAddress
+              const { value: minContractPaymentLinkJuels, valid: minContractPaymentLinkJuelsValid } = context.jobTypeSpecific.directrequest.minContractPaymentLinkJuels
+              const { value: minIncomingConfirmations, valid: minIncomingConfirmationsValid } = context.jobTypeSpecific.directrequest.minIncomingConfirmations
               lines.push({ value: `contractAddress = "${contractAddress}"`, valid: contractAddressValid })
               minContractPaymentLinkJuels !== "" && lines.push({ value: `minContractPaymentLinkJuels = "${minContractPaymentLinkJuels}"`, valid: minContractPaymentLinkJuelsValid })
               minIncomingConfirmations !== "" && lines.push({ value: `minIncomingConfirmations = ${minIncomingConfirmations}`, valid: minIncomingConfirmationsValid })

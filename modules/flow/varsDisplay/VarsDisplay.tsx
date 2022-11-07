@@ -5,7 +5,7 @@ export interface VarsDisplayProps {
     vars: { [key: string]: string }
 }
 
-const SHOW_TRUNCATOR_CHARS_LIMIT = 150
+const SHOW_TRUNCATOR_CHARS_LIMIT = 80
 
 export const VarsDisplay = ({ vars }: VarsDisplayProps) => {
 
@@ -18,9 +18,9 @@ export const VarsDisplay = ({ vars }: VarsDisplayProps) => {
         <ul className="text-xs flex flex-col gap-2">
             {Object.keys(vars).map(key => {
 
-                const showTruncator = vars[key] && vars[key].length > SHOW_TRUNCATOR_CHARS_LIMIT
+                const showTruncator = vars[key] && JSON.stringify(vars[key]).length > SHOW_TRUNCATOR_CHARS_LIMIT
 
-                return <li className="flex flex-col gap-1">
+                return <li className="flex flex-col gap-1" key={key}>
                     <p className="font-bold text-secondary whitespace-nowrap">{key}:</p>
                     <div className="flex flex-row items-start w-full">
                         {showTruncator
@@ -32,7 +32,7 @@ export const VarsDisplay = ({ vars }: VarsDisplayProps) => {
                             :
                             <div className="basis-4 grow-0"></div>
                         }
-                        <p className={`min-w-0 basis-full grow-0 break-words ${shrink ? "text-ellipsis whitespace-nowrap overflow-hidden" : ""}`}>{vars[key]}</p>
+                        <p className={`min-w-0 basis-full grow-0 break-words ${shrink ? "whitespace-nowrap overflow-auto" : ""}`}>{JSON.stringify(vars[key])}</p>
                     </div>
                 </li>
             })}

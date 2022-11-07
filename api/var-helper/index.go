@@ -24,6 +24,8 @@ type Var struct {
 
 type Input struct {
 	Vars         map[string]Var
+	JobRun       map[string]Var
+	JobSpec      map[string]Var
 	Inputs       []Var
 	Want         Var
 	MockResponse Var
@@ -47,6 +49,23 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			varValues[k] = convertBasedOnTypeParam(v)
 		}
 	}
+	// JobRun
+	jobRunVars := make(map[string]interface{})
+	if i.JobRun != nil {
+		for k, v := range i.JobRun {
+			jobRunVars[k] = convertBasedOnTypeParam(v)
+		}
+	}
+	varValues["jobRun"] = jobRunVars
+	// JobSpec
+	jobSpecVars := make(map[string]interface{})
+	if i.JobSpec != nil {
+		for k, v := range i.JobSpec {
+			jobSpecVars[k] = convertBasedOnTypeParam(v)
+		}
+	}
+	varValues["jobSpec"] = jobSpecVars
+
 	varsBase64 := customToBase64(varValues)
 
 	// Inputs
