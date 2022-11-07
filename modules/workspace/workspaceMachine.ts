@@ -54,6 +54,7 @@ type WorkspaceEvent =
     jobType: JOB_TYPE;
     variable: string;
     value?: string;
+    values?: Array<string>;
     valid?: boolean;
   }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
@@ -75,7 +76,7 @@ interface WorkspaceContext {
   edges: CustomEdge[];
   nodes: Nodes;
   jobTypeSpecific: JobTypeFieldMap;
-  jobTypeVariables: JobTypeFieldMap;
+  jobTypeVariables: JobTypeVarFieldMap;
   totalNodesAdded: number;
   totalEdgesAdded: number;
   isConnecting: boolean;
@@ -91,6 +92,14 @@ type JobTypeFieldMap = { [key in JOB_TYPE]: { [key: string]: Field } }
 
 type Field = {
   value: string;
+  valid: boolean;
+}
+
+type JobTypeVarFieldMap = { [key in JOB_TYPE]: { [key: string]: JobLevelVarField } }
+
+type JobLevelVarField = {
+  value?: string;
+  values?: Array<string>;
   valid: boolean;
 }
 
@@ -357,7 +366,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         directrequest: {
           logTopics: {
             value: "",
-            valid: true
+            values: [],
+            valid: true,
           },
           logData: {
             value: "",
@@ -570,6 +580,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               if (event.value !== undefined)
                 context.jobTypeVariables[event.jobType][event.variable].value = event.value;
 
+              if (event.values !== undefined)
+                context.jobTypeVariables[event.jobType][event.variable].values = event.values;
+
               // if (event.valid !== undefined)
               //   current[event.jobType][event.variable].valid = event.valid;
 
@@ -656,7 +669,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           body: JSON.stringify(
             {
               // TODO: Need to prepend with jobSpec instead of jobRun for non job-specific variables
-              jobRun: Object.fromEntries(Object.entries(context.jobTypeVariables[context.type]).map(([k, v]) => [k, ({ value: v.value, type: "string" })]))
+              jobRun: Object.fromEntries(Object.entries(context.jobTypeVariables[context.type]).map(([k, v]) => {
+
+                return [k, ({ 
+                  ...v.values !== undefined && { values: v.values },
+                  ...(v.values === undefined && v.value !== undefined) && { value: v.value },
+                  type: "string" })]
+              }))
             }
           )
         })
