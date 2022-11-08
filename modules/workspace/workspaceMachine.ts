@@ -918,6 +918,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               )
               break;
             }
+            case "ETHABIDECODELOG": {
+              observationSrcLines.push(
+                { value: `${customId} [type="ethabidecodelog"`, valid: isValid },
+                { value: `${spacer}  abi="${taskSpecific.abi || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"`, valid: isValid },
+                { value: `${spacer}  topics="${taskSpecific.topics || ""}"]`, valid: isValid },
+              )
+              break;
+            }
           }
         })
 

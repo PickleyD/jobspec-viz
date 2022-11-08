@@ -12,6 +12,10 @@ const categories: Array<Category> = [
         tasks: ["HTTP", "BRIDGE"]
     },
     {
+        name: "Encoding & Decoding",
+        tasks: ["ETHABIDECODELOG"]
+    },
+    {
         name: "Parsing",
         tasks: ["JSONPARSE", "CBORPARSE"]
     },
