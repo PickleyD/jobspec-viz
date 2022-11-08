@@ -101,7 +101,12 @@ type JobLevelVarField = {
   value?: string;
   values?: Array<string>;
   valid: boolean;
+  type: DATA_TYPES;
+  fromType?: "hex" | "string"
 }
+
+const dataTypes = ["string", "bytes", "bytes32", "int", "float", "decimal", "bool", "address", "null"]
+type DATA_TYPES = typeof dataTypes[number]
 
 type TaskInstructions = {
   id: string;
@@ -368,10 +373,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             value: "",
             values: [],
             valid: true,
+            type: "string"
           },
           logData: {
             value: "",
-            valid: true
+            valid: true,
+            type: "bytes",
+            fromType: "hex"
           }
         },
         cron: {}
@@ -674,7 +682,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 return [k, ({ 
                   ...v.values !== undefined && { values: v.values },
                   ...(v.values === undefined && v.value !== undefined) && { value: v.value },
-                  type: "string" })]
+                  type: v.type || "string",
+                  fromType: v.fromType || "string"
+                 })]
               }))
             }
           )
