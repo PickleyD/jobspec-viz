@@ -10,16 +10,18 @@ import (
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pickleyd/chainlink/core/services/pipeline"
 	"github.com/pickleyd/jobspecviz/middleware"
 	"github.com/shopspring/decimal"
 )
 
 type Var struct {
-	Value  string
-	Values []string
-	Type   string
-	Keep   interface{}
+	Value    string
+	Values   []string
+	Type     string
+	FromType string
+	Keep     interface{}
 }
 
 type Input struct {
@@ -128,6 +130,12 @@ func convertBasedOnTypeParam(v Var) interface{} {
 	// TODO: Handle deeper nesting using recursion?
 	if v.Keep != nil {
 		return v.Keep
+	} else if v.Type == "string" {
+		if v.Value != "" {
+			return v.Value
+		} else if len(v.Values) > 0 {
+			return v.Values
+		}
 	} else if v.Type == "bytes32" {
 		if v.Value != "" {
 			return toBytes32(v.Value)
@@ -140,11 +148,11 @@ func convertBasedOnTypeParam(v Var) interface{} {
 		}
 	} else if v.Type == "bytes" {
 		if v.Value != "" {
-			return toBytes(v.Value)
+			return toBytes(v.Value, v.FromType)
 		} else if len(v.Values) > 0 {
 			var s [][]byte
 			for _, val := range v.Values {
-				s = append(s, toBytes(val))
+				s = append(s, toBytes(val, v.FromType))
 			}
 			return s
 		}
@@ -249,6 +257,9 @@ func toBytes32(s string) [32]byte {
 	return bytes32
 }
 
-func toBytes(s string) []byte {
+func toBytes(s string, fromType string) []byte {
+	if fromType == "hex" {
+		return hexutil.MustDecode(s)
+	}
 	return []byte(s)
 }

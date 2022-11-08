@@ -118,7 +118,12 @@ type JobLevelVarField = {
   value?: string;
   values?: Array<string>;
   valid: boolean;
-};
+  type: DATA_TYPES;
+  fromType?: "hex" | "string"
+}
+
+const dataTypes = ["string", "bytes", "bytes32", "int", "float", "decimal", "bool", "address", "null"]
+type DATA_TYPES = typeof dataTypes[number]
 
 type TaskInstructions = {
   id: string;
@@ -382,11 +387,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             value: "",
             values: [],
             valid: true,
+            type: "string"
           },
           logData: {
             value: "",
             valid: true,
-          },
+            type: "bytes",
+            fromType: "hex"
+          }
         },
         cron: {},
       },
@@ -738,26 +746,22 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             Accept: "application/json",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            // TODO: Need to prepend with jobSpec instead of jobRun for non job-specific variables
-            jobRun: Object.fromEntries(
-              Object.entries(context.jobTypeVariables[context.type]).map(
-                ([k, v]) => {
-                  return [
-                    k,
-                    {
-                      ...(v.values !== undefined && { values: v.values }),
-                      ...(v.values === undefined &&
-                        v.value !== undefined && { value: v.value }),
-                      type: "string",
-                    },
-                  ];
-                }
-              )
-            ),
-          }),
-        }).then((res) =>
-          res.json().then((json) => {
+          body: JSON.stringify(
+            {
+              // TODO: Need to prepend with jobSpec instead of jobRun for non job-specific variables
+              jobRun: Object.fromEntries(Object.entries(context.jobTypeVariables[context.type]).map(([k, v]) => {
+
+                return [k, ({ 
+                  ...v.values !== undefined && { values: v.values },
+                  ...(v.values === undefined && v.value !== undefined) && { value: v.value },
+                  type: v.type || "string",
+                  fromType: v.fromType || "string"
+                 })]
+              }))
+            }
+          )
+        })
+          .then(res => res.json().then(json => {
             return res.ok ? json : Promise.reject(json);
           })
         );
@@ -1112,6 +1116,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   valid: isValid,
                 }
               );
+              break;
+            }
+            case "ETHABIDECODELOG": {
+              observationSrcLines.push(
+                { value: `${customId} [type="ethabidecodelog"`, valid: isValid },
+                { value: `${spacer}  abi="${taskSpecific.abi || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"`, valid: isValid },
+                { value: `${spacer}  topics="${taskSpecific.topics || ""}"]`, valid: isValid },
+              )
               break;
             }
           }
