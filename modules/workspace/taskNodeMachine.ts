@@ -348,7 +348,9 @@ export const createTaskNodeMachine = (
             )
           })
             .then(res => res.json().then(json => {
-              return res.ok ? json : Promise.reject(json);
+              return res.ok ? json : {
+                error: json.error.message
+              }
             }))
         }
       },
