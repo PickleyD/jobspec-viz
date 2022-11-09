@@ -28,7 +28,7 @@ export type TaskNodeEvent =
   | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
   | { type: "RESET" };
 
-export const tasks = ["HTTP", "BRIDGE", "JSONPARSE", "CBORPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN", "ETHABIDECODELOG"] as const
+export const tasks = ["HTTP", "BRIDGE", "JSONPARSE", "CBORPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN", "ETHABIDECODE", "ETHABIDECODELOG"] as const
 export type TASK_TYPE = typeof tasks[number]
 
 type TaskMock = {
