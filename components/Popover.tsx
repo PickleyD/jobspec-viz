@@ -1,4 +1,4 @@
-import { Popover as HeadlessPopover, Transition } from "@headlessui/react"
+import { Popover as HeadlessPopover } from "@headlessui/react"
 import { Float } from '@headlessui-float/react';
 import type { Placement } from '@floating-ui/dom';
 
@@ -24,7 +24,7 @@ export const Popover = ({ className = "", content, label, placement = "bottom" }
                 portal
                 placement={placement}
                 autoUpdate={{ animationFrame: true }}>
-                <HeadlessPopover.Button className="focus:outline-none">
+                <HeadlessPopover.Button className="focus:outline-none grid">
                     {label(open)}
                 </HeadlessPopover.Button>
                 <HeadlessPopover.Panel className={`flex flex-col

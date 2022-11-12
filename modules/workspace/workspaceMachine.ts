@@ -931,8 +931,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
           switch (taskType) {
             case "HTTP": {
-              const processedRequestData = taskSpecific.requestData
-                ? taskSpecific.requestData
+              const processedRequestData = taskSpecific.requestData?.raw
+                ? taskSpecific.requestData.raw
                     .replace(/\s/g, "")
                     .replace(/"/g, '\\\\"')
                 : "";
@@ -940,11 +940,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="http"`, valid: isValid },
                 {
-                  value: `${spacer}  method=${taskSpecific.method || "GET"}`,
+                  value: `${spacer}  method=${taskSpecific.method?.raw || "GET"}`,
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  url="${taskSpecific.url || ""}"`,
+                  value: `${spacer}  url="${taskSpecific.url?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
@@ -955,8 +955,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "BRIDGE": {
-              const processedRequestData = taskSpecific.requestData
-                ? taskSpecific.requestData
+              const processedRequestData = taskSpecific.requestData?.raw
+                ? taskSpecific.requestData.raw
                     .replace(/\s/g, "")
                     .replace(/"/g, '\\\\"')
                 : "";
@@ -964,7 +964,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="bridge"`, valid: isValid },
                 {
-                  value: `${spacer}  name="${taskSpecific.name || ""}"`,
+                  value: `${spacer}  name="${taskSpecific.name?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
@@ -972,7 +972,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  async="${taskSpecific.async || "no"}"]`,
+                  value: `${spacer}  async="${taskSpecific.async?.raw || "no"}"]`,
                   valid: isValid,
                 }
               );
@@ -982,11 +982,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="jsonparse"`, valid: isValid },
                 {
-                  value: `${spacer}  data="${taskSpecific.data || ""}"`,
+                  value: `${spacer}  data="${taskSpecific.data?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  path="${taskSpecific.path || ""}"]`,
+                  value: `${spacer}  path="${taskSpecific.path?.raw || ""}"]`,
                   valid: isValid,
                 }
               );
@@ -996,11 +996,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="cborparse"`, valid: isValid },
                 {
-                  value: `${spacer}  data="${taskSpecific.data || ""}"`,
+                  value: `${spacer}  data="${taskSpecific.data?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  mode="${taskSpecific.mode || "diet"}"]`,
+                  value: `${spacer}  mode="${taskSpecific.mode?.raw || "diet"}"]`,
                   valid: isValid,
                 }
               );
@@ -1010,11 +1010,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="ethtx"`, valid: isValid },
                 {
-                  value: `${spacer}  to="${taskSpecific.to || ""}"`,
+                  value: `${spacer}  to="${taskSpecific.to?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  data="${taskSpecific.data || ""}"]`,
+                  value: `${spacer}  data="${taskSpecific.data?.raw || ""}"]`,
                   valid: isValid,
                 }
               );
@@ -1024,15 +1024,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="sum"`, valid: isValid },
                 {
-                  value: `${spacer}  values=<${taskSpecific.values || ""}>${
-                    taskSpecific.allowedFaults ? "" : "]"
+                  value: `${spacer}  values=<${taskSpecific.values?.raw || ""}>${
+                    taskSpecific.allowedFaults.raw ? "" : "]"
                   }`,
                   valid: isValid,
                 }
               );
               taskSpecific.allowedFaults &&
                 observationSrcLines.push({
-                  value: `${spacer}  allowedFaults=${taskSpecific.allowedFaults}]`,
+                  value: `${spacer}  allowedFaults=${taskSpecific.allowedFaults?.raw}]`,
                   valid: isValid,
                 });
               break;
@@ -1041,11 +1041,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="multiply"`, valid: isValid },
                 {
-                  value: `${spacer}  input="${taskSpecific.input || ""}"`,
+                  value: `${spacer}  input="${taskSpecific.input?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  times="${taskSpecific.times || ""}"]`,
+                  value: `${spacer}  times="${taskSpecific.times?.raw || ""}"]`,
                   valid: isValid,
                 }
               );
@@ -1055,16 +1055,16 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="divide"`, valid: isValid },
                 {
-                  value: `${spacer}  input="${taskSpecific.input || ""}"`,
+                  value: `${spacer}  input="${taskSpecific.input?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  divisor="${taskSpecific.divisor || ""}"`,
+                  value: `${spacer}  divisor="${taskSpecific.divisor?.raw || ""}"`,
                   valid: isValid,
                 },
                 {
                   value: `${spacer}  precision="${
-                    taskSpecific.precision || ""
+                    taskSpecific.precision?.raw || ""
                   }"]`,
                   valid: isValid,
                 }
@@ -1088,7 +1088,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  precision=${taskSpecific.precision || 2}]`,
+                  value: `${spacer}  precision=${taskSpecific.precision?.raw || 2}]`,
                   valid: isValid,
                 }
               );
@@ -1121,25 +1121,25 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             case "ETHABIDECODELOG": {
               observationSrcLines.push(
                 { value: `${customId} [type="ethabidecodelog"`, valid: isValid },
-                { value: `${spacer}  abi="${taskSpecific.abi || ""}"`, valid: isValid },
-                { value: `${spacer}  data="${taskSpecific.data || ""}"`, valid: isValid },
-                { value: `${spacer}  topics="${taskSpecific.topics || ""}"]`, valid: isValid },
+                { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data?.raw || ""}"`, valid: isValid },
+                { value: `${spacer}  topics="${taskSpecific.topics?.raw || ""}"]`, valid: isValid },
               )
               break;
             }
             case "ETHABIDECODE": {
               observationSrcLines.push(
                 { value: `${customId} [type="ethabidecode"`, valid: isValid },
-                { value: `${spacer}  abi="${taskSpecific.abi || ""}"`, valid: isValid },
-                { value: `${spacer}  data="${taskSpecific.data || ""}"]`, valid: isValid },
+                { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data?.raw || ""}"]`, valid: isValid },
               )
               break;
             }
             case "ETHABIENCODE": {
               observationSrcLines.push(
                 { value: `${customId} [type="ethabiencode"`, valid: isValid },
-                { value: `${spacer}  abi="${taskSpecific.abi || ""}"`, valid: isValid },
-                { value: `${spacer}  data="${taskSpecific.data || ""}"]`, valid: isValid },
+                { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data?.raw || ""}"]`, valid: isValid },
               )
               break;
             }

@@ -57,7 +57,14 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
             optional
             placeholder="Type request data in JSON format"
             value={requestData}
-            onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { requestData: newValue } })}
+            onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+              value: {
+                requestData: {
+                  raw: newValue,
+                  rich: newRichValue
+                }
+              }
+            })}
             incomingNodes={incomingNodes}
           />
         </>
