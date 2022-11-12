@@ -1127,6 +1127,22 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               )
               break;
             }
+            case "ETHABIDECODE": {
+              observationSrcLines.push(
+                { value: `${customId} [type="ethabidecode"`, valid: isValid },
+                { value: `${spacer}  abi="${taskSpecific.abi || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"]`, valid: isValid },
+              )
+              break;
+            }
+            case "ETHABIENCODE": {
+              observationSrcLines.push(
+                { value: `${customId} [type="ethabiencode"`, valid: isValid },
+                { value: `${spacer}  abi="${taskSpecific.abi || ""}"`, valid: isValid },
+                { value: `${spacer}  data="${taskSpecific.data || ""}"]`, valid: isValid },
+              )
+              break;
+            }
           }
         });
 

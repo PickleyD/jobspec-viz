@@ -13,7 +13,7 @@ const categories: Array<Category> = [
     },
     {
         name: "Encoding & Decoding",
-        tasks: ["ETHABIDECODELOG"]
+        tasks: ["ETHABIENCODE", "ETHABIDECODE", "ETHABIDECODELOG"]
     },
     {
         name: "Parsing",

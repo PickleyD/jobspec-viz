@@ -29,6 +29,8 @@ import {
   MultiplyTaskNode,
   MeanTaskNode,
   SumTaskNode,
+  EthAbiEncodeTaskNode,
+  EthAbiDecodeTaskNode,
   EthAbiDecodeLogTaskNode
 } from "./nodes";
 import clsx from "clsx";
@@ -129,6 +131,12 @@ export const Flow = ({ className }: FlowProps) => {
         break;
       case "ETHABIDECODELOG":
         flowElement.type = "ethAbiDecodeLogTask";
+        break;
+      case "ETHABIDECODE":
+        flowElement.type = "ethAbiDecodeTask";
+        break;
+      case "ETHABIENCODE":
+        flowElement.type = "ethAbiEncodeTask";
         break;
       default:
         flowElement.type = "task";
@@ -268,7 +276,9 @@ export const Flow = ({ className }: FlowProps) => {
       multiplyTask: MultiplyTaskNode,
       meanTask: MeanTaskNode,
       sumTask: SumTaskNode,
-      ethAbiDecodeLogTask: EthAbiDecodeLogTaskNode
+      ethAbiDecodeLogTask: EthAbiDecodeLogTaskNode,
+      ethAbiDecodeTask: EthAbiDecodeTaskNode,
+      ethAbiEncodeTask: EthAbiEncodeTaskNode
     }),
     []
   );
