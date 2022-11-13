@@ -46,16 +46,22 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
               <option value="DELETE">DELETE</option>
             </select>
           </div>
-          <PowerTextField
+          <PowerTextArea
             label="URL"
             value={url}
-            onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { url: newValue } })}
+            onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+              value: {
+                url: {
+                  raw: newValue,
+                  rich: newRichValue
+                }
+              }
+            })}
             incomingNodes={incomingNodes}
           />
           <PowerTextArea
             label="Request Data"
             optional
-            placeholder="Type request data in JSON format"
             value={requestData}
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {

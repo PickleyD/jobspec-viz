@@ -51,10 +51,14 @@ export const PowerTextArea = ({
   }
 
   const handleChange = (event: ContentEditableEvent) => {
-    if (event.type !== "input") return
     const newVal = stripSpanTags(event.target.value)
-    const richValue = wrapVariables(newVal)
-    onChange(newVal, richValue)
+    onChange(newVal, event.target.value)
+  }
+
+  const handleBlur = (event: any) => {
+    const currVal = stripSpanTags(event.target.innerHTML)
+    const richValue = wrapVariables(currVal)
+    onChange(currVal, richValue)
   }
 
   return (
@@ -67,6 +71,7 @@ export const PowerTextArea = ({
         <ContentEditable
           html={value.rich || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
           className="textarea textarea-bordered h-full pr-8"
         />
         <div className="absolute right-1 bottom-1">

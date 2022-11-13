@@ -932,7 +932,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           switch (taskType) {
             case "HTTP": {
               const processedRequestData = taskSpecific.requestData?.raw
-                ? taskSpecific.requestData.raw
+                ? taskSpecific.requestData?.raw
                     .replace(/\s/g, "")
                     .replace(/"/g, '\\\\"')
                 : "";
@@ -956,7 +956,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             }
             case "BRIDGE": {
               const processedRequestData = taskSpecific.requestData?.raw
-                ? taskSpecific.requestData.raw
+                ? taskSpecific.requestData?.raw
                     .replace(/\s/g, "")
                     .replace(/"/g, '\\\\"')
                 : "";
@@ -1025,7 +1025,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 { value: `${customId} [type="sum"`, valid: isValid },
                 {
                   value: `${spacer}  values=<${taskSpecific.values?.raw || ""}>${
-                    taskSpecific.allowedFaults.raw ? "" : "]"
+                    taskSpecific.allowedFaults?.raw ? "" : "]"
                   }`,
                   valid: isValid,
                 }
