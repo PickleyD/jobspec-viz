@@ -20,6 +20,12 @@ export interface PowerTextAreaProps {
 
 const jobTypeSelector = (state: any) => state.context.type;
 
+const wrapMatch = (match: string) => `<span class="text-secondary">${match}</span>`
+
+const wrapVariables = (input: string) => input.replace(/(?<!>)(?!<)\$\(.*?\)/g, wrapMatch)
+
+const stripSpanTags = (input: string) => input.replaceAll(/(<([^>]+)>)/ig, "");
+
 export const PowerTextArea = ({
   label,
   value = {raw: "", rich: ""},
@@ -39,13 +45,16 @@ export const PowerTextArea = ({
   const jobTypeSpecificPipelineVars = pipelineVarsData[jobType];
 
   const handleItemSelected = (item: string) => {
-    const newVal = `${value || ""}$(${item})`
-    onChange(newVal, newVal)
+    const newVal = `${value.raw || ""}$(${item})`
+    const richValue = wrapVariables(newVal)
+    onChange(newVal, richValue)
   }
 
   const handleChange = (event: ContentEditableEvent) => {
-    const newVal = event.target.value
-    onChange(newVal, newVal)
+    if (event.type !== "input") return
+    const newVal = stripSpanTags(event.target.value)
+    const richValue = wrapVariables(newVal)
+    onChange(newVal, richValue)
   }
 
   return (
@@ -55,12 +64,6 @@ export const PowerTextArea = ({
         {optional && <span className="label-text-alt">(optional)</span>}
       </label>
       <div className="relative">
-        {/* <textarea
-          onChange={handleChange}
-          placeholder={placeholder}
-          value={value}
-          className="textarea textarea-bordered h-full"
-        /> */}
         <ContentEditable
           html={value.rich || ""}
           onChange={handleChange}
