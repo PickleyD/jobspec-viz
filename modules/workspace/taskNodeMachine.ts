@@ -348,9 +348,7 @@ export const createTaskNodeMachine = (
                 name: context.taskType.toLowerCase(),
                 inputs64: 'input64s' in event ? [...event.input64s] : [],
                 vars64: 'vars64' in event ? event.vars64 : "",
-                options: {
-                  ...context.taskSpecific
-                },
+                options: Object.fromEntries(Object.entries(context.taskSpecific).map(([k, v]) => [k, v.raw])),
                 ...context.mock.enabled && { mockResponse: context.mock.mockResponseData }
               }
             )

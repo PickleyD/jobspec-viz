@@ -26,19 +26,26 @@ export const EthTxTaskNode = (nodeProps: NodeProps) => {
                 placeholder="Enter ETH address"
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
-                      to: {
-                        raw: newValue,
-                        rich: newRichValue
-                      }
+                        to: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
                     }
-                  })}
+                })}
                 incomingNodes={incomingNodes}
             />
             <PowerTextArea
                 label="Data"
                 value={data}
                 placeholder="Likely the output of an 'ETH ABI Encode' task"
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { data: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        data: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
         </TaskNode>

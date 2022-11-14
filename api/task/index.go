@@ -163,7 +163,7 @@ const (
 	// TaskTypeVRFV2            TaskType = "vrfv2"
 	// TaskTypeEstimateGasLimit TaskType = "estimategaslimit"
 	// TaskTypeETHCall          TaskType = "ethcall"
-	// TaskTypeETHTx            TaskType = "ethtx"
+	TaskTypeETHTx        TaskType = "ethtx"
 	TaskTypeETHABIEncode TaskType = "ethabiencode"
 	// TaskTypeETHABIEncode2    TaskType = "ethabiencode2"
 	TaskTypeETHABIDecode    TaskType = "ethabidecode"
@@ -311,8 +311,24 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	// 	task = &EstimateGasLimitTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeETHCall:
 	// 	task = &ETHCallTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeETHTx:
-	// 	task = &ETHTxTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeETHTx:
+		var opts pipeline.ETHTxTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ETHTxTask{
+			BaseTask:         baseTask,
+			From:             opts.From,
+			To:               opts.To,
+			Data:             opts.Data,
+			GasLimit:         opts.GasLimit,
+			TxMeta:           opts.TxMeta,
+			MinConfirmations: opts.MinConfirmations,
+			FailOnRevert:     opts.FailOnRevert,
+			EVMChainID:       opts.EVMChainID,
+			TransmitChecker:  opts.TransmitChecker,
+		}
 	case TaskTypeETHABIEncode:
 		var opts pipeline.ETHABIEncodeTask
 		if err := json.Unmarshal(jsonString, &opts); err != nil {
