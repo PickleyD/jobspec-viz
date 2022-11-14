@@ -526,8 +526,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: [
           assign({
             nodes: (context, event) => {
-              console.log(context.nodes.tasks)
-              console.log(event.nodeId)
               return {
                 ...context.nodes,
                 tasks: [

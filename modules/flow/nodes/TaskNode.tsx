@@ -170,7 +170,6 @@ export const TaskNode = ({
   };
 
   const handleTaskSelected = (task: TASK_TYPE) => {
-    console.log(machine)
     globalServices.workspaceService.send("REPLACE_TASK_NODE", {
       nodeId: machine.id,
       existing: {
