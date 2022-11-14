@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField, PowerTextArrayField } from "./fields";
+import { PowerTextArrayField, PowerTextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const valuesSelector = (state: any) => state.context.taskSpecific.values;
@@ -21,13 +21,27 @@ export const SumTaskNode = (nodeProps: NodeProps) => {
             <PowerTextArrayField
                 label="Values"
                 value={values}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { values: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        values: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
-            <PowerTextField
+            <PowerTextArea
                 label="Allowed Faults"
                 value={allowedFaults}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { allowedFaults: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        allowedFaults: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
                 optional
             />

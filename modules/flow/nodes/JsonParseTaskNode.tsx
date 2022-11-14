@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextArea, PowerTextField } from "./fields";
+import { PowerTextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
@@ -25,11 +25,18 @@ export const JsonParseTaskNode = (nodeProps: NodeProps) => {
                 onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { data: newValue } })}
                 incomingNodes={incomingNodes}
             />
-            <PowerTextField
+            <PowerTextArea
                 label="Path"
                 value={path}
                 placeholder="Comma delimited keys"
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { path: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                      path: {
+                        raw: newValue,
+                        rich: newRichValue
+                      }
+                    }
+                  })}
                 incomingNodes={incomingNodes}
             />
         </TaskNode>

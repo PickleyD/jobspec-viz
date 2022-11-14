@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField, PowerTextArea, TaskConfigTabs, TextArea } from "./fields";
+import { PowerTextArea, TaskConfigTabs, TextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const nameSelector = (state: any) => state.context.taskSpecific.name;
@@ -24,10 +24,17 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
     <TaskNode {...nodeProps}>
       <TaskConfigTabs
         config={<>
-          <PowerTextField
+          <PowerTextArea
             label="Name"
             value={name}
-            onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { name: newValue } })}
+            onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+              value: {
+                name: {
+                  raw: newValue,
+                  rich: newRichValue
+                }
+              }
+            })}
             incomingNodes={incomingNodes}
           />
           <PowerTextArea
