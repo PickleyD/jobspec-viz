@@ -9,7 +9,7 @@ type Category = {
 const categories: Array<Category> = [
     {
         name: "Data & Interactivity",
-        tasks: ["HTTP", "BRIDGE"]
+        tasks: ["HTTP", "BRIDGE", "ETHTX"]
     },
     {
         name: "Encoding & Decoding",
