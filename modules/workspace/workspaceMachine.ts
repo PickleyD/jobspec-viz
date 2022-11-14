@@ -99,6 +99,7 @@ interface WorkspaceContext {
   taskRunResults: TaskRunResult[];
   toml: Array<TomlLine>;
   parsedTaskOrder: Array<TaskInstructions>;
+  parsingError: string;
   currentTaskIndex: number;
   jobLevelVars64?: string;
 }
@@ -224,17 +225,24 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               src: "parseSpec",
               id: "parseSpec",
               onDone: {
-                target: "processingJobLevelVariables",
+                target: "inspectingParseResult",
                 actions: assign((_, event) => {
                   return {
-                    parsedTaskOrder: event.data.tasks,
+                    parsedTaskOrder: event.data.tasks || [],
+                    parsingError: event.data.error || ""
                   };
                 }),
               },
               onError: {
-                target: "#workspace.error",
+                target: "#workspace.idle",
               },
             },
+          },
+          inspectingParseResult: {
+            always: [
+              { target: "#workspace.idle", cond: "hasParsingError" },
+              { target: "processingJobLevelVariables" }
+            ]
           },
           processingJobLevelVariables: {
             invoke: {
@@ -248,7 +256,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   })),
                 ],
               },
-              onError: { target: "#workspace.error" },
+              onError: { target: "#workspace.idle" },
             },
           },
         },
@@ -282,6 +290,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 ),
                 assign({
                   parsedTaskOrder: [],
+                  parsingError: "",
                   currentTaskIndex: 0,
                   taskRunResults: [],
                   jobLevelVars64: undefined,
@@ -403,6 +412,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       taskRunResults: [],
       toml: [],
       parsedTaskOrder: [],
+      parsingError: "",
       currentTaskIndex: 0,
       jobLevelVars64: undefined,
     },
@@ -515,27 +525,31 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       REPLACE_TASK_NODE: {
         actions: [
           assign({
-            nodes: (context, event) => ({
-              ...context.nodes,
-              tasks: [
-                ...context.nodes.tasks.filter(
-                  (task) => task.ref.state.context.customId !== event.nodeId
-                ),
-                {
-                  // add a new taskNodeMachine actor with a unique name
-                  ref: spawn(
-                    createTaskNodeMachine({
-                      coords: event.existing.coords,
-                      taskType: event.newType,
-                      customId: event.existing.customId,
-                      incomingNodes: event.existing.incomingNodes,
-                      outgoingNodes: event.existing.outgoingNodes,
-                    }),
-                    event.nodeId
+            nodes: (context, event) => {
+              console.log(context.nodes.tasks)
+              console.log(event.nodeId)
+              return {
+                ...context.nodes,
+                tasks: [
+                  ...context.nodes.tasks.filter(
+                    (task) => task.ref.id !== event.nodeId
                   ),
-                },
-              ],
-            }),
+                  {
+                    // add a new taskNodeMachine actor with a unique name
+                    ref: spawn(
+                      createTaskNodeMachine({
+                        coords: event.existing.coords,
+                        taskType: event.newType,
+                        customId: event.existing.customId,
+                        incomingNodes: event.existing.incomingNodes,
+                        outgoingNodes: event.existing.outgoingNodes,
+                      }),
+                      event.nodeId
+                    ),
+                  },
+                ],
+              }
+            },
           }),
           "regenerateToml",
         ],
@@ -730,6 +744,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
     },
   },
   {
+    guards: {
+      hasParsingError: (context, event) => {
+        return context.parsingError.length > 0
+      }
+    },
     services: {
       parseSpec: (context, event) => {
         return fetch("/api/graph", {
@@ -744,11 +763,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               .map((line) => line.value)
               .join("\n")}`,
           }),
-        }).then((res) =>
-          res.json().then((json) => {
-            return res.ok ? json : Promise.reject(json);
-          })
-        );
+        })
+          .then(res => res.json().then(json => {
+            return json
+          }))
       },
       processJobLevelVariables: (context, event) => {
         return fetch("/api/var-helper", {

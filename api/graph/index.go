@@ -25,6 +25,7 @@ type Task struct {
 
 type Response struct {
 	Tasks []Task `json:"tasks"`
+	Error string `json:"error"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -34,27 +35,30 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	parsed, err := pipeline.Parse(input.Spec)
 
 	if err != nil {
-		fmt.Fprintf(w, "%v", err)
+		fmt.Printf("%v", err)
 	}
 
 	taskArr := []Task{}
 
-	for _, element := range parsed.Tasks {
-		task := Task{
-			Id:     element.DotID(),
-			Inputs: []TaskDependency{},
+	if parsed != nil {
+		for _, element := range parsed.Tasks {
+			task := Task{
+				Id:     element.DotID(),
+				Inputs: []TaskDependency{},
+			}
+			for _, input := range element.Inputs() {
+				task.Inputs = append(task.Inputs, TaskDependency{
+					Id:              input.InputTask.DotID(),
+					PropagateResult: input.PropagateResult,
+				})
+			}
+			taskArr = append(taskArr, task)
 		}
-		for _, input := range element.Inputs() {
-			task.Inputs = append(task.Inputs, TaskDependency{
-				Id:              input.InputTask.DotID(),
-				PropagateResult: input.PropagateResult,
-			})
-		}
-		taskArr = append(taskArr, task)
 	}
 
 	response := Response{
 		Tasks: taskArr,
+		Error: err.Error(),
 	}
 
 	jsonSer := pipeline.JSONSerializable{

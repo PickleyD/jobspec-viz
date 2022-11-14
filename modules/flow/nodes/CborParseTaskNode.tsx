@@ -22,7 +22,14 @@ export const CborParseTaskNode = (nodeProps: NodeProps) => {
                 label="Data"
                 value={data}
                 placeholder="A byte array containing the CBOR payload"
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { data: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        data: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
             <div className="form-control w-full max-w-xs">

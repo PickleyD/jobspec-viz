@@ -76,32 +76,32 @@ const validateTask = (context: TaskNodeContext) => {
   switch (context.taskType) {
     case "HTTP": {
       result = context.taskSpecific.url
-        && context.taskSpecific.url.raw.length > 0
+        && (context.taskSpecific.url.raw?.length ?? 0) > 0
       break;
     }
     case "BRIDGE": {
       result = context.taskSpecific.name
-        && context.taskSpecific.name.raw.length > 0
+        && (context.taskSpecific.name.raw?.length ?? 0) > 0
       break;
     }
     case "JSONPARSE": {
       result = context.taskSpecific.data
-        && context.taskSpecific.data.raw.length > 0
+        && (context.taskSpecific.data.raw?.length ?? 0) > 0
         && context.taskSpecific.path
-        && context.taskSpecific.path.raw.length > 0
+        && (context.taskSpecific.path.raw?.length ?? 0) > 0
       break;
     }
     case "CBORPARSE": {
       result = context.taskSpecific.data
-        && context.taskSpecific.data.raw.length > 0
+        && (context.taskSpecific.data.raw?.length ?? 0) > 0
       break;
     }
     case "ETHTX": {
       result = context.taskSpecific.to
-        && context.taskSpecific.to.raw.length > 0
+        && (context.taskSpecific.to.raw?.length ?? 0) > 0
         && validateAddress(context.taskSpecific.to.raw)
         && context.taskSpecific.data
-        && context.taskSpecific.data.raw.length > 0
+        && (context.taskSpecific.data.raw?.length ?? 0) > 0
       break;
     }
     case "SUM": {
@@ -111,18 +111,18 @@ const validateTask = (context: TaskNodeContext) => {
     }
     case "MULTIPLY": {
       result = context.taskSpecific.input
-        && context.taskSpecific.input.raw.length > 0
+        && (context.taskSpecific.input.raw?.length ?? 0) > 0
         && context.taskSpecific.times
-        && context.taskSpecific.times.raw.length > 0
+        && (context.taskSpecific.times.raw?.length ?? 0) > 0
       break;
     }
     case "DIVIDE": {
       result = context.taskSpecific.input
-        && context.taskSpecific.input.raw.length > 0
+        && (context.taskSpecific.input.raw?.length ?? 0) > 0
         && context.taskSpecific.divisor
-        && context.taskSpecific.divisor.raw.length > 0
+        && (context.taskSpecific.divisor.raw?.length ?? 0) > 0
         && context.taskSpecific.precision
-        && context.taskSpecific.precision.raw.length > 0
+        && (context.taskSpecific.precision.raw?.length ?? 0) > 0
       break;
     }
     case "ANY": {
@@ -136,7 +136,7 @@ const validateTask = (context: TaskNodeContext) => {
     case "MEAN": {
       result = context.incomingNodes.length > 0
         && context.taskSpecific.precision
-        && context.taskSpecific.precision.raw.length > 0
+        && (context.taskSpecific.precision.raw?.length ?? 0) > 0
       break;
     }
     case "MEDIAN": {

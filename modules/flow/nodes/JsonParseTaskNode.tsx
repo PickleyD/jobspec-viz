@@ -22,7 +22,14 @@ export const JsonParseTaskNode = (nodeProps: NodeProps) => {
                 label="Data"
                 value={data}
                 placeholder="JSON content"
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { data: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        data: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
             <PowerTextArea
@@ -31,12 +38,12 @@ export const JsonParseTaskNode = (nodeProps: NodeProps) => {
                 placeholder="Comma delimited keys"
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
-                      path: {
-                        raw: newValue,
-                        rich: newRichValue
-                      }
+                        path: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
                     }
-                  })}
+                })}
                 incomingNodes={incomingNodes}
             />
         </TaskNode>

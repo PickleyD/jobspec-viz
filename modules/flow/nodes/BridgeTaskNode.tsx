@@ -42,7 +42,14 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
             optional
             placeholder="Statically-defined payload to be sent to the external adapter"
             value={requestData}
-            onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { requestData: newValue } })}
+            onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+              value: {
+                requestData: {
+                  raw: newValue,
+                  rich: newRichValue
+                }
+              }
+            })}
             incomingNodes={incomingNodes}
           />
           <div className="form-control w-full max-w-xs">

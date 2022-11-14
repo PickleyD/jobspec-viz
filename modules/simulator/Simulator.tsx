@@ -15,6 +15,7 @@ const testModeLoadingSelector = (state: any) =>
 const taskInstructionsSelector = (state: any) => state.context.parsedTaskOrder;
 const currentTaskIndexSelector = (state: any) => state.context.currentTaskIndex;
 const taskRunResultsSelector = (state: any) => state.context.taskRunResults;
+const parsingErrorSelector = (state: any) => state.context.parsingError;
 
 export interface SimulatorProps {
   className?: string;
@@ -47,6 +48,11 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
     globalServices.workspaceService,
     taskRunResultsSelector
   );
+
+  const parsingError = useSelector(
+    globalServices.workspaceService,
+    parsingErrorSelector
+  )
 
   const handleToggleTestMode = () => {
     setProgress(0);
@@ -101,9 +107,8 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
           <div className="flex gap-1 items-center">
             <label className="label cursor-pointer flex gap-2 items-center">
               <span
-                className={`label-text ${
-                  testMode || testModeLoading ? "" : "text-gray-500"
-                }`}
+                className={`label-text ${testMode || testModeLoading ? "" : "text-gray-500"
+                  }`}
               >
                 Test Mode
               </span>
@@ -126,16 +131,14 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
               <button
                 onClick={handlePrevIndex}
                 disabled={!testMode || currentTaskIndex === 0}
-                className={`${
-                  testMode ? "" : "btn-disabled"
-                } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
+                className={`${testMode ? "" : "btn-disabled"
+                  } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
               <div
-                className={`${
-                  testMode ? "" : "btn-disabled"
-                } btn grow pointer-events-none cursor-default btn-sm normal-case`}
+                className={`${testMode ? "" : "btn-disabled"
+                  } btn grow pointer-events-none cursor-default btn-sm normal-case`}
               >
                 {testModeLoading ? (
                   "Loading..."
@@ -150,17 +153,15 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                 disabled={
                   !testMode || currentTaskIndex >= taskInstructions.length
                 }
-                className={`${
-                  testMode ? "" : "btn-disabled"
-                } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
+                className={`${testMode ? "" : "btn-disabled"
+                  } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
               >
                 <ChevronRightIcon className="w-5 h-5" />
               </button>
             </div>
             <progress
-              className={`${testMode ? "" : "disabled"} progress bg-gray-700 ${
-                testModeLoading ? "" : "progress-secondary"
-              } w-56`}
+              className={`${testMode ? "" : "disabled"} progress bg-gray-700 ${testModeLoading ? "" : "progress-secondary"
+                } w-56`}
               value={testModeLoading ? undefined : progress}
               max="100"
             ></progress>
@@ -183,6 +184,14 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                   <p className="text-sm text-gray-300">Error:</p>
                   <p className="text-sm text-error overflow-auto max-h-[10rem]">
                     {latestTaskRunResult.error}
+                  </p>
+                </div>
+              )}
+              {parsingError.length > 0 && (
+                <div className="flex flex-col">
+                  <p className="text-sm text-gray-300">Error:</p>
+                  <p className="text-sm text-error overflow-auto max-h-[10rem]">
+                    {parsingError}
                   </p>
                 </div>
               )}
