@@ -1,5 +1,5 @@
 import { useSelector } from "@xstate/react";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { GlobalStateContext } from "../../../../context/GlobalStateContext";
 import pipelineVarsData from "../../../../data/jobTypeSpecificPipelineVars.json";
 import { JOB_TYPE } from "../../../workspace/workspaceMachine";
@@ -28,7 +28,7 @@ const stripSpanTags = (input: string) => input.replaceAll(/(<([^>]+)>)/ig, "");
 
 export const PowerTextArea = ({
   label,
-  value = {raw: "", rich: ""},
+  value = { raw: "", rich: "" },
   onChange,
   incomingNodes,
   placeholder = "",
@@ -51,15 +51,22 @@ export const PowerTextArea = ({
   }
 
   const handleChange = (event: ContentEditableEvent) => {
-    const newVal = stripSpanTags(event.target.value)
-    onChange(newVal, event.target.value)
+    const newVal = event.target.value
+    onChange(newVal, newVal)
   }
 
   const handleBlur = (event: any) => {
-    const currVal = stripSpanTags(event.target.innerHTML)
+    const currVal = event.target.innerHTML
     const richValue = wrapVariables(currVal)
     onChange(currVal, richValue)
+    setShowRich(true)
   }
+
+  const handleFocus = (event: any) => {
+    setShowRich(false)
+  }
+
+  const [showRich, setShowRich] = useState<boolean>(true)
 
   return (
     <div className={`${className} form-control w-full max-w-xs`}>
@@ -69,10 +76,16 @@ export const PowerTextArea = ({
       </label>
       <div className="relative">
         <ContentEditable
-          html={value.rich || ""}
+          html={value.raw || ""}
           onChange={handleChange}
           onBlur={handleBlur}
-          className="textarea textarea-bordered h-full pr-8"
+          onFocus={handleFocus}
+          className="textarea textarea-bordered h-full w-full pr-8"
+        />
+        <ContentEditable
+          html={value.rich || ""}
+          onChange={() => { }}
+          className={`${showRich ? "visible" : "invisible"} textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
         />
         <div className="absolute right-1 bottom-1">
           <Popover

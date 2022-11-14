@@ -21,7 +21,14 @@ export const SumTaskNode = (nodeProps: NodeProps) => {
             <PowerTextArrayField
                 label="Values"
                 value={values}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { values: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        values: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
             <PowerTextField
