@@ -90,7 +90,7 @@ export const PowerTextArrayField = ({
                 <ContentEditable
                     html={value.rich || ""}
                     onChange={() => { }}
-                    className={`${showRich ? "visible" : "invisible"} textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
+                    className={`${showRich ? "" : "invisible"} textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
                 />
                 <div className="absolute right-1 bottom-1">
                     <Popover
