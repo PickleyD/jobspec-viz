@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField } from "./fields";
+import { PowerTextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const inputSelector = (state: any) => state.context.taskSpecific.input;
@@ -18,16 +18,30 @@ export const MultiplyTaskNode = (nodeProps: NodeProps) => {
 
     return (
         <TaskNode {...nodeProps}>
-            <PowerTextField
+            <PowerTextArea
                 label="Input"
                 value={input}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { input: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                      input: {
+                        raw: newValue,
+                        rich: newRichValue
+                      }
+                    }
+                  })}
                 incomingNodes={incomingNodes}
             />
-            <PowerTextField
+            <PowerTextArea
                 label="Times"
                 value={times}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { times: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                      times: {
+                        raw: newValue,
+                        rich: newRichValue
+                      }
+                    }
+                  })}
                 incomingNodes={incomingNodes}
             />
         </TaskNode>

@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField, PowerTextArea, TextArea, TaskConfigTabs } from "./fields";
+import { PowerTextArea, TextArea, TaskConfigTabs } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const abiSelector = (state: any) => state.context.taskSpecific.abi;
@@ -30,22 +30,43 @@ export const EthAbiDecodeLogTaskNode = (nodeProps: NodeProps) => {
     <TaskNode {...nodeProps}>
       <TaskConfigTabs
         config={<>
-          <PowerTextField
+          <PowerTextArea
             label="ABI"
             value={abi}
-            onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { abi: newValue } })}
+            onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+              value: {
+                abi: {
+                  raw: newValue,
+                  rich: newRichValue
+                }
+              }
+            })}
             incomingNodes={incomingNodes}
           />
-          <PowerTextField
+          <PowerTextArea
             label="Data"
             value={data}
-            onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { data: newValue } })}
+            onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+              value: {
+                data: {
+                  raw: newValue,
+                  rich: newRichValue
+                }
+              }
+            })}
             incomingNodes={incomingNodes}
           />
-          <PowerTextField
+          <PowerTextArea
             label="Topics"
             value={topics}
-            onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { topics: newValue } })}
+            onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+              value: {
+                topics: {
+                  raw: newValue,
+                  rich: newRichValue
+                }
+              }
+            })}
             incomingNodes={incomingNodes}
           />
         </>

@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField, PowerTextArea, TextArea, TaskConfigTabs } from "./fields";
+import { PowerTextArea, TextArea, TaskConfigTabs } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const methodSelector = (state: any) => state.context.taskSpecific.method;

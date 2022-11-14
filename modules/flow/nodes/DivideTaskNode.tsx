@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextField } from "./fields";
+import { PowerTextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const inputSelector = (state: any) => state.context.taskSpecific.input;
@@ -20,22 +20,43 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
 
     return (
         <TaskNode {...nodeProps}>
-            <PowerTextField
+            <PowerTextArea
                 label="Input"
                 value={input}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { input: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        input: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
-            <PowerTextField
+            <PowerTextArea
                 label="Divisor"
                 value={divisor}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { divisor: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        divisor: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
-            <PowerTextField
+            <PowerTextArea
                 label="Precision"
                 value={precision}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { precision: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                        precision: {
+                            raw: newValue,
+                            rich: newRichValue
+                        }
+                    }
+                })}
                 incomingNodes={incomingNodes}
             />
         </TaskNode>

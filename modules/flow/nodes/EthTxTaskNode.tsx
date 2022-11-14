@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextArea, PowerTextField } from "./fields";
+import { PowerTextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
@@ -18,11 +18,18 @@ export const EthTxTaskNode = (nodeProps: NodeProps) => {
 
     return (
         <TaskNode {...nodeProps}>
-            <PowerTextField
+            <PowerTextArea
                 label="To"
                 value={to}
                 placeholder="Enter ETH address"
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { to: newValue } })}
+                onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
+                    value: {
+                      to: {
+                        raw: newValue,
+                        rich: newRichValue
+                      }
+                    }
+                  })}
                 incomingNodes={incomingNodes}
             />
             <PowerTextArea
