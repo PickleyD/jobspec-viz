@@ -27,49 +27,49 @@ export type NEW_NODE_TYPE = "source" | "target";
 
 type WorkspaceEvent =
   | {
-      type: "SET_REACT_FLOW_INSTANCE";
-      value: ReactFlowInstance;
-    }
+    type: "SET_REACT_FLOW_INSTANCE";
+    value: ReactFlowInstance;
+  }
   | {
-      type: "ADD_TASK_NODE";
-      options: TaskNodeOptions;
-      edgeDetails: {
-        newNodeType: NEW_NODE_TYPE;
-        fromHandleId: string;
-        fromNodeId: string;
-      };
-    }
+    type: "ADD_TASK_NODE";
+    options: TaskNodeOptions;
+    edgeDetails: {
+      newNodeType: NEW_NODE_TYPE;
+      fromHandleId: string;
+      fromNodeId: string;
+    };
+  }
   | { type: "DELETE_TASK_NODE"; nodeId: string }
   | {
-      type: "REPLACE_TASK_NODE";
-      nodeId: string;
-      newType: TASK_TYPE;
-      existing: {
-        coords: XYCoords;
-        customId: string;
-        incomingNodes: Array<string>;
-        outgoingNodes: Array<string>;
-      };
-    }
+    type: "REPLACE_TASK_NODE";
+    nodeId: string;
+    newType: TASK_TYPE;
+    existing: {
+      coords: XYCoords;
+      customId: string;
+      incomingNodes: Array<string>;
+      outgoingNodes: Array<string>;
+    };
+  }
   | { type: "UPDATE_EDGES_WITH_NODE_ID"; nodeId: string; prevNodeId: string }
   | { type: "SET_JOB_TYPE"; value: JOB_TYPE }
   | { type: "SET_NAME"; value: string }
   | { type: "SET_EXTERNAL_JOB_ID"; value: string }
   | {
-      type: "SET_JOB_TYPE_SPECIFIC_PROPS";
-      jobType: JOB_TYPE;
-      prop: string;
-      value?: string;
-      valid?: boolean;
-    }
+    type: "SET_JOB_TYPE_SPECIFIC_PROPS";
+    jobType: JOB_TYPE;
+    prop: string;
+    value?: string;
+    valid?: boolean;
+  }
   | {
-      type: "SET_JOB_TYPE_SPECIFIC_VARIABLES";
-      jobType: JOB_TYPE;
-      variable: string;
-      value?: string;
-      values?: Array<string>;
-      valid?: boolean;
-    }
+    type: "SET_JOB_TYPE_SPECIFIC_VARIABLES";
+    jobType: JOB_TYPE;
+    variable: string;
+    value?: string;
+    values?: Array<string>;
+    valid?: boolean;
+  }
   | { type: "CONNECTION_START"; params: OnConnectStartParams }
   | { type: "CONNECTION_END" }
   | { type: "CONNECTION_SUCCESS"; initialCoords: XYCoords }
@@ -424,12 +424,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           const isFirstNode = !fromHandleId || !newNodeType;
           const isForwardConnection = newNodeType === "target";
 
-          const newNodeId = `task_${
-            event.options.id ?? context.totalNodesAdded
-          }`;
-          const newNodePresentationId = `task_${
-            event.options.id ?? getNextUniqueTaskId(context.nodes.tasks)
-          }`;
+          const newNodeId = `task_${event.options.id ?? context.totalNodesAdded
+            }`;
+          const newNodePresentationId = `task_${event.options.id ?? getNextUniqueTaskId(context.nodes.tasks)
+            }`;
 
           const fromId = isForwardConnection ? fromNodeId : newNodeId;
           const toId = isForwardConnection ? newNodeId : fromNodeId;
@@ -469,15 +467,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               edges:
                 fromNodeId && fromHandleId
                   ? [
-                      ...context.edges,
-                      {
-                        id: `edge_${context.totalEdgesAdded}`,
-                        source: fromId,
-                        sourceCustomId: fromPresentationId,
-                        target: toId,
-                        targetCustomId: toPresentationId,
-                      },
-                    ]
+                    ...context.edges,
+                    {
+                      id: `edge_${context.totalEdgesAdded}`,
+                      source: fromId,
+                      sourceCustomId: fromPresentationId,
+                      target: toId,
+                      targetCustomId: toPresentationId,
+                    },
+                  ]
                   : context.edges,
             }),
             send(
@@ -678,9 +676,22 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       PERSIST_STATE: {
         actions: [
           (context) => {
+
+            // Extract any context props we don't want to persist
+            const {
+              reactFlowInstance,
+              nodes,
+              isConnecting,
+              connectionParams,
+              taskRunResults,
+              parsedTaskOrder,
+              currentTaskIndex,
+              jobLevelVars64,
+              ...toPersist } = context
+
             // Instead of saving the full context as-is, we'll expand the context of each spawned machine
             const parsedContext = {
-              ...context,
+              ...toPersist,
               nodes: {
                 tasks: context.nodes.tasks.map((entry) => ({
                   ...entry,
@@ -751,12 +762,12 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               // TODO: Need to prepend with jobSpec instead of jobRun for non job-specific variables
               jobRun: Object.fromEntries(Object.entries(context.jobTypeVariables[context.type]).map(([k, v]) => {
 
-                return [k, ({ 
+                return [k, ({
                   ...v.values !== undefined && { values: v.values },
                   ...(v.values === undefined && v.value !== undefined) && { value: v.value },
                   type: v.type || "string",
                   fromType: v.fromType || "string"
-                 })]
+                })]
               }))
             }
           )
@@ -764,7 +775,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           .then(res => res.json().then(json => {
             return res.ok ? json : Promise.reject(json);
           })
-        );
+          );
       },
     },
     actions: {
@@ -811,10 +822,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         const initialCoords =
           "initialCoords" in event
             ? adjustNewSourceNodeHeightByTypeDefault(
-                event.initialCoords,
-                taskType,
-                isForwardConnection
-              )
+              event.initialCoords,
+              taskType,
+              isForwardConnection
+            )
             : { x: 0, y: 0 };
 
         return {
@@ -854,7 +865,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         const vars64 =
           context.taskRunResults.length > 0
             ? context.taskRunResults[context.taskRunResults.length - 1].result
-                .vars64
+              .vars64
             : context.jobLevelVars64;
 
         return [
@@ -933,8 +944,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             case "HTTP": {
               const processedRequestData = taskSpecific.requestData?.raw
                 ? taskSpecific.requestData?.raw
-                    .replace(/\s/g, "")
-                    .replace(/"/g, '\\\\"')
+                  .replace(/\s/g, "")
+                  .replace(/"/g, '\\\\"')
                 : "";
 
               observationSrcLines.push(
@@ -957,8 +968,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             case "BRIDGE": {
               const processedRequestData = taskSpecific.requestData?.raw
                 ? taskSpecific.requestData?.raw
-                    .replace(/\s/g, "")
-                    .replace(/"/g, '\\\\"')
+                  .replace(/\s/g, "")
+                  .replace(/"/g, '\\\\"')
                 : "";
 
               observationSrcLines.push(
@@ -1024,9 +1035,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               observationSrcLines.push(
                 { value: `${customId} [type="sum"`, valid: isValid },
                 {
-                  value: `${spacer}  values=<${taskSpecific.values?.raw || ""}>${
-                    taskSpecific.allowedFaults?.raw ? "" : "]"
-                  }`,
+                  value: `${spacer}  values=<${taskSpecific.values?.raw || ""}>${taskSpecific.allowedFaults?.raw ? "" : "]"
+                    }`,
                   valid: isValid,
                 }
               );
@@ -1063,9 +1073,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  precision="${
-                    taskSpecific.precision?.raw || ""
-                  }"]`,
+                  value: `${spacer}  precision="${taskSpecific.precision?.raw || ""
+                    }"]`,
                   valid: isValid,
                 }
               );
