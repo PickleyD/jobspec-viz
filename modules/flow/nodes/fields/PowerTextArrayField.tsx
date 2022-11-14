@@ -71,6 +71,12 @@ export const PowerTextArrayField = ({
         setShowRich(false)
     }
 
+    const handlePaste: React.ClipboardEventHandler<HTMLDivElement> = (event) => {
+        const rawVal = event.clipboardData.getData('Text')
+        event.preventDefault()
+        document.execCommand("insertText", false, rawVal)
+    }
+
     const [showRich, setShowRich] = useState<boolean>(true)
 
     return (
@@ -85,12 +91,13 @@ export const PowerTextArrayField = ({
                     onChange={handleChange}
                     onBlur={handleBlur}
                     onFocus={handleFocus}
-                    className="textarea textarea-bordered h-full pr-8"
+                    onPaste={handlePaste}
+                    className="textarea textarea-bordered h-full whitespace-nowrap overflow-auto"
                 />
                 <ContentEditable
                     html={value.rich || ""}
                     onChange={() => { }}
-                    className={`${showRich ? "" : "invisible"} textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
+                    className={`${showRich ? "" : "invisible"} whitespace-nowrap overflow-auto textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
                 />
                 <div className="absolute right-1 bottom-1">
                     <Popover

@@ -66,6 +66,12 @@ export const PowerTextArea = ({
     setShowRich(false)
   }
 
+  const handlePaste: React.ClipboardEventHandler<HTMLDivElement> = (event) => {
+    const rawVal = event.clipboardData.getData('Text')
+    event.preventDefault()
+    document.execCommand("insertText", false, rawVal)
+  }
+
   const [showRich, setShowRich] = useState<boolean>(true)
 
   return (
@@ -80,6 +86,7 @@ export const PowerTextArea = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onPaste={handlePaste}
           className="textarea textarea-bordered h-full w-full pr-8"
         />
         <ContentEditable
