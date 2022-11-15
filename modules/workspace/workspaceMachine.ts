@@ -732,7 +732,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             nodes: {
               tasks: savedContext.nodes.tasks.map((entry) => ({
                 ...entry,
-                // Picking up the context persisted above and using that to spawn the machines for full restoration
                 // @ts-ignore
                 ref: spawn(createTaskNodeMachine(entry.context || {}), entry.ref.id),
               })),

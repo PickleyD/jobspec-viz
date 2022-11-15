@@ -7,10 +7,13 @@ import { LayoutGroup } from "framer-motion";
 import { useState, useContext } from "react";
 import {
   BookOpenIcon,
-} from "@heroicons/react/24/solid";
+  PlusCircleIcon,
+  XMarkIcon
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { Simulator } from "../modules/simulator";
 import { GlobalStateContext } from "../context/GlobalStateContext"
+import empty from "../examples/empty.json"
 import getUint256 from "../examples/getUint256.json"
 import { useSelector } from "@xstate/react";
 
@@ -65,6 +68,15 @@ const Home: NextPage = () => {
                 </div>
               </div>
             </div>
+            <div className="absolute top-4 right-4 z-50">
+              <label
+                tabIndex={0}
+                onClick={() => setNewProjectHeroDisplayed(false)}
+                className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </label>
+            </div>
             <div className="z-20 flex flex-col items-start justify-center gap-6 p-8">
               <div className="flex flex-col items-start justify-center gap-8 py-4">
                 <div className="relative h-20 w-[141px]">
@@ -75,14 +87,14 @@ const Home: NextPage = () => {
               <div className="divider max-w-[400px]" />
               <div className="flex flex-col gap-2">
                 <div className="">
-                  <p className="text-gray-300 text-sm font-bold max-w-sm">Start a new empty project or pick from a handful of examples to give yourself a headstart</p>
+                  <p className="text-gray-300 text-sm font-bold max-w-sm">Start a new empty project or pick an example to give yourself a headstart</p>
                 </div>
                 <div className="z-20 flex items-center justify-center h-28">
-                  <div className="btn btn-outline" onClick={handleNewEmptyProject}>New Empty Project</div>
+                  <div className="btn btn-outline" onClick={() => handleRehydrate(empty)}>Empty Project</div>
                   <div className="divider divider-horizontal"></div>
                   <div className="btn btn-outline" onClick={() => handleRehydrate(getUint256)}>{`Get -> Uint256`}</div>
                   <div className="divider divider-horizontal"></div>
-                  <div className="p-8">Something else</div>
+                  <div className="btn btn-outline" onClick={() => handleRehydrate(getUint256)}>{`Get -> Uint256`}</div>
                 </div>
               </div>
             </div>
@@ -161,14 +173,14 @@ const Home: NextPage = () => {
           </div>
         </div>
         <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
-          <div className="p-8 absolute left-0 flex flex-col items-end gap-2">
-            {/* <label
-                tabIndex={0}
-                onClick={() => setHelpMsgDisplayed(true)}
-                className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
-              >
-                <QuestionMarkCircleIcon className="fill-current h-5 w-5 text-white" />
-              </label> */}
+          <div className="p-8 pt-10 absolute left-0 flex flex-col items-end gap-4">
+            <label
+              tabIndex={0}
+              onClick={() => setNewProjectHeroDisplayed(true)}
+              className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
+            >
+              <PlusCircleIcon className="h-5 w-5" />
+            </label>
             <a
               href="https://docs.chain.link/docs/jobs/"
               target="_blank"
@@ -178,7 +190,7 @@ const Home: NextPage = () => {
                 tabIndex={0}
                 className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
               >
-                <BookOpenIcon className="fill-current h-5 w-5 text-white" />
+                <BookOpenIcon className="h-5 w-5" />
               </label>
             </a>
           </div>
