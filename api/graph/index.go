@@ -58,7 +58,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	response := Response{
 		Tasks: taskArr,
-		Error: err.Error(),
+	}
+
+	if err != nil {
+		response.Error = err.Error()
 	}
 
 	jsonSer := pipeline.JSONSerializable{
