@@ -4,12 +4,17 @@ import { Flow } from "../modules/flow";
 import { Configurator } from "../modules/configurator";
 import { Codegen } from "../modules/codegen";
 import { LayoutGroup } from "framer-motion";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   BookOpenIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { Simulator } from "../modules/simulator";
+import { GlobalStateContext } from "../context/GlobalStateContext"
+import getUint256 from "../examples/getUint256.json"
+import { useSelector } from "@xstate/react";
+
+const reactFlowInstanceSelector = (state: any) => state.context.reactFlowInstance;
 
 const Home: NextPage = () => {
 
@@ -18,6 +23,24 @@ const Home: NextPage = () => {
   const [newProjectHeroDisplayed, setNewProjectHeroDisplayed] = useState<boolean>(true);
 
   const handleNewEmptyProject = () => setNewProjectHeroDisplayed(false)
+
+  const globalServices = useContext(GlobalStateContext);
+
+  const reactFlowInstance = useSelector(
+    globalServices.workspaceService,
+    reactFlowInstanceSelector
+  )
+
+  const handleRehydrate = (json: any) => {
+    globalServices.workspaceService.send("RESTORE_STATE", {
+      savedContext: json,
+    });
+    setNewProjectHeroDisplayed(false)
+    setTimeout(() => reactFlowInstance.fitView({
+      duration: 500,
+      padding: 1
+    }), 100)
+  }
 
   return (
     <div className="bg-primary h-screen w-screen">
@@ -57,7 +80,7 @@ const Home: NextPage = () => {
                 <div className="z-20 flex items-center justify-center h-28">
                   <div className="btn btn-outline" onClick={handleNewEmptyProject}>New Empty Project</div>
                   <div className="divider divider-horizontal"></div>
-                  <div className="p-8">Something else</div>
+                  <div className="btn btn-outline" onClick={() => handleRehydrate(getUint256)}>{`Get -> Uint256`}</div>
                   <div className="divider divider-horizontal"></div>
                   <div className="p-8">Something else</div>
                 </div>
