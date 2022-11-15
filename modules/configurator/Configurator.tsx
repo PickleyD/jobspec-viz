@@ -76,6 +76,20 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
         <div className="form-control w-full max-w-xs">
           <label className="label">
+            <span className="label-text text-xs">Chainlink Version</span>
+          </label>
+          <select
+            disabled={true}
+            className="select select-bordered select-sm"
+            defaultValue="v1.8.1"
+            onChange={() => {}}
+          >
+            <option value="v1.8.1">v1.8.1</option>
+          </select>
+        </div>
+
+        <div className="form-control w-full max-w-xs">
+          <label className="label">
             <span className="label-text text-xs">Job Type</span>
           </label>
           <select
