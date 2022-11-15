@@ -7,6 +7,7 @@ import { PowerTextArrayField, PowerTextArea } from "./fields";
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const valuesSelector = (state: any) => state.context.taskSpecific.values;
 const allowedFaultsSelector = (state: any) => state.context.taskSpecific.allowedFaults;
+const customIdSelector = (state: any) => state.context.customId
 
 export const SumTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
@@ -15,6 +16,7 @@ export const SumTaskNode = (nodeProps: NodeProps) => {
     const allowedFaults = useSelector(machine, allowedFaultsSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
+    const taskCustomId = useSelector(machine, customIdSelector)
 
     return (
         <TaskNode {...nodeProps}>
@@ -29,7 +31,7 @@ export const SumTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
             <PowerTextArea
                 label="Allowed Faults"
@@ -42,7 +44,7 @@ export const SumTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
                 optional
             />
         </TaskNode>

@@ -12,12 +12,14 @@ export interface PowerTextArrayFieldProps {
     label: string;
     value: { raw: string; rich: string; };
     onChange: (newValue: string, newRichValue: string) => void;
-    incomingNodes: Array<string>;
+    incomingNodes?: Array<string>;
+    ownerNodeCustomId: string,
     placeholder?: string;
     optional?: boolean;
 }
 
 const jobTypeSelector = (state: any) => state.context.type;
+const taskCustomIdsSelector = (state: any) => state.context.nodes.tasks.map((task: any) => task.ref.state.context.customId)
 
 const wrapMatch = (match: string) => `<span class="text-secondary">${match}</span>`
 
@@ -30,6 +32,7 @@ export const PowerTextArrayField = ({
     value = { raw: "", rich: "" },
     onChange,
     incomingNodes,
+    ownerNodeCustomId,
     placeholder = "Enter each item on a new line",
     optional = false,
 }: PowerTextArrayFieldProps) => {
@@ -39,6 +42,11 @@ export const PowerTextArrayField = ({
         globalServices.workspaceService,
         jobTypeSelector
     );
+
+    const tasks = useSelector(
+        globalServices.workspaceService,
+        taskCustomIdsSelector
+    )
 
     const jobTypeSpecificPipelineVars = pipelineVarsData[jobType];
 
@@ -115,7 +123,7 @@ export const PowerTextArrayField = ({
                             <VarSelector
                                 onVarSelected={handleItemSelected}
                                 jobVariables={jobTypeSpecificPipelineVars}
-                                taskVariables={incomingNodes ?? []}
+                                taskVariables={tasks.filter((customId: string) => customId !== ownerNodeCustomId) ?? []}
                             />
                         }
                     />

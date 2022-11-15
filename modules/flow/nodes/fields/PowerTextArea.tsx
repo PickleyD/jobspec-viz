@@ -12,13 +12,15 @@ export interface PowerTextAreaProps {
   label: string;
   value: { raw: string; rich: string; };
   onChange: (newValue: string, newRichValue: string) => void;
-  incomingNodes: Array<string>;
+  incomingNodes?: Array<string>;
+  ownerNodeCustomId: string,
   placeholder?: string;
   optional?: boolean;
   className?: string;
 }
 
 const jobTypeSelector = (state: any) => state.context.type;
+const taskCustomIdsSelector = (state: any) => state.context.nodes.tasks.map((task: any) => task.ref.state.context.customId)
 
 const wrapMatch = (match: string) => `<span class="text-secondary">${match}</span>`
 
@@ -31,6 +33,7 @@ export const PowerTextArea = ({
   value = { raw: "", rich: "" },
   onChange,
   incomingNodes,
+  ownerNodeCustomId,
   placeholder = "",
   optional = false,
   className = "",
@@ -40,6 +43,11 @@ export const PowerTextArea = ({
   const jobType: JOB_TYPE = useSelector(
     globalServices.workspaceService,
     jobTypeSelector
+  )
+
+  const tasks = useSelector(
+    globalServices.workspaceService,
+    taskCustomIdsSelector
   )
 
   const jobTypeSpecificPipelineVars = pipelineVarsData[jobType];
@@ -110,7 +118,7 @@ export const PowerTextArea = ({
               <VarSelector
                 onVarSelected={handleItemSelected}
                 jobVariables={jobTypeSpecificPipelineVars}
-                taskVariables={incomingNodes ?? []}
+                taskVariables={tasks.filter((customId: string) => customId !== ownerNodeCustomId) ?? []}
               />
             }
           />

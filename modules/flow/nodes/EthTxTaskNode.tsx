@@ -8,6 +8,7 @@ const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
 const toSelector = (state: any) => state.context.taskSpecific.to;
 // const mockResponseDataSelector = (state: any) => state.context.mock.mockResponseData;
+const customIdSelector = (state: any) => state.context.customId
 
 export const EthTxTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
@@ -17,6 +18,7 @@ export const EthTxTaskNode = (nodeProps: NodeProps) => {
     // const mockResponseData = useSelector(machine, mockResponseDataSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
+    const taskCustomId = useSelector(machine, customIdSelector)
 
     return (
         <TaskNode {...nodeProps}>
@@ -32,7 +34,7 @@ export const EthTxTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
             <PowerTextArea
                 label="Data"
@@ -46,7 +48,7 @@ export const EthTxTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
         </TaskNode>
     );

@@ -26,7 +26,7 @@ export const VarSelector = ({ onVarSelected, jobVariables, taskVariables }: VarS
       </section>
       <section className="flex flex-col align-start gap-2">
         <p className="whitespace-nowrap text-xs underline text-gray-400">
-          Task-level
+          Other tasks
         </p>
         <div className="flex flex-row flex-wrap gap-1">
           {taskVariables.map((variable, varIndex) => (
@@ -37,7 +37,7 @@ export const VarSelector = ({ onVarSelected, jobVariables, taskVariables }: VarS
               {variable}
             </VarChip>
           ))}
-          {taskVariables.length === 0 && <p className="text-xs italic">No preceding tasks connected</p>}
+          {taskVariables.length === 0 && <p className="text-xs italic">No other tasks</p>}
         </div>
       </section>
     </div>

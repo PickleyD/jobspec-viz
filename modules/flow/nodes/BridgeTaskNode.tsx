@@ -9,6 +9,7 @@ const nameSelector = (state: any) => state.context.taskSpecific.name;
 const requestDataSelector = (state: any) => state.context.taskSpecific.requestData;
 const mockResponseDataSelector = (state: any) => state.context.mock.mockResponseData;
 const asyncSelector = (state: any) => state.context.taskSpecific.async;
+const customIdSelector = (state: any) => state.context.customId
 
 export const BridgeTaskNode = (nodeProps: NodeProps) => {
   const { machine } = nodeProps.data;
@@ -19,6 +20,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
   const mockResponseData = useSelector(machine, mockResponseDataSelector);
 
   const incomingNodes = useSelector(machine, incomingNodesSelector);
+  const taskCustomId = useSelector(machine, customIdSelector)
 
   return (
     <TaskNode {...nodeProps}>
@@ -35,7 +37,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
                 }
               }
             })}
-            incomingNodes={incomingNodes}
+            ownerNodeCustomId={taskCustomId}
           />
           <PowerTextArea
             label="Request Data"
@@ -50,7 +52,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
                 }
               }
             })}
-            incomingNodes={incomingNodes}
+            ownerNodeCustomId={taskCustomId}
           />
           <div className="form-control w-full max-w-xs">
             <label className="label">

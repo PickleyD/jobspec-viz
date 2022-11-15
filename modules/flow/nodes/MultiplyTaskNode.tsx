@@ -7,6 +7,7 @@ import { PowerTextArea } from "./fields";
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const inputSelector = (state: any) => state.context.taskSpecific.input;
 const timesSelector = (state: any) => state.context.taskSpecific.times;
+const customIdSelector = (state: any) => state.context.customId
 
 export const MultiplyTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
@@ -15,6 +16,7 @@ export const MultiplyTaskNode = (nodeProps: NodeProps) => {
     const times = useSelector(machine, timesSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
+    const taskCustomId = useSelector(machine, customIdSelector)
 
     return (
         <TaskNode {...nodeProps}>
@@ -29,7 +31,7 @@ export const MultiplyTaskNode = (nodeProps: NodeProps) => {
                       }
                     }
                   })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
             <PowerTextArea
                 label="Times"
@@ -42,7 +44,7 @@ export const MultiplyTaskNode = (nodeProps: NodeProps) => {
                       }
                     }
                   })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
         </TaskNode>
     );

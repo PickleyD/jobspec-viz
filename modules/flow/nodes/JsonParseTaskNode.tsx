@@ -7,6 +7,7 @@ import { PowerTextArea } from "./fields";
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
 const pathSelector = (state: any) => state.context.taskSpecific.path;
+const customIdSelector = (state: any) => state.context.customId
 
 export const JsonParseTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
@@ -15,6 +16,7 @@ export const JsonParseTaskNode = (nodeProps: NodeProps) => {
     const path = useSelector(machine, pathSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
+    const taskCustomId = useSelector(machine, customIdSelector)
 
     return (
         <TaskNode {...nodeProps}>
@@ -30,7 +32,7 @@ export const JsonParseTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
             <PowerTextArea
                 label="Path"
@@ -44,7 +46,7 @@ export const JsonParseTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
         </TaskNode>
     );

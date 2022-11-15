@@ -8,6 +8,7 @@ const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const inputSelector = (state: any) => state.context.taskSpecific.input;
 const divisorSelector = (state: any) => state.context.taskSpecific.divisor;
 const precisionSelector = (state: any) => state.context.taskSpecific.precision;
+const customIdSelector = (state: any) => state.context.customId
 
 export const DivideTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
@@ -17,6 +18,7 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
     const precision = useSelector(machine, precisionSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
+    const taskCustomId = useSelector(machine, customIdSelector)
 
     return (
         <TaskNode {...nodeProps}>
@@ -31,7 +33,7 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
             <PowerTextArea
                 label="Divisor"
@@ -44,7 +46,7 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
             <PowerTextArea
                 label="Precision"
@@ -57,7 +59,7 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
         </TaskNode>
     );

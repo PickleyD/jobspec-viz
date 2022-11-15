@@ -9,6 +9,7 @@ const abiSelector = (state: any) => state.context.taskSpecific.abi;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
 const enabledMockSelector = (state: any) => state.context.mock.enabled;
 const mockResponseDataInputSelector = (state: any) => state.context.mock.mockResponseDataInput;
+const customIdSelector = (state: any) => state.context.customId
 
 export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
   const { machine } = nodeProps.data;
@@ -19,6 +20,7 @@ export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
   const enabledMock = useSelector(machine, enabledMockSelector);
 
   const incomingNodes = useSelector(machine, incomingNodesSelector);
+  const taskCustomId = useSelector(machine, customIdSelector)
 
   const handleToggleMockEnabled = () => {
     machine.send("SET_MOCK_RESPONSE", { value: { enabled: !enabledMock } })
@@ -39,7 +41,7 @@ export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
                 }
               }
             })}
-            incomingNodes={incomingNodes}
+            ownerNodeCustomId={taskCustomId}
           />
           <PowerTextArea
             label="Data"
@@ -52,7 +54,7 @@ export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
                 }
               }
             })}
-            incomingNodes={incomingNodes}
+            ownerNodeCustomId={taskCustomId}
           />
         </>
         }

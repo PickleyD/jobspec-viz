@@ -7,6 +7,7 @@ import { PowerTextArea } from "./fields";
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
 const modeSelector = (state: any) => state.context.taskSpecific.mode;
+const customIdSelector = (state: any) => state.context.customId
 
 export const CborParseTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
@@ -15,6 +16,7 @@ export const CborParseTaskNode = (nodeProps: NodeProps) => {
     const mode = useSelector(machine, modeSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
+    const taskCustomId = useSelector(machine, customIdSelector)
 
     return (
         <TaskNode {...nodeProps}>
@@ -30,7 +32,7 @@ export const CborParseTaskNode = (nodeProps: NodeProps) => {
                         }
                     }
                 })}
-                incomingNodes={incomingNodes}
+                ownerNodeCustomId={taskCustomId}
             />
             <div className="form-control w-full max-w-xs">
                 <label className="label">
