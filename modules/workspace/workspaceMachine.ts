@@ -697,6 +697,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               connectionParams,
               taskRunResults,
               parsedTaskOrder,
+              parsingError,
               currentTaskIndex,
               jobLevelVars64,
               ...toPersist } = context
@@ -749,11 +750,12 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
     },
     services: {
       parseSpec: (context, event) => {
+
         return fetch("/api/graph", {
           method: "POST",
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/json",
+            "Content-Type": "application/json; charset=UTF-8",
           },
           body: JSON.stringify({
             spec: `${context.toml
@@ -892,6 +894,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         ];
       }),
       regenerateToml: assign((context, event) => {
+
         const { type: jobType, name, externalJobId } = context;
 
         const lines: Array<TomlLine> = [];
@@ -961,7 +964,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               const processedRequestData = taskSpecific.requestData?.raw
                 ? taskSpecific.requestData?.raw
                   .replace(/\s/g, "")
-                  .replace(/"/g, '\\\\"')
+                  .replace(/"/g, `\\\"`)
                 : "";
 
               observationSrcLines.push(
@@ -985,7 +988,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               const processedRequestData = taskSpecific.requestData?.raw
                 ? taskSpecific.requestData?.raw
                   .replace(/\s/g, "")
-                  .replace(/"/g, '\\\\"')
+                  .replace(/"/g, `\\\"`)
                 : "";
 
               observationSrcLines.push(
@@ -1006,10 +1009,17 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "JSONPARSE": {
+
+              const processedData = taskSpecific.data?.raw
+              ? taskSpecific.data?.raw
+                .replace(/\s/g, "")
+                .replace(/"/g, `\\\"`)
+              : "";
+
               observationSrcLines.push(
                 { value: `${customId} [type="jsonparse"`, valid: isValid },
                 {
-                  value: `${spacer}  data="${taskSpecific.data?.raw || ""}"`,
+                  value: `${spacer}  data="${processedData}"`,
                   valid: isValid,
                 },
                 {
@@ -1161,10 +1171,16 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               break;
             }
             case "ETHABIENCODE": {
+              const processedData = taskSpecific.data?.raw
+              ? taskSpecific.data?.raw
+                // .replace(/\s/g, "")
+                .replace(/"/g, `\\\"`)
+              : "";
+
               observationSrcLines.push(
                 { value: `${customId} [type="ethabiencode"`, valid: isValid },
                 { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
-                { value: `${spacer}  data="${taskSpecific.data?.raw || ""}"]`, valid: isValid },
+                { value: `${spacer}  data="${processedData}"]`, valid: isValid },
               )
               break;
             }

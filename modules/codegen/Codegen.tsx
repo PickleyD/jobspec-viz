@@ -77,7 +77,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             // which is unknown without calling the graph endpoint
             // className={`${line.valid === undefined ? "" : (line.valid === true ? "text-success" : "text-error")}`}
             >
-              <code>{line.value}</code>
+              <code>{line.value.replace(/\\/g, `\\\\`)}</code>
             </pre>)
           }
         </div>
