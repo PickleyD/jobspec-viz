@@ -6,8 +6,8 @@ import { Codegen } from "../modules/codegen";
 import { LayoutGroup } from "framer-motion";
 import { useState, useContext } from "react";
 import {
+  Bars3Icon,
   BookOpenIcon,
-  PlusCircleIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -179,7 +179,7 @@ const Home: NextPage = () => {
               onClick={() => setNewProjectHeroDisplayed(true)}
               className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
             >
-              <PlusCircleIcon className="h-5 w-5" />
+              <Bars3Icon className="h-5 w-5" />
             </label>
             <a
               href="https://docs.chain.link/docs/jobs/"

@@ -89,19 +89,21 @@ export const PowerTextArea = ({
         {optional && <span className="label-text-alt">(optional)</span>}
       </label>
       <div className="relative">
-        <ContentEditable
-          html={value.raw || ""}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          onPaste={handlePaste}
-          className="textarea textarea-bordered h-full w-full pr-8"
-        />
-        <ContentEditable
-          html={value.rich || ""}
-          onChange={() => { }}
-          className={`${showRich ? "" : "invisible"} textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
-        />
+        <div className="grid grid-cols-1 grid-rows-1">
+            <ContentEditable
+              html={value.raw || ""}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onFocus={handleFocus}
+              onPaste={handlePaste}
+              className="row-span-full col-span-full textarea textarea-bordered h-full w-full pr-8"
+            />
+            <ContentEditable
+              html={value.rich || `<div class="text-gray-300">${placeholder}</div>`}
+              onChange={() => { }}
+              className={`${showRich ? "" : "invisible"} row-span-full col-span-full textarea textarea-bordered pr-8 pointer-events-none`}
+            />
+        </div>
         <div className="absolute right-1 bottom-1">
           <Popover
             label={(open) => (
