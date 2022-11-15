@@ -14,6 +14,8 @@ const customIdSelector = (state: any) => state.context.customId;
 const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const isConnectingSelector = (state: any) => state.context.isConnecting
+const testModeSelector = (state: any) => state.matches("testModeLoading") || state.matches("testMode")
+
 const isIdleSelector = (state: any) => {
   return state.matches('idle');
 };
@@ -64,6 +66,11 @@ export const TaskNode = ({
   const isConnecting = useSelector(
     globalServices.workspaceService,
     isConnectingSelector
+  )
+
+  const testMode = useSelector(
+    globalServices.workspaceService,
+    testModeSelector
   )
 
   const reactFlowInstanceSelector = (state: any) =>
@@ -221,7 +228,7 @@ export const TaskNode = ({
               <TrashIcon className="fill-current w-6" />
             </div>
           }
-          {!isIdle && !isPendingRun &&
+          {testMode &&
             <div className="absolute top-0 right-0 bottom-0 left-0 transparent z-20">
               <div className="absolute top-0 right-0 bottom-0 left-0 bg-base-100 opacity-50 rounded-md" />
               {/* {

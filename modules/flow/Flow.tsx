@@ -45,6 +45,7 @@ import { NEW_NODE_TYPE } from "../workspace/workspaceMachine";
 const taskNodesSelector = (state: any) => state.context.nodes.tasks;
 const edgesSelector = (state: any) => state.context.edges;
 const reactFlowInstanceSelector = (state: any) => state.context.reactFlowInstance;
+const testModeSelector = (state: any) => state.matches("testModeLoading") || state.matches("testMode")
 
 export const NODE_WIDTH = 300;
 export const SNAP_GRID = 15;
@@ -81,6 +82,11 @@ export const Flow = ({ className }: FlowProps) => {
   const reactFlowInstance = useSelector(
     globalServices.workspaceService,
     reactFlowInstanceSelector
+  )
+
+  const testMode = useSelector(
+    globalServices.workspaceService,
+    testModeSelector
   )
 
   const nodeToFlowElement = (node: any, index: number, numNodes: number) => {
@@ -193,10 +199,15 @@ export const Flow = ({ className }: FlowProps) => {
   };
 
   const handleConnectStart: OnConnectStart = (event, params) => {
+
+    if (testMode) return
+
     globalServices.workspaceService.send("CONNECTION_START", { params });
   };
 
   const handleConnectEnd: OnConnectEnd = (event) => {
+
+    if (testMode) return
 
     globalServices.workspaceService.send("CONNECTION_END")
 
@@ -226,6 +237,8 @@ export const Flow = ({ className }: FlowProps) => {
     taskNodesFromMachine.find((taskNode: any) => taskNode.ref.id === nodeId);
 
   const handleConnect = (newConnection: Connection) => {
+
+    if (testMode) return
 
     const sourceTaskNode = getTaskNodeById(newConnection.source || "");
 
@@ -314,6 +327,7 @@ export const Flow = ({ className }: FlowProps) => {
             duration: 500,
             padding: 1
           }}
+          nodesDraggable={!testMode}
         >
           <Controls />
           <Background gap={15} />
