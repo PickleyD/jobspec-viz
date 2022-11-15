@@ -291,7 +291,7 @@ export const TaskNode = ({
               value={tempCustomId}
               onChange={handleCustomIdChange}
               type="text"
-              placeholder="Type here"
+              placeholder="Give the task a unique ID"
               className={`${customIdError ? "input-error" : ""
                 } input input-bordered w-full max-w-xs`}
             />

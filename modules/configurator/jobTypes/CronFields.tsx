@@ -55,7 +55,7 @@ export const CronFields = ({ className = "" }: CronFieldsProps) => {
     </label>
     <input
       type="text"
-      placeholder="Type here"
+      placeholder=""
       className="input input-bordered input-sm w-full max-w-xs"
       value={cron}
       onChange={(event) => (globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "cron", prop: "schedule", value: event.target.value }))}

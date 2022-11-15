@@ -36,7 +36,7 @@ export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps
       </label>
       <input
         type="text"
-        placeholder="Type here"
+        placeholder=""
         className="input input-bordered input-sm w-full max-w-xs"
         value={contractAddress}
         onChange={(event) => (globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "directrequest", prop: "contractAddress", value: event.target.value }))}

@@ -33,7 +33,7 @@ export const TextArea = ({
         isValidJson && onValidJsonChange(JSON.stringify(JSON.parse(value)))
     }
 
-    return <div className={`${className} form-control w-full max-w-xs`}>
+    return <div className={`${className} form-control w-full`}>
         {label && <label className="label pb-0">
             <span className="label-text">{label}</span>
             {

@@ -1,7 +1,7 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { useContext } from "react"
-import { TextArrayField } from "../../flow/nodes/fields";
+import { TextArrayField, TextArea } from "../../flow/nodes/fields";
 
 const logTopicsSelector = (state: any) => state.context.jobTypeVariables.directrequest.logTopics.value;
 const logDataSelector = (state: any) => state.context.jobTypeVariables.directrequest.logData.value;
@@ -26,24 +26,87 @@ export const DirectRequestVariableSetters = ({ className = "", disabled = false 
     )
 
     return <>
-        <TextArrayField
-            label="$(jobRun.logTopics)"
-            value={logTopics}
-            placeholder="Enter each topic as a hex-encoded bytes32 on a new line"
-            onChange={(newValue) => globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_VARIABLES", { jobType: "directrequest", variable: "logTopics", value: newValue })}
-            onChangeAsArray={(newArray) => globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_VARIABLES", { jobType: "directrequest", variable: "logTopics", values: newArray })}
-        />
-        <div className={`${className} form-control w-60`}>
-            <label className="label">
-                <span className="label-text text-xs">$(jobRun.logData)</span>
-            </label>
-            <input
+        <div className="grid grid-rows-2 grid-flow-col gap-2 max-w-lg overflow-auto">
+            <div className="w-[410px]">
+                <TextArrayField
+                    label="$(jobRun.logTopics)"
+                    value={logTopics}
+                    placeholder="Enter each topic as a hex-encoded bytes32 on a new line"
+                    onChange={(newValue) => globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_VARIABLES", { jobType: "directrequest", variable: "logTopics", value: newValue })}
+                    onChangeAsArray={(newArray) => globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_VARIABLES", { jobType: "directrequest", variable: "logTopics", values: newArray })}
+                />
+            </div>
+            <TextArea
                 disabled={disabled}
-                type="text"
-                placeholder="Type here"
-                className="input input-bordered input-sm w-full max-w-xs"
+                label="$(jobRun.logData)"
+                placeholder=""
+                displayJsonValidity={false}
                 value={logData}
-                onChange={(event) => (globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_VARIABLES", { jobType: "directrequest", variable: "logData", value: event.target.value }))}
+                onChange={(newValue) => (globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_VARIABLES", { jobType: "directrequest", variable: "logData", value: newValue }))}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.meta)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.logBlockHash)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.logBlockNumber)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.logTxHash)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.logAddress)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.blockReceiptsRoot)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.blockTransactionsRoot)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
+            />
+            <TextArea
+                disabled={true}
+                label="$(jobRun.blockStateRoot)"
+                placeholder="Not yet implemented"
+                displayJsonValidity={false}
+                value={""}
+                onChange={() => { }}
             />
         </div>
     </>

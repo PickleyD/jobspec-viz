@@ -1,8 +1,8 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { CogIcon } from "@heroicons/react/24/solid";
-import { CronFields, DirectRequestFields, DirectRequestVariableSetters } from "./jobTypes"
+import { CronFields, CronVariableSetters, DirectRequestFields, DirectRequestVariableSetters } from "./jobTypes"
 import { JOB_TYPE } from "../workspace/workspaceMachine"
 import { ExpanderPanel, Tooltip } from "../../components";
 import { TaskConfigTabs } from "../flow/nodes/fields";
@@ -29,8 +29,8 @@ const renderJobTypeSpecificFields = (jobType: JOB_TYPE) => {
 
 const renderJobTypeSpecificVariableSetters = (jobType: JOB_TYPE, props: any) => {
   switch (jobType) {
-    // case "cron":
-    //   return <CronVariableSetters />
+    case "cron":
+      return <CronVariableSetters />
     case "directrequest":
       return <DirectRequestVariableSetters {...props} />
     default:
@@ -106,7 +106,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
                   <input
                     disabled={disabled}
                     type="text"
-                    placeholder="Type here"
+                    placeholder=""
                     className="input input-bordered input-sm w-full max-w-xs"
                     value={name}
                     onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
@@ -121,7 +121,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
                   <input
                     disabled={disabled}
                     type="text"
-                    placeholder="Type here"
+                    placeholder=""
                     className="input input-bordered input-sm w-full max-w-xs"
                     value={externalJobId}
                     onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
@@ -139,19 +139,6 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
             {
               renderJobTypeSpecificVariableSetters(jobType, { disabled })
             }
-            {/* <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text">$(jobRun.logTopics)</span>
-              </label>
-              <input
-                value={tempCustomId}
-                onChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { url: newValue } })}
-                type="text"
-                placeholder="Type here"
-                className={`${customIdError ? "input-error" : ""
-                  } input input-bordered w-full max-w-xs`}
-              />
-            </div> */}
           </>}
         />
       </div>
