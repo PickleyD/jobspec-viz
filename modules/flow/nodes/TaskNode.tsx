@@ -202,7 +202,7 @@ export const TaskNode = ({
   return (
     <div className="relative overflow-visible">
       {/* width divisible by grid snap size */}
-      <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-widget text-white w-[300px]">
+      <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-widget text-white w-[315px]">
         {isPendingRun && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
           <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-light via-secondary via-secondary-dark via-secondary to-secondary-light"></div>
         </div>
