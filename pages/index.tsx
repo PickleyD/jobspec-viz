@@ -197,6 +197,7 @@ const Home: NextPage = () => {
         <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
           <div className="p-8 pt-10 absolute left-0 flex flex-col items-end gap-4">
             <label
+              title="Examples"
               tabIndex={0}
               onClick={() => setNewProjectHeroDisplayed(true)}
               className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
@@ -209,6 +210,7 @@ const Home: NextPage = () => {
               rel="noopener noreferrer"
             >
               <label
+                title="Chanlink Docs"
                 tabIndex={0}
                 className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
               >

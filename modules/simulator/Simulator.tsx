@@ -101,7 +101,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
     });
 
   return (
-    <ExpanderPanel className={className} icon={BeakerIcon}>
+    <ExpanderPanel className={className} icon={BeakerIcon} title="Testing">
       <div className="flex items-center justify-center p-4">
         <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[14rem]">
           <div className="flex gap-1 items-center">

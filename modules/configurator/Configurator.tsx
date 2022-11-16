@@ -62,7 +62,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const disabled = testMode
 
   return (
-    <ExpanderPanel className={className} icon={CogIcon}>
+    <ExpanderPanel className={className} icon={CogIcon} title="Job Configuration">
       <div className="p-4 pr-6">
         <div className="flex items-center justify-start gap-2">
           <div className="text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">

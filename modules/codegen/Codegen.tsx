@@ -51,7 +51,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
   };
 
   return (
-    <ExpanderPanel className={className} icon={CodeBracketIcon}>
+    <ExpanderPanel className={className} icon={CodeBracketIcon} title="Codegen">
       <div
         className="mockup-code text-sm bg-base-100 relative"
         ref={codeRef}
