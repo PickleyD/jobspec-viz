@@ -29,6 +29,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
           <PowerTextArea
             label="Name"
             value={name}
+            placeholder="Given to bridge by node operator."
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {
                 name: {
@@ -42,7 +43,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
           <PowerTextArea
             label="Request Data"
             optional
-            placeholder="Statically-defined payload to be sent to the external adapter"
+            placeholder="Statically-defined payload to be sent to the external adapter."
             value={requestData}
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {
@@ -73,7 +74,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
           <TextArea
             className="h-48"
             label="Mock Response"
-            placeholder="Provide a mock bridge response to test the rest of your pipeline with"
+            placeholder="Provide a mock bridge response to test the rest of your pipeline with."
             value={mockResponseData}
             onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseData: newValue } })}
           />

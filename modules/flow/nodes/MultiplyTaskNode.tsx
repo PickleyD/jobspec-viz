@@ -22,6 +22,7 @@ export const MultiplyTaskNode = (nodeProps: NodeProps) => {
         <TaskNode {...nodeProps}>
             <PowerTextArea
                 label="Input"
+                placeholder="The value to be multipled."
                 value={input}
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
@@ -35,6 +36,7 @@ export const MultiplyTaskNode = (nodeProps: NodeProps) => {
             />
             <PowerTextArea
                 label="Times"
+                placeholder="The value to multiply the input with."
                 value={times}
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {

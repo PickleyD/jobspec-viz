@@ -23,7 +23,7 @@ export const CborParseTaskNode = (nodeProps: NodeProps) => {
             <PowerTextArea
                 label="Data"
                 value={data}
-                placeholder="A byte array containing the CBOR payload"
+                placeholder="A byte array variable containing the CBOR payload"
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
                         data: {

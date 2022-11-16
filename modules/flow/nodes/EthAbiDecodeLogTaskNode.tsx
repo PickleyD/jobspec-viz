@@ -34,6 +34,7 @@ export const EthAbiDecodeLogTaskNode = (nodeProps: NodeProps) => {
         config={<>
           <PowerTextArea
             label="ABI"
+            placeholder="Should be formatted exactly as in Solidity. Each argument must be named."
             value={abi}
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {
@@ -47,6 +48,7 @@ export const EthAbiDecodeLogTaskNode = (nodeProps: NodeProps) => {
           />
           <PowerTextArea
             label="Data"
+            placeholder="Either a byte array variable or a hex-encoded string beginning with '0x'."
             value={data}
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {
@@ -60,6 +62,7 @@ export const EthAbiDecodeLogTaskNode = (nodeProps: NodeProps) => {
           />
           <PowerTextArea
             label="Topics"
+            placeholder="Array of bytes32 values or array of hex-encoded bytes32 values beginning with '0x'."
             value={topics}
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {

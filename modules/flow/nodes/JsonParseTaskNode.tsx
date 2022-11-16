@@ -37,7 +37,7 @@ export const JsonParseTaskNode = (nodeProps: NodeProps) => {
             <PowerTextArea
                 label="Path"
                 value={path}
-                placeholder="Comma delimited keys"
+                placeholder="Comma-separated keys"
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
                         path: {

@@ -35,6 +35,7 @@ export const SumTaskNode = (nodeProps: NodeProps) => {
             />
             <PowerTextArea
                 label="Allowed Faults"
+                placeholder="Defaults to N - 1, where N is the number of inputs."
                 value={allowedFaults}
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {

@@ -25,7 +25,7 @@ export const EthTxTaskNode = (nodeProps: NodeProps) => {
             <PowerTextArea
                 label="To"
                 value={to}
-                placeholder="Enter ETH address"
+                placeholder="ETH address."
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
                         to: {
@@ -39,7 +39,7 @@ export const EthTxTaskNode = (nodeProps: NodeProps) => {
             <PowerTextArea
                 label="Data"
                 value={data}
-                placeholder="Likely the output of an 'ETH ABI Encode' task"
+                placeholder="Likely the output of an 'ETH ABI Encode' task."
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
                         data: {

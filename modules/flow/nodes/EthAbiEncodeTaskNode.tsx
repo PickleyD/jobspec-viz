@@ -32,6 +32,7 @@ export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
         config={<>
           <PowerTextArea
             label="ABI"
+            placeholder="Should be formatted exactly as in Solidity. Each argument must be named."
             value={abi}
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {
@@ -45,6 +46,7 @@ export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
           />
           <PowerTextArea
             label="Data"
+            placeholder="Map of the values to be encoded."
             value={data}
             onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
               value: {

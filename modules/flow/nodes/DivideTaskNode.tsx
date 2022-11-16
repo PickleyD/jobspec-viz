@@ -24,6 +24,7 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
         <TaskNode {...nodeProps}>
             <PowerTextArea
                 label="Input"
+                placeholder="The value to be divided."
                 value={input}
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
@@ -37,6 +38,7 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
             />
             <PowerTextArea
                 label="Divisor"
+                placeholder="The value by which to divide the input."
                 value={divisor}
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
@@ -50,6 +52,7 @@ export const DivideTaskNode = (nodeProps: NodeProps) => {
             />
             <PowerTextArea
                 label="Precision"
+                placeholder="The number of decimal places to retain in the result."
                 value={precision}
                 onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                     value: {
