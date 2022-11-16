@@ -198,8 +198,8 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
             </div>
           </div>
         </div>
-        <button onClick={handlePersist}>persist</button>
-        <button onClick={handleRehydrate}>rehydrate</button>
+        {/* <button onClick={handlePersist}>persist</button>
+        <button onClick={handleRehydrate}>rehydrate</button> */}
       </div>
     </ExpanderPanel>
   );
