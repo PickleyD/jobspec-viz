@@ -148,11 +148,11 @@ export const TaskNode = ({
 
   const notifyExistingConnectionsOfDeletion = () => {
     const outgoingNodes = outgoingNodeIds.map((nodeId: string) =>
-      getTaskNodeById(nodeId)
+      getTaskNodeByCustomId(nodeId)
     );
 
     outgoingNodes.map((outgoingNode: any) => {
-      outgoingNode.ref.send("REMOVE_INCOMING_NODE", {
+      outgoingNode?.ref && outgoingNode.ref.send("REMOVE_INCOMING_NODE", {
         nodeId: customId,
       });
     });
