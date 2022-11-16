@@ -15,6 +15,7 @@ import { Simulator } from "../modules/simulator";
 import { GlobalStateContext } from "../context/GlobalStateContext";
 import empty from "../examples/empty.json";
 import getUint256 from "../examples/getUint256.json";
+import median from "../examples/median.json";
 import { useSelector } from "@xstate/react";
 
 const reactFlowInstanceSelector = (state: any) =>
@@ -98,7 +99,7 @@ const Home: NextPage = () => {
               <div className="flex flex-col gap-2">
                 <div className="">
                   <p className="text-gray-300 text-sm font-bold max-w-sm">
-                    Start a new empty project or pick an example to give
+                    Start from an empty project or pick an example to give
                     yourself a headstart
                   </p>
                 </div>
@@ -117,8 +118,8 @@ const Home: NextPage = () => {
                   <div className="divider divider-horizontal"></div>
                   <div
                     className="btn btn-outline"
-                    onClick={() => handleRehydrate(getUint256)}
-                  >{`Get -> Uint256`}</div>
+                    onClick={() => handleRehydrate(median)}
+                  >{`Median Answer`}</div>
                 </div>
               </div>
             </div>
