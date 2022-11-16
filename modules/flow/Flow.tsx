@@ -132,6 +132,15 @@ export const Flow = ({ className }: FlowProps) => {
       case "MEAN":
         flowElement.type = "meanTask";
         break;
+      case "MODE":
+        flowElement.type = "modeTask";
+        break;
+      case "ANY":
+        flowElement.type = "anyTask";
+        break;
+      case "MEDIAN":
+        flowElement.type = "medianTask";
+        break;
       case "SUM":
         flowElement.type = "sumTask";
         break;
@@ -288,6 +297,9 @@ export const Flow = ({ className }: FlowProps) => {
       divideTask: DivideTaskNode,
       multiplyTask: MultiplyTaskNode,
       meanTask: MeanTaskNode,
+      medianTask: TaskNode,
+      anyTask: TaskNode,
+      modeTask: TaskNode,
       sumTask: SumTaskNode,
       ethAbiDecodeLogTask: EthAbiDecodeLogTaskNode,
       ethAbiDecodeTask: EthAbiDecodeTaskNode,
