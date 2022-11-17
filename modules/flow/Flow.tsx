@@ -185,10 +185,6 @@ export const Flow = ({ className }: FlowProps) => {
     setEdges(edgesFromMachine.map((edge: any) => ({ type: "custom", ...edge })));
   }, [edgesFromMachine]);
 
-  useEffect(() => {
-    handleAddNewNode({ x: 150, y: 150 }, "HTTP");
-  }, []);
-
   const handleAddNewNode = (
     initialCoords: XYCoords,
     taskType: TASK_TYPE,
