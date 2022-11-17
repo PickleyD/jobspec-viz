@@ -706,10 +706,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             const parsedContext = {
               ...toPersist,
               nodes: {
-                tasks: context.nodes.tasks.map((entry) => ({
-                  ...entry,
-                  context: entry.ref.getSnapshot()?.context,
-                })),
+                tasks: context.nodes.tasks.map((entry) => {
+
+                  const { runResult, ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
+
+                  return {
+                    ...entry,
+                    context: nodeContextToPersist,
+                  }
+                }),
               },
             };
 
@@ -1010,10 +1015,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             case "JSONPARSE": {
 
               const processedData = taskSpecific.data?.raw
-              ? taskSpecific.data?.raw
-                .replace(/\s/g, "")
-                .replace(/"/g, `\\\"`)
-              : "";
+                ? taskSpecific.data?.raw
+                  .replace(/\s/g, "")
+                  .replace(/"/g, `\\\"`)
+                : "";
 
               observationSrcLines.push(
                 { value: `${customId} [type="jsonparse"`, valid: isValid },
@@ -1107,7 +1112,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             }
             case "ANY": {
               observationSrcLines.push({
-                value: `${customId} [type="any"`,
+                value: `${customId} [type="any"]`,
                 valid: isValid,
               });
               break;
@@ -1118,7 +1123,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 {
                   value: `${spacer}  values=<[ ${incomingNodes
                     .map(wrapVariable)
-                    .join(", ")} ]>`,
+                    .join(", ")} ]>]`,
                   valid: isValid,
                 },
                 {
@@ -1134,7 +1139,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 {
                   value: `${spacer}  values=<[ ${incomingNodes
                     .map(wrapVariable)
-                    .join(", ")} ]>`,
+                    .join(", ")} ]>]`,
                   valid: isValid,
                 }
               );
@@ -1146,7 +1151,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 {
                   value: `${spacer}  values=<[ ${incomingNodes
                     .map(wrapVariable)
-                    .join(", ")} ]>`,
+                    .join(", ")} ]>]`,
                   valid: isValid,
                 }
               );
@@ -1171,10 +1176,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             }
             case "ETHABIENCODE": {
               const processedData = taskSpecific.data?.raw
-              ? taskSpecific.data?.raw
-                // .replace(/\s/g, "")
-                .replace(/"/g, `\\\"`)
-              : "";
+                ? taskSpecific.data?.raw
+                  // .replace(/\s/g, "")
+                  .replace(/"/g, `\\\"`)
+                : "";
 
               observationSrcLines.push(
                 { value: `${customId} [type="ethabiencode"`, valid: isValid },

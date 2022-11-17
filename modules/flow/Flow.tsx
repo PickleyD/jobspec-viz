@@ -328,6 +328,7 @@ export const Flow = ({ className }: FlowProps) => {
             padding: 1
           }}
           nodesDraggable={!testMode}
+          minZoom={0.35}
         >
           <Controls />
           <Background gap={15} />
