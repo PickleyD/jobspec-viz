@@ -194,7 +194,7 @@ export const TaskNode = ({
   }
 
   const [hasDraggedFromHandle, setHasDraggedFromHandle] = useState<boolean>(false)
-  
+
   useEffect(() => {
     isConnecting && setHasDraggedFromHandle(true)
   }, [isConnecting])
@@ -220,7 +220,7 @@ export const TaskNode = ({
         </div>
         }
         <div className="relative w-full h-full p-3 bg-base-100 rounded-md z-10">
-          {deletable &&
+          {deletable && !testMode &&
             <div
               onClick={handleDeleteNode}
               className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
@@ -228,7 +228,7 @@ export const TaskNode = ({
               <TrashIcon className="fill-current w-6" />
             </div>
           }
-          {testMode &&
+          {!isIdle && !isPendingRun &&
             <div className="absolute top-0 right-0 bottom-0 left-0 transparent z-20">
               <div className="absolute top-0 right-0 bottom-0 left-0 bg-base-100 opacity-50 rounded-md" />
               {/* {
@@ -244,18 +244,20 @@ export const TaskNode = ({
               } */}
             </div>
           }
-          <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="fill-current"
-              height="28"
-              viewBox="0 0 24 24"
-              width="28"
-            >
-              <path d="M0 0h24v24H0V0z" fill="none" />
-              <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-            </svg>
-          </div>
+          {!testMode &&
+            <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="fill-current"
+                height="28"
+                viewBox="0 0 24 24"
+                width="28"
+              >
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+              </svg>
+            </div>
+          }
           {useDefaultHandles && (
             <>
               <Handle
