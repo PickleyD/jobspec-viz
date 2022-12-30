@@ -265,12 +265,14 @@ export const TaskNode = ({
                 type="target"
                 position={Position.Top}
                 className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3 z-30"
+                data-cy={`${id}-handle-top`}
               />
               <Handle
                 id={`${id}-bottom`}
                 type="source"
                 position={Position.Bottom}
                 className="!w-6 !h-6 !bg-white !border-black !border-2 !-bottom-3 shadow-widget z-30"
+                data-cy={`${id}-handle-bottom`}
               />
             </>
           )}

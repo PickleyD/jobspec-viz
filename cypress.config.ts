@@ -8,6 +8,7 @@ export default defineConfig({
     },
     video: false,
     screenshotOnRunFailure: false,
-    supportFile: false
+    supportFile: false,
+    experimentalStudio: true
   },
 });

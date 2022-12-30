@@ -43,7 +43,7 @@ const Home: NextPage = () => {
     setNewProjectHeroDisplayed(false);
     setTimeout(
       () =>
-        reactFlowInstance.fitView({
+        reactFlowInstance?.fitView({
           duration: 500,
           padding: 1,
         }),
@@ -107,6 +107,7 @@ const Home: NextPage = () => {
                   <div
                     className="btn btn-outline"
                     onClick={() => handleRehydrate(empty)}
+                    data-cy="open-template-empty"
                   >
                     Empty Project
                   </div>
