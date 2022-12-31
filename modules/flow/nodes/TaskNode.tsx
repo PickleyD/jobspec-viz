@@ -200,7 +200,7 @@ export const TaskNode = ({
   }, [isConnecting])
 
   return (
-    <div className="relative overflow-visible">
+    <div className="relative overflow-visible" data-cy={`${id}`}>
       {/* width divisible by grid snap size */}
       <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-widget text-white w-[315px]">
         {isPendingRun && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
@@ -224,6 +224,7 @@ export const TaskNode = ({
             <div
               onClick={handleDeleteNode}
               className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
+              data-cy={`${id}-delete`}
             >
               <TrashIcon className="fill-current w-6" />
             </div>
@@ -245,7 +246,10 @@ export const TaskNode = ({
             </div>
           }
           {!testMode &&
-            <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab">
+            <div
+              className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab"
+              data-cy={`${id}-drag`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="fill-current"
@@ -314,7 +318,12 @@ export const TaskNode = ({
         <div className="absolute -bottom-[92px] left-[160px] text-white">
           <div className="relative">
             <svg className="absolute -top-[44px] -left-[24px] fill-current w-16 -scale-x-100 rotate-12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 359.171 359.171" xmlSpace="preserve"><path d="M351.689 201.729c-.612-46.512-6.732-95.472-18.972-140.76-3.061-9.792-17.748-6.12-15.301 4.284 9.792 40.392 15.912 81.396 17.748 123.013 1.837 41.615 2.448 97.308-27.54 129.743-15.3 16.524-42.84 15.912-63.647 17.137-30.601 1.836-61.812 1.224-92.412-.612-30.6-1.224-61.812-4.284-92.412-7.956-16.524-1.836-43.452-11.016-58.14-3.06-1.224.611-1.224 2.447-.612 3.06 11.016 14.076 42.228 13.464 58.752 15.912 36.72 4.896 72.828 7.344 109.548 9.18 44.675 1.836 114.443 11.017 149.939-22.644 32.437-29.377 33.049-86.905 33.049-127.297z" /><path d="M338.225 8.949c-4.284-6.12-11.628-4.896-14.688 1.836-8.567 20.808-22.031 39.78-30.6 60.588-2.448 6.12 6.732 9.18 9.792 4.284 9.792-15.912 18.972-31.824 28.764-47.736l7.345 14.688c3.06 7.956 3.672 15.912 7.344 23.256 2.447 5.508 9.792 3.06 11.628-1.224 6.119-17.136-9.793-41.616-19.585-55.692z" /></svg>
-            <div className="rotate-12 text-center text-xs font-hand">Drag from the handles to add another task</div>
+            <div
+              className="rotate-12 text-center text-xs font-hand"
+              data-cy={`${id}-drag-prompt`}
+            >
+              Drag from the handles to add another task
+            </div>
           </div>
         </div>
       }
