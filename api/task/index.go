@@ -87,7 +87,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
 
 		// Append the result to the vars
-		// TODO - existence check?
+		// TODO - existence check and warning for overwrite?
 		vars[t.Id] = result.Value
 
 		varsEnc := customToBase64(vars)
@@ -176,7 +176,7 @@ const (
 	TaskTypeHexEncode       TaskType = "hexencode"
 	TaskTypeBase64Decode    TaskType = "base64decode"
 	TaskTypeBase64Encode    TaskType = "base64encode"
-
+	TaskTypeLessThan        TaskType = "lessthan"
 	// // Testing only.
 	// TaskTypePanic TaskType = "panic"
 	// TaskTypeMemo  TaskType = "memo"
@@ -189,7 +189,7 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	jsonString, _ := json.Marshal(options)
 
 	// seeing as we're just running a single task with no context
-	// or pipeline variables we can just use an empty base task
+	// we can just use an empty base task
 	baseTask := pipeline.NewBaseTask(0, "", nil, nil, 0)
 
 	var task pipeline.Task
@@ -458,6 +458,18 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 		task = &pipeline.Base64DecodeTask{
 			BaseTask: baseTask,
 			Input:    opts.Input,
+		}
+	case TaskTypeLessThan:
+		var opts pipeline.LessThanTask
+
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.LessThanTask{
+			BaseTask: baseTask,
+			Left:     opts.Left,
+			Right:    opts.Right,
 		}
 	default:
 		return nil, fmt.Errorf(`unknown task type: "%v"`, taskType)
