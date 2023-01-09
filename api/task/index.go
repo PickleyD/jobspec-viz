@@ -178,6 +178,7 @@ const (
 	TaskTypeBase64Encode    TaskType = "base64encode"
 	TaskTypeLessThan        TaskType = "lessthan"
 	TaskTypeLength          TaskType = "length"
+	TaskTypeLookup          TaskType = "lookup"
 	// // Testing only.
 	// TaskTypePanic TaskType = "panic"
 	// TaskTypeMemo  TaskType = "memo"
@@ -482,6 +483,17 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 		task = &pipeline.LengthTask{
 			BaseTask: baseTask,
 			Input:    opts.Input,
+		}
+	case TaskTypeLookup:
+		var opts pipeline.LookupTask
+
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.LookupTask{
+			BaseTask: baseTask,
+			Key:      opts.Key,
 		}
 	default:
 		return nil, fmt.Errorf(`unknown task type: "%v"`, taskType)
