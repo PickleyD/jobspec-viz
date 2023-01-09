@@ -17,11 +17,11 @@ const categories: Array<Category> = [
     },
     {
         name: "Parsing",
-        tasks: ["JSONPARSE", "CBORPARSE"]
+        tasks: ["JSONPARSE", "CBORPARSE", "LOOKUP"]
     },
     {
         name: "Math",
-        tasks: ["SUM", "MULTIPLY", "DIVIDE"]
+        tasks: ["SUM", "MULTIPLY", "DIVIDE", "LENGTH", "LESSTHAN"]
     },
     {
         name: "Aggregators",

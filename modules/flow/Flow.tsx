@@ -31,7 +31,10 @@ import {
   SumTaskNode,
   EthAbiEncodeTaskNode,
   EthAbiDecodeTaskNode,
-  EthAbiDecodeLogTaskNode
+  EthAbiDecodeLogTaskNode,
+  LessThanTaskNode,
+  LengthTaskNode,
+  LookupTaskNode
 } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
@@ -143,6 +146,15 @@ export const Flow = ({ className }: FlowProps) => {
         break;
       case "ETHABIENCODE":
         flowElement.type = "ethAbiEncodeTask";
+        break;
+      case "LESSTHAN":
+        flowElement.type = "lessThanTask";
+        break;
+      case "LENGTH":
+        flowElement.type = "lengthTask";
+        break;
+      case "LOOKUP":
+        flowElement.type = "lookupTask";
         break;
       default:
         flowElement.type = "task";
@@ -291,7 +303,10 @@ export const Flow = ({ className }: FlowProps) => {
       sumTask: SumTaskNode,
       ethAbiDecodeLogTask: EthAbiDecodeLogTaskNode,
       ethAbiDecodeTask: EthAbiDecodeTaskNode,
-      ethAbiEncodeTask: EthAbiEncodeTaskNode
+      ethAbiEncodeTask: EthAbiEncodeTaskNode,
+      lessThanTask: LessThanTaskNode,
+      lengthTask: LengthTaskNode,
+      lookupTask: LookupTaskNode
     }),
     []
   );

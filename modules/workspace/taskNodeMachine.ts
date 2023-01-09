@@ -28,7 +28,26 @@ export type TaskNodeEvent =
   | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
   | { type: "RESET" };
 
-export const tasks = ["HTTP", "BRIDGE", "JSONPARSE", "CBORPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN", "ETHABIENCODE", "ETHABIDECODE", "ETHABIDECODELOG"] as const
+export const tasks = [
+  "HTTP", 
+  "BRIDGE", 
+  "JSONPARSE", 
+  "CBORPARSE", 
+  "ETHTX", 
+  "SUM", 
+  "DIVIDE", 
+  "MULTIPLY", 
+  "ANY", 
+  "MODE", 
+  "MEAN", 
+  "MEDIAN", 
+  "ETHABIENCODE", 
+  "ETHABIDECODE", 
+  "ETHABIDECODELOG",
+  "LESSTHAN",
+  "LENGTH",
+  "LOOKUP"
+] as const
 export type TASK_TYPE = typeof tasks[number]
 
 type TaskMock = {
@@ -71,7 +90,7 @@ const defaultContext: TaskNodeContext = {
 const validateAddress = (input: string) => isAddress(input)
 
 const validateTask = (context: TaskNodeContext) => {
-  let result = false;
+  let result = true;
 
   switch (context.taskType) {
     case "HTTP": {

@@ -1103,8 +1103,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   valid: isValid,
                 },
                 {
-                  value: `${spacer}  precision="${taskSpecific.precision?.raw || ""
-                    }"]`,
+                  value: `${spacer}  precision="${taskSpecific.precision?.raw || ""}"]`,
                   valid: isValid,
                 }
               );
@@ -1123,7 +1122,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 {
                   value: `${spacer}  values=<[ ${incomingNodes
                     .map(wrapVariable)
-                    .join(", ")} ]>]`,
+                    .join(", ")} ]>`,
                   valid: isValid,
                 },
                 {
@@ -1186,6 +1185,40 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
                 { value: `${spacer}  data="${processedData}"]`, valid: isValid },
               )
+              break;
+            }
+            case "LESSTHAN": {
+              observationSrcLines.push(
+                { value: `${customId} [type="lessthan"`, valid: isValid },
+                {
+                  value: `${spacer}  left="${taskSpecific.input?.raw || ""}"`,
+                  valid: isValid,
+                },
+                {
+                  value: `${spacer}  right="${taskSpecific.limit?.raw || ""}"]`,
+                  valid: isValid,
+                }
+              );
+              break;
+            }
+            case "LENGTH": {
+              observationSrcLines.push(
+                { value: `${customId} [type="length"`, valid: isValid },
+                {
+                  value: `${spacer}  input="${taskSpecific.input?.raw || ""}"]`,
+                  valid: isValid,
+                }
+              );
+              break;
+            }
+            case "LOOKUP": {
+              observationSrcLines.push(
+                { value: `${customId} [type="lookup"`, valid: isValid },
+                {
+                  value: `${spacer}  key="${taskSpecific.key?.raw || ""}"]`,
+                  valid: isValid,
+                }
+              );
               break;
             }
           }
