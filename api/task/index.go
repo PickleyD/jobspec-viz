@@ -148,8 +148,8 @@ func (t TaskType) String() string {
 }
 
 const (
-	TaskTypeHTTP TaskType = "http"
-	// TaskTypeBridge           TaskType = "bridge"
+	TaskTypeHTTP      TaskType = "http"
+	TaskTypeBridge    TaskType = "bridge"
 	TaskTypeMean      TaskType = "mean"
 	TaskTypeMedian    TaskType = "median"
 	TaskTypeMode      TaskType = "mode"
@@ -220,8 +220,20 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 
 		task = &httpTask
 
-	// case TaskTypeBridge:
-	// 	task = &BridgeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeBridge:
+		var opts pipeline.BridgeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.BridgeTask{
+			BaseTask:          baseTask,
+			Name:              opts.Name,
+			RequestData:       opts.RequestData,
+			IncludeInputAtKey: opts.IncludeInputAtKey,
+			Async:             opts.Async,
+			CacheTTL:          opts.CacheTTL,
+		}
 	case TaskTypeMean:
 		var opts pipeline.MeanTask
 		if err := json.Unmarshal(jsonString, &opts); err != nil {

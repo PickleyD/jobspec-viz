@@ -295,6 +295,10 @@ github.com/pickleyd/chainlink v1.9.0-rc1.0.20230105174800-789c6064dd98 h1:6qbhhd
 github.com/pickleyd/chainlink v1.9.0-rc1.0.20230105174800-789c6064dd98/go.mod h1:eeoadZw0c4SHzYUuoVDucKI1N6CtKYNne/hDMButY+A=
 github.com/pickleyd/chainlink v1.9.0-rc1.0.20230110170128-36b261bea7b6 h1:vkt32n0q4ci3OF4kWOLaMbK9iFd3AmfAd3XxtwXybmE=
 github.com/pickleyd/chainlink v1.9.0-rc1.0.20230110170128-36b261bea7b6/go.mod h1:eeoadZw0c4SHzYUuoVDucKI1N6CtKYNne/hDMButY+A=
+github.com/pickleyd/chainlink v1.9.0-rc1.0.20230111162334-726ecda77416 h1:0whfb9GUl4OK6NQjAYe/KVU0d5G8kUa9Iph7ScE0PII=
+github.com/pickleyd/chainlink v1.9.0-rc1.0.20230111162334-726ecda77416/go.mod h1:eeoadZw0c4SHzYUuoVDucKI1N6CtKYNne/hDMButY+A=
+github.com/pickleyd/chainlink v1.9.0-rc1.0.20230111232046-3dce6b2d5231 h1:k7BacqnQv6ljZLqY+tJgbT7p4SZaX9j2W8pYarSG2Bs=
+github.com/pickleyd/chainlink v1.9.0-rc1.0.20230111232046-3dce6b2d5231/go.mod h1:eeoadZw0c4SHzYUuoVDucKI1N6CtKYNne/hDMButY+A=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

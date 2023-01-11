@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/golang/gddo v0.0.0-20210115222349-20d68f94ee1f
-	github.com/pickleyd/chainlink v1.9.0-rc1.0.20230110170128-36b261bea7b6
+	github.com/pickleyd/chainlink v1.9.0-rc1.0.20230111232046-3dce6b2d5231
 	github.com/shopspring/decimal v1.3.1
 )
 
