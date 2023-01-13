@@ -17,6 +17,7 @@ export type Test = {
     want64?: string;
     expectError?: boolean;
     mockResponse?: any;
+    wantSideEffectData?: Var;
 }
 
 export const generateTest = (test: Test, inputs64Override?: Array<string>) => {

@@ -25,11 +25,12 @@ type Task struct {
 }
 
 type Response struct {
-	Value  string                 `json:"value"`
-	Val64  string                 `json:"val64"`
-	Vars   map[string]interface{} `json:"vars"`
-	Vars64 string                 `json:"vars64"`
-	Error  string                 `json:"error"`
+	Value          string                 `json:"value"`
+	Val64          string                 `json:"val64"`
+	Vars           map[string]interface{} `json:"vars"`
+	Vars64         string                 `json:"vars64"`
+	Error          string                 `json:"error"`
+	SideEffectData string                 `json:"sideEffectData"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -51,46 +52,48 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	response := Response{}
 
+	pipelineVars := pipeline.NewVarsFrom(vars)
+
+	task, taskErr := getTask(TaskType(t.Name), t.Options)
+
+	if taskErr != nil {
+		// TODO: Define and return different error types
+		msg := "Bad request"
+		http.Error(w, msg, http.StatusBadRequest)
+	}
+
+	inputs := make([]pipeline.Result, 0, len(t.Inputs64))
+	for _, r := range t.Inputs64 {
+		inputsDec, _ := base64.StdEncoding.DecodeString(r)
+
+		inputsTemp := pipeline.JSONSerializable{}
+		inputsTemp.UnmarshalJSON(inputsDec)
+
+		inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
+	}
+
+	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
+
+	// Append the result to the vars
+	// TODO - existence check and warning for overwrite?
 	if t.MockResponse != nil {
 		vars[t.Id] = t.MockResponse
+	} else {
+		vars[t.Id] = result.Value
+	}
 
-		varsEnc := customToBase64(vars)
+	varsEnc := customToBase64(vars)
 
+	if t.MockResponse != nil {
 		response = Response{
-			Value:  fmt.Sprintf("%v", t.MockResponse),
-			Val64:  customToBase64(t.MockResponse),
-			Vars:   vars,
-			Vars64: varsEnc,
-			Error:  "",
+			Value:          fmt.Sprintf("%v", t.MockResponse),
+			Val64:          customToBase64(t.MockResponse),
+			Vars:           vars,
+			Vars64:         varsEnc,
+			Error:          "",
+			SideEffectData: fmt.Sprintf("%v", result.SideEffectData),
 		}
 	} else {
-		pipelineVars := pipeline.NewVarsFrom(vars)
-
-		task, taskErr := getTask(TaskType(t.Name), t.Options)
-
-		if taskErr != nil {
-			// TODO: Define and return different error types
-			msg := "Bad request"
-			http.Error(w, msg, http.StatusBadRequest)
-		}
-
-		inputs := make([]pipeline.Result, 0, len(t.Inputs64))
-		for _, r := range t.Inputs64 {
-			inputsDec, _ := base64.StdEncoding.DecodeString(r)
-
-			inputsTemp := pipeline.JSONSerializable{}
-			inputsTemp.UnmarshalJSON(inputsDec)
-
-			inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
-		}
-
-		result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
-
-		// Append the result to the vars
-		// TODO - existence check and warning for overwrite?
-		vars[t.Id] = result.Value
-
-		varsEnc := customToBase64(vars)
 		resultValEnc := customToBase64(result.Value)
 
 		resultErr := ""
@@ -99,11 +102,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response = Response{
-			Value:  fmt.Sprintf("%v", result.Value),
-			Val64:  resultValEnc,
-			Vars:   vars,
-			Vars64: varsEnc,
-			Error:  resultErr,
+			Value:          fmt.Sprintf("%v", result.Value),
+			Val64:          resultValEnc,
+			Vars:           vars,
+			Vars64:         varsEnc,
+			Error:          resultErr,
+			SideEffectData: fmt.Sprintf("%v", result.SideEffectData),
 		}
 	}
 
