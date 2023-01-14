@@ -63,7 +63,8 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
                     //         keep: test.want?.value
                     //     }
                     // },
-                    ...test.want && { want: test.want }
+                    ...test.want && { want: test.want },
+                    ...test.wantSideEffectData && { wantSideEffectData: test.wantSideEffectData }
                 },
             ).then((varHelperResponse) => {
                 if (test.want64) {
@@ -75,6 +76,10 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
 
                 if (test.expectError) {
                     expect(taskResponse.body.error).to.not.empty
+                }
+
+                if (test.wantSideEffectData) {
+                    expect(taskResponse.body.sideEffectData64).to.eq(varHelperResponse.body.wantSideEffectData64)
                 }
 
                 return taskResponse.body

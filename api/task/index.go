@@ -25,12 +25,13 @@ type Task struct {
 }
 
 type Response struct {
-	Value          string                 `json:"value"`
-	Val64          string                 `json:"val64"`
-	Vars           map[string]interface{} `json:"vars"`
-	Vars64         string                 `json:"vars64"`
-	Error          string                 `json:"error"`
-	SideEffectData string                 `json:"sideEffectData"`
+	Value            string                 `json:"value"`
+	Val64            string                 `json:"val64"`
+	Vars             map[string]interface{} `json:"vars"`
+	Vars64           string                 `json:"vars64"`
+	Error            string                 `json:"error"`
+	SideEffectData   string                 `json:"sideEffectData"`
+	SideEffectData64 string                 `json:"sideEffectData64"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -84,31 +85,22 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	varsEnc := customToBase64(vars)
 
-	if t.MockResponse != nil {
-		response = Response{
-			Value:          fmt.Sprintf("%v", t.MockResponse),
-			Val64:          customToBase64(t.MockResponse),
-			Vars:           vars,
-			Vars64:         varsEnc,
-			Error:          "",
-			SideEffectData: fmt.Sprintf("%v", result.SideEffectData),
-		}
-	} else {
-		resultValEnc := customToBase64(result.Value)
+	resultValEnc := customToBase64(vars[t.Id])
 
-		resultErr := ""
-		if result.Error != nil {
-			resultErr = result.Error.Error()
-		}
+	response = Response{
+		Value:  fmt.Sprintf("%v", vars[t.Id]),
+		Val64:  resultValEnc,
+		Vars:   vars,
+		Vars64: varsEnc,
+	}
 
-		response = Response{
-			Value:          fmt.Sprintf("%v", result.Value),
-			Val64:          resultValEnc,
-			Vars:           vars,
-			Vars64:         varsEnc,
-			Error:          resultErr,
-			SideEffectData: fmt.Sprintf("%v", result.SideEffectData),
-		}
+	if result.Error != nil {
+		response.Error = result.Error.Error()
+	}
+
+	if result.SideEffectData != nil {
+		response.SideEffectData = fmt.Sprintf("%v", result.SideEffectData)
+		response.SideEffectData64 = customToBase64(result.SideEffectData)
 	}
 
 	jsonSer := pipeline.JSONSerializable{
