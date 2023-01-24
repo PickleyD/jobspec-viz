@@ -171,14 +171,30 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
               <p className="text-xs text-gray-300">Current Result:</p>
             )}
             <div className="flex flex-col gap-1">
-              {taskRunResults.length > 0 && (
-                <div className="flex flex-col">
-                  <p className="text-sm text-gray-300">Value:</p>
-                  <p className="text-sm text-secondary overflow-auto max-h-[10rem]">
-                    {latestTaskRunResult.value}
-                  </p>
-                </div>
-              )}
+              {
+                latestTaskRunResult.value !== undefined
+                && latestTaskRunResult.value.length > 0
+                && (
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-300">Value:</p>
+                    <p className="text-sm text-secondary overflow-auto max-h-[10rem]">
+                      {latestTaskRunResult.value}
+                    </p>
+                  </div>
+                )
+              }
+              {
+                latestTaskRunResult.sideEffectData !== undefined
+                && latestTaskRunResult.sideEffectData.length > 0
+                && (
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-300">Side-effect data:</p>
+                    <p className="text-sm text-blue-300 overflow-auto max-h-[10rem]">
+                      {latestTaskRunResult.sideEffectData}
+                    </p>
+                  </div>
+                )
+              }
               {latestTaskRunResult.error && (
                 <div className="flex flex-col">
                   <p className="text-sm text-gray-300">Error:</p>

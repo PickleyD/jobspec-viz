@@ -33,6 +33,7 @@ export const tasks = [
   "BRIDGE", 
   "JSONPARSE", 
   "CBORPARSE", 
+  "ETHCALL",
   "ETHTX", 
   "SUM", 
   "DIVIDE", 
@@ -121,6 +122,14 @@ const validateTask = (context: TaskNodeContext) => {
         && validateAddress(context.taskSpecific.to.raw)
         && context.taskSpecific.data
         && (context.taskSpecific.data.raw?.length ?? 0) > 0
+      break;
+    }
+    case "ETHCALL": {
+      result = context.taskSpecific.contract
+       && (context.taskSpecific.contract.raw?.length ?? 0) > 0 
+       && validateAddress(context.taskSpecific.contract.raw)
+       && context.taskSpecific.data
+       && (context.taskSpecific.data.raw?.length ?? 0) > 0
       break;
     }
     case "SUM": {

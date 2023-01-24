@@ -1061,6 +1061,20 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               );
               break;
             }
+            case "ETHCALL": {
+              observationSrcLines.push(
+                { value: `${customId} [type="ethcall"`, valid: isValid },
+                {
+                  value: `${spacer}  contract="${taskSpecific.contract?.raw || ""}"`,
+                  valid: isValid,
+                },
+                {
+                  value: `${spacer}  data="${taskSpecific.data?.raw || ""}"]`,
+                  valid: isValid,
+                }
+              );
+              break;
+            }
             case "SUM": {
               observationSrcLines.push(
                 { value: `${customId} [type="sum"`, valid: isValid },
