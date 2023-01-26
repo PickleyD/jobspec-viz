@@ -80,6 +80,7 @@ type WorkspaceEvent =
   | { type: "SIMULATOR_PREV_TASK" }
   | { type: "TRY_RUN_CURRENT_TASK" }
   | { type: "SIMULATOR_NEXT_TASK" }
+  | { type: "SIMULATOR_PROMPT_SIDE_EFFECT" }
   | { type: "PERSIST_STATE" }
   | { type: "RESTORE_STATE"; savedContext: WorkspaceContext };
 
@@ -278,6 +279,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             always: [{ target: "idle" }],
           },
           error: {},
+          sideEffectPrompt: {}
         },
         on: {
           TOGGLE_TEST_MODE: {
@@ -353,6 +355,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               };
             }),
           },
+          SIMULATOR_PROMPT_SIDE_EFFECT: {
+            target: ".sideEffectPrompt"
+          }
         },
       },
       error: {},

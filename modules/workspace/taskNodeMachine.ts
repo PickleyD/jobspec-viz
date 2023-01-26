@@ -29,21 +29,21 @@ export type TaskNodeEvent =
   | { type: "RESET" };
 
 export const tasks = [
-  "HTTP", 
-  "BRIDGE", 
-  "JSONPARSE", 
-  "CBORPARSE", 
+  "HTTP",
+  "BRIDGE",
+  "JSONPARSE",
+  "CBORPARSE",
   "ETHCALL",
-  "ETHTX", 
-  "SUM", 
-  "DIVIDE", 
-  "MULTIPLY", 
-  "ANY", 
-  "MODE", 
-  "MEAN", 
-  "MEDIAN", 
-  "ETHABIENCODE", 
-  "ETHABIDECODE", 
+  "ETHTX",
+  "SUM",
+  "DIVIDE",
+  "MULTIPLY",
+  "ANY",
+  "MODE",
+  "MEAN",
+  "MEDIAN",
+  "ETHABIENCODE",
+  "ETHABIDECODE",
   "ETHABIDECODELOG",
   "LESSTHAN",
   "LENGTH",
@@ -126,10 +126,10 @@ const validateTask = (context: TaskNodeContext) => {
     }
     case "ETHCALL": {
       result = context.taskSpecific.contract
-       && (context.taskSpecific.contract.raw?.length ?? 0) > 0 
-       && validateAddress(context.taskSpecific.contract.raw)
-       && context.taskSpecific.data
-       && (context.taskSpecific.data.raw?.length ?? 0) > 0
+        && (context.taskSpecific.contract.raw?.length ?? 0) > 0
+        && validateAddress(context.taskSpecific.contract.raw)
+        && context.taskSpecific.data
+        && (context.taskSpecific.data.raw?.length ?? 0) > 0
       break;
     }
     case "SUM": {
@@ -217,9 +217,9 @@ export const createTaskNodeMachine = (
                   nodeId: context.customId,
                   type: "STORE_TASK_RUN_RESULT"
                 })),
-                sendParent(() => ({
-                  type: "SIMULATOR_NEXT_TASK"
-                }))
+                // sendParent(() => ({
+                //   type: "SIMULATOR_NEXT_TASK"
+                // }))
               ]
             },
             onError: { target: "error" }
@@ -227,13 +227,31 @@ export const createTaskNodeMachine = (
         },
         inspectingResult: {
           always: [
+            { target: "pendingSideEffect", cond: "resultHasSideEffectData"},
             { target: "error", cond: "resultHasError" },
             { target: "success" }
           ]
         },
         success: {
+          entry: [
+            sendParent(() => ({
+              type: "SIMULATOR_NEXT_TASK"
+            }))
+          ]
         },
         error: {
+          entry: [
+            sendParent(() => ({
+              type: "SIMULATOR_NEXT_TASK"
+            }))
+          ]
+        },
+        pendingSideEffect: {
+          entry: [
+            sendParent(() => ({
+              type: "SIMULATOR_PROMPT_SIDE_EFFECT"
+            }))
+          ]
         }
       },
       on: {
@@ -394,6 +412,9 @@ export const createTaskNodeMachine = (
         },
         resultHasError: (context, event) => {
           return context.runResult.error.length > 0
+        },
+        resultHasSideEffectData: (context, event) => {
+          return context.runResult.sideEffectData.length > 0
         }
       }
     },

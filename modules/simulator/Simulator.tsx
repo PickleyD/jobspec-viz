@@ -9,9 +9,9 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 
-const testModeSelector = (state: any) => state.matches("testMode");
-const testModeLoadingSelector = (state: any) =>
-  state.matches("testModeLoading");
+const isTestModeSelector = (state: any) => state.matches("testMode");
+const isTestModeLoadingSelector = (state: any) => state.matches("testModeLoading");
+const isSideEffectPromptSelector = (state: any) => state.matches("testMode.sideEffectPrompt")
 const taskInstructionsSelector = (state: any) => state.context.parsedTaskOrder;
 const currentTaskIndexSelector = (state: any) => state.context.currentTaskIndex;
 const taskRunResultsSelector = (state: any) => state.context.taskRunResults;
@@ -26,13 +26,18 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
 
   const testMode = useSelector(
     globalServices.workspaceService,
-    testModeSelector
+    isTestModeSelector
   );
 
   const testModeLoading = useSelector(
     globalServices.workspaceService,
-    testModeLoadingSelector
+    isTestModeLoadingSelector
   );
+
+  const isSideEffectPrompt = useSelector(
+    globalServices.workspaceService,
+    isSideEffectPromptSelector
+  )
 
   const taskInstructions = useSelector(
     globalServices.workspaceService,
@@ -195,6 +200,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                   </div>
                 )
               }
+              { isSideEffectPrompt && <div>SIDE EFFECT PROMPT</div>}
               {latestTaskRunResult.error && (
                 <div className="flex flex-col">
                   <p className="text-sm text-gray-300">Error:</p>
@@ -214,8 +220,8 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
             </div>
           </div>
         </div>
-        {/* <button onClick={handlePersist}>persist</button>
-        <button onClick={handleRehydrate}>rehydrate</button> */}
+        <button onClick={handlePersist}>persist</button>
+        <button onClick={handleRehydrate}>rehydrate</button>
       </div>
     </ExpanderPanel>
   );
