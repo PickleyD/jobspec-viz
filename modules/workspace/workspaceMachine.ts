@@ -21,6 +21,8 @@ import {
   ReactFlowInstance,
 } from "react-flow-renderer";
 import { isAddress } from "ethers/lib/utils";
+import Web3 from "web3";
+import { ethers } from "ethers";
 
 type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
@@ -82,7 +84,8 @@ type WorkspaceEvent =
   | { type: "SIMULATOR_NEXT_TASK" }
   | { type: "SIMULATOR_PROMPT_SIDE_EFFECT" }
   | { type: "PERSIST_STATE" }
-  | { type: "RESTORE_STATE"; savedContext: WorkspaceContext };
+  | { type: "RESTORE_STATE"; savedContext: WorkspaceContext }
+  | { type: "TRY_RUN_CURRENT_SIDE_EFFECT" };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -103,6 +106,7 @@ interface WorkspaceContext {
   parsingError: string;
   currentTaskIndex: number;
   jobLevelVars64?: string;
+  provider: ReturnType<typeof getProvider>;
 }
 
 type JobTypeFieldMap = { [key in JOB_TYPE]: { [key: string]: Field } };
@@ -206,6 +210,15 @@ const validateJobTypeSpecifics = (jobTypeSpecifics: any, event: any) => {
   return validatedJobTypeSpecifics;
 };
 
+const getProvider = (network = "") => {
+  const networkToUse = "homestead"
+
+  return ethers.getDefaultProvider(networkToUse, {
+    // TODO: Add more services
+    alchemy: process.env.NEXT_PUBLIC_ALCHEMY_ID
+  })
+}
+
 export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
   {
     id: "workspace",
@@ -279,7 +292,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             always: [{ target: "idle" }],
           },
           error: {},
-          sideEffectPrompt: {}
+          sideEffectPrompt: {
+            on: {
+              TRY_RUN_CURRENT_SIDE_EFFECT: { target: "processingCurrentSideEffect" },
+            },
+          },
+          processingCurrentSideEffect: {
+            entry: ["executeCurrentSideEffect"],
+            always: [{ target: "idle" }],
+          },
         },
         on: {
           TOGGLE_TEST_MODE: {
@@ -420,6 +441,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       parsingError: "",
       currentTaskIndex: 0,
       jobLevelVars64: undefined,
+      provider: getProvider()
     },
     on: {
       SET_REACT_FLOW_INSTANCE: {
@@ -663,6 +685,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       },
       STORE_TASK_RUN_RESULT: {
         actions: assign((context, event) => {
+          console.log(event)
           return {
             taskRunResults: [
               ...context.taskRunResults,
@@ -749,6 +772,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           };
         }),
       },
+      // SET_NETWORK: {
+      //   actions: [
+      //     assign((context, event) => {
+      //       return {
+      //         network: event.value
+      //       }
+      //     })
+      //   ]
+      // }
     },
   },
   {
@@ -869,7 +901,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         };
       }),
       // @ts-ignore
-      processCurrentTask: actions.pure((context: WorkspaceContext, event) => {
+      processCurrentTask: actions.pure((context, _) => {
         if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
 
         // Try to execute the current task and then proceed if successful
@@ -901,6 +933,26 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             { to: currentTaskId }
           ),
         ];
+      }),
+      // @ts-ignore
+      executeCurrentSideEffect: actions.pure((context, event) => {
+        if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
+
+        // Try to execute the current task and then proceed if successful
+        const currentTask = context.parsedTaskOrder[context.currentTaskIndex];
+        const currentTaskCustomId = currentTask.id;
+
+        const currentTaskId = getTaskNodeByCustomId(
+          context,
+          currentTaskCustomId
+        )?.ref.id;
+
+        return [
+          send(
+            { type: "TRY_RUN_SIDE_EFFECT", provider: context.provider },
+            { to: currentTaskId }
+          ),
+        ]
       }),
       regenerateToml: assign((context, event) => {
 

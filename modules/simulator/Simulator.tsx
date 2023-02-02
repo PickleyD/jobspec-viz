@@ -8,6 +8,8 @@ import {
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
+import Web3 from "web3"
+import { useSigner } from "wagmi"
 
 const isTestModeSelector = (state: any) => state.matches("testMode");
 const isTestModeLoadingSelector = (state: any) => state.matches("testModeLoading");
@@ -105,6 +107,23 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
       savedContext: JSON.parse(localStorage.getItem("persisted-state") || ""),
     });
 
+  // const { data: signer } = useSigner()
+
+  const handleMakeCall = () => {
+    globalServices.workspaceService.send("TRY_RUN_CURRENT_SIDE_EFFECT");
+    // const web3 = new Web3((signer?.provider as any).provider)
+
+    // const base64Decoded = Buffer.from("mm/I9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAADMW", 'base64').toString('hex');
+    // const hexEncoded = '0x' + base64Decoded;
+    // console.log(hexEncoded)
+
+    // web3.eth.call({
+    //   to: "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419",
+    //   gas: 500000,
+    //   data: hexEncoded
+    // }).then(result => console.log(result))
+  }
+
   return (
     <ExpanderPanel className={className} icon={BeakerIcon}>
       <div className="flex items-center justify-center p-4">
@@ -126,8 +145,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
             </label>
             <Tooltip className="text-sm text-gray-300" placement="bottom-end">
               <p>
-                Here is the generated TOML job spec. Copy and paste it into your
-                Chainlink node UI when setting up your job!
+                Enable test mode to parse your pipeline and step through task execution a simulated environment.
               </p>
             </Tooltip>
           </div>
@@ -200,7 +218,9 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                   </div>
                 )
               }
-              { isSideEffectPrompt && <div>SIDE EFFECT PROMPT</div>}
+              {isSideEffectPrompt && <><div>SIDE EFFECT PROMPT</div>
+                <button className="border-2 border-white" onClick={handleMakeCall}>Make Eth Call</button>
+              </>}
               {latestTaskRunResult.error && (
                 <div className="flex flex-col">
                   <p className="text-sm text-gray-300">Error:</p>

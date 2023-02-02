@@ -1,5 +1,5 @@
 import { isAddress } from "ethers/lib/utils";
-import { createMachine, assign } from "xstate";
+import { createMachine, assign, send, actions } from "xstate";
 import { sendParent } from "xstate/lib/actions";
 
 export type XYCoords = {
@@ -26,6 +26,7 @@ export type TaskNodeEvent =
   | { type: "UPDATE_COORDS"; value: XYCoords }
   | { type: "SET_PENDING_RUN" }
   | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
+  | { type: "TRY_RUN_SIDE_EFFECT"; provider: any; }
   | { type: "RESET" };
 
 export const tasks = [
@@ -71,6 +72,7 @@ export interface TaskNodeContext {
   mock: TaskMock;
   isValid: boolean;
   runResult: any;
+  executedSideEffect: boolean;
 }
 
 const defaultContext: TaskNodeContext = {
@@ -85,7 +87,8 @@ const defaultContext: TaskNodeContext = {
     enabled: true
   },
   isValid: false,
-  runResult: undefined
+  runResult: undefined,
+  executedSideEffect: false
 };
 
 const validateAddress = (input: string) => isAddress(input)
@@ -227,7 +230,7 @@ export const createTaskNodeMachine = (
         },
         inspectingResult: {
           always: [
-            { target: "pendingSideEffect", cond: "resultHasSideEffectData"},
+            { target: "pendingSideEffect", cond: "resultHasPendingSideEffectData" },
             { target: "error", cond: "resultHasError" },
             { target: "success" }
           ]
@@ -251,7 +254,41 @@ export const createTaskNodeMachine = (
             sendParent(() => ({
               type: "SIMULATOR_PROMPT_SIDE_EFFECT"
             }))
-          ]
+          ],
+          on: {
+            TRY_RUN_SIDE_EFFECT: {
+              target: "executingSideEffect"
+            }
+          }
+        },
+        executingSideEffect: {
+          invoke: {
+            src: "executeSideEffect",
+            id: "executeSideEffect",
+            onDone: {
+              target: "pendingRun",
+              // @ts-ignore
+              actions: actions.pure((context, event) => {
+                return [
+                  assign({
+                    // @ts-ignore
+                    mock: (context, event) => ({
+                      // @ts-ignore
+                      mockResponseDataInput: event.data,
+                      // @ts-ignore
+                      mockResponseData: event.data,
+                      enabled: true
+                    }),
+                    executedSideEffect: true
+                  }),
+                  sendParent(() => ({
+                    type: "TRY_RUN_CURRENT_TASK"
+                  }))
+                ];
+              }),
+            },
+            onError: { target: "error" }
+          }
         }
       },
       on: {
@@ -356,7 +393,7 @@ export const createTaskNodeMachine = (
         UPDATE_COORDS: {
           actions: [
             assign({
-              coords: (context, event) => (event.value),
+              coords: (_, event) => (event.value),
             })
           ],
         },
@@ -382,6 +419,8 @@ export const createTaskNodeMachine = (
       },
       services: {
         runTask: (context, event) => {
+          console.log(context)
+          console.log(event)
           return fetch("/api/task", {
             method: "POST",
             headers: {
@@ -404,6 +443,23 @@ export const createTaskNodeMachine = (
                 error: json.error.message
               }
             }))
+        },
+        executeSideEffect: (context, event) => {
+
+          const { To: to, Data: base64Data } = JSON.parse(context.runResult.sideEffectData)
+
+          if (!('provider' in event)) {
+            return Promise.reject("No 'provider' prop on the event inside 'executeSideEffect'")
+          }
+
+          const hexEncodedData = '0x' + Buffer.from(base64Data, 'base64').toString('hex');
+
+          const result = event.provider.call({
+            to: to,
+            data: hexEncodedData
+          })
+
+          return result
         }
       },
       guards: {
@@ -413,8 +469,8 @@ export const createTaskNodeMachine = (
         resultHasError: (context, event) => {
           return context.runResult.error.length > 0
         },
-        resultHasSideEffectData: (context, event) => {
-          return context.runResult.sideEffectData.length > 0
+        resultHasPendingSideEffectData: (context, event) => {
+          return context.runResult.sideEffectData.length > 0 && context.executedSideEffect !== true
         }
       }
     },
