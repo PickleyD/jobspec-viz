@@ -72,7 +72,6 @@ export interface TaskNodeContext {
   mock: TaskMock;
   isValid: boolean;
   runResult: any;
-  executedSideEffect: boolean;
 }
 
 const defaultContext: TaskNodeContext = {
@@ -87,8 +86,7 @@ const defaultContext: TaskNodeContext = {
     enabled: true
   },
   isValid: false,
-  runResult: undefined,
-  executedSideEffect: false
+  runResult: undefined
 };
 
 const validateAddress = (input: string) => isAddress(input)
@@ -278,8 +276,7 @@ export const createTaskNodeMachine = (
                       // @ts-ignore
                       mockResponseData: event.data,
                       enabled: true
-                    }),
-                    executedSideEffect: true
+                    })
                   }),
                   sendParent(() => ({
                     type: "TRY_RUN_CURRENT_TASK"
@@ -470,7 +467,7 @@ export const createTaskNodeMachine = (
           return context.runResult.error.length > 0
         },
         resultHasPendingSideEffectData: (context, event) => {
-          return context.runResult.sideEffectData.length > 0 && context.executedSideEffect !== true
+          return context.runResult.sideEffectData.length > 0 && context.mock.enabled !== true
         }
       }
     },
