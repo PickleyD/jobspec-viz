@@ -2,7 +2,7 @@ import { TaskNode } from "./TaskNode";
 import { NodeProps } from "react-flow-renderer";
 import React, { useEffect } from "react";
 import { useSelector } from "@xstate/react";
-import { PowerTextArea, TaskConfigTabs } from "./fields";
+import { PowerTextArea, TaskConfigTabs, TextArea } from "./fields";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
@@ -12,8 +12,9 @@ const gasSelector = (state: any) => state.context.taskSpecific.gas;
 const gasPriceSelector = (state: any) => state.context.taskSpecific.gasPrice;
 const gasTipCapSelector = (state: any) => state.context.taskSpecific.gasTipCapPrice;
 const gasFeeCapSelector = (state: any) => state.context.taskSpecific.gasFeeCapPrice;
-const mockResponseDataSelector = (state: any) => state.context.mock.mockResponseData;
-const customIdSelector = (state: any) => state.context.customId
+const mockResponseDataInputSelector = (state: any) => state.context.mock.mockResponseDataInput;
+const enabledMockSelector = (state: any) => state.context.mock.enabled;
+const customIdSelector = (state: any) => state.context.customId;
 
 export const EthCallTaskNode = (nodeProps: NodeProps) => {
     const { machine } = nodeProps.data;
@@ -25,14 +26,15 @@ export const EthCallTaskNode = (nodeProps: NodeProps) => {
     const gasPrice = useSelector(machine, gasPriceSelector);
     const gasTipCap = useSelector(machine, gasTipCapSelector);
     const gasFeeCap = useSelector(machine, gasFeeCapSelector);
-    const mockResponseData = useSelector(machine, mockResponseDataSelector);
-
-    useEffect(() => {
-        console.log(mockResponseData)
-    }, [mockResponseData])
+    const mockResponseDataInput = useSelector(machine, mockResponseDataInputSelector);
+    const enabledMock = useSelector(machine, enabledMockSelector);
 
     const incomingNodes = useSelector(machine, incomingNodesSelector);
     const taskCustomId = useSelector(machine, customIdSelector)
+
+    const handleToggleMockEnabled = () => {
+        machine.send("SET_MOCK_RESPONSE", { value: { enabled: !enabledMock } })
+    }
 
     return (
         <TaskNode {...nodeProps}>
@@ -150,7 +152,21 @@ export const EthCallTaskNode = (nodeProps: NodeProps) => {
                 </>
                 }
                 test={
-                    <></>
+                    <>
+                        <div className="form-control">
+                            <label className="label cursor-pointer">
+                                <span className={`label-text ${enabledMock ? "" : "text-gray-500"}`}>Mock response</span>
+                                <input type="checkbox" checked={enabledMock} className="toggle toggle-secondary" onChange={handleToggleMockEnabled} />
+                            </label>
+                        </div>
+                        <TextArea
+                            disabled={!enabledMock}
+                            className="h-48"
+                            placeholder="Provide a mock response to test the rest of your pipeline with"
+                            value={mockResponseDataInput}
+                            onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseDataInput: newValue, mockResponseData: newValue } })}
+                        />
+                    </>
                 }
             />
         </TaskNode>
