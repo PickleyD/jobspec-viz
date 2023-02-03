@@ -728,6 +728,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               parsingError,
               currentTaskIndex,
               jobLevelVars64,
+              provider,
               ...toPersist } = context
 
             // Instead of saving the full context as-is, we'll expand the context of each spawned machine
