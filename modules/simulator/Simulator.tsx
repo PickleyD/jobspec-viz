@@ -8,8 +8,6 @@ import {
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
-import Web3 from "web3"
-import { useSigner } from "wagmi"
 
 const isTestModeSelector = (state: any) => state.matches("testMode");
 const isTestModeLoadingSelector = (state: any) => state.matches("testModeLoading");
