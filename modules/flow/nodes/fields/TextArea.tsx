@@ -12,7 +12,7 @@ export interface TextAreaProps extends Omit<React.ComponentProps<"textarea">, "o
 }
 
 export const TextArea = ({
-    displayJsonValidity = true,
+    displayJsonValidity = false,
     label,
     value,
     onChange,

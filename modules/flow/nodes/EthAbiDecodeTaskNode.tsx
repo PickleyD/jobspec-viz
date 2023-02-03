@@ -70,8 +70,7 @@ export const EthAbiDecodeTaskNode = (nodeProps: NodeProps) => {
             className="h-48"
             placeholder="Provide a mock response to test the rest of your pipeline with"
             value={mockResponseDataInput}
-            onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseDataInput: newValue } })}
-            onValidJsonChange={(newJson) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseData: newJson } })}
+            onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseDataInput: newValue, mockResponseData: newValue } })}
           />
         </>
         }

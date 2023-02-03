@@ -66,6 +66,7 @@ export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
             </label>
           </div>
           <TextArea
+          displayJsonValidity
             disabled={!enabledMock}
             className="h-48"
             placeholder="Provide a mock response to test the rest of your pipeline with"
