@@ -53,6 +53,7 @@ export const tasks = [
 export type TASK_TYPE = typeof tasks[number]
 
 type TaskMock = {
+  mockResponseDataInput?: any;
   mockResponseData?: any;
   enabled: boolean;
 }

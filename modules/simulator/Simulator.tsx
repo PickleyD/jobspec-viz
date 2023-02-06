@@ -8,6 +8,7 @@ import {
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
+import { SideEffectPrompt } from "./SideEffectPrompt";
 
 const isTestModeSelector = (state: any) => state.matches("testMode");
 const isTestModeLoadingSelector = (state: any) => state.matches("testModeLoading");
@@ -105,27 +106,10 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
       savedContext: JSON.parse(localStorage.getItem("persisted-state") || ""),
     });
 
-  // const { data: signer } = useSigner()
-
-  const handleMakeCall = () => {
-    globalServices.workspaceService.send("TRY_RUN_CURRENT_SIDE_EFFECT");
-    // const web3 = new Web3((signer?.provider as any).provider)
-
-    // const base64Decoded = Buffer.from("mm/I9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAADMW", 'base64').toString('hex');
-    // const hexEncoded = '0x' + base64Decoded;
-    // console.log(hexEncoded)
-
-    // web3.eth.call({
-    //   to: "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419",
-    //   gas: 500000,
-    //   data: hexEncoded
-    // }).then(result => console.log(result))
-  }
-
   return (
     <ExpanderPanel className={className} icon={BeakerIcon}>
       <div className="flex items-center justify-center p-4">
-        <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[14rem]">
+        <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[20rem]">
           <div className="flex gap-1 items-center">
             <label className="label cursor-pointer flex gap-2 items-center">
               <span
@@ -187,59 +171,45 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
               max="100"
             ></progress>
           </div>
-          <div className="flex flex-col gap-1 w-full">
-            {(latestTaskRunResult.value || latestTaskRunResult.error) && (
-              <p className="text-xs text-gray-300">Current Result:</p>
-            )}
-            <div className="flex flex-col gap-1">
-              {
-                latestTaskRunResult.value !== undefined
-                && latestTaskRunResult.value.length > 0
-                && (
+          {isSideEffectPrompt ? <SideEffectPrompt /> :
+            <div className="flex flex-col gap-1 w-full">
+              {(latestTaskRunResult.value || latestTaskRunResult.error) && (
+                <p className="text-xs text-gray-300">Current Result:</p>
+              )}
+              <div className="flex flex-col gap-1">
+                {
+                  latestTaskRunResult.value !== undefined
+                  && latestTaskRunResult.value.length > 0
+                  && (
+                    <div className="flex flex-col">
+                      <p className="text-sm text-gray-300">Value:</p>
+                      <p className="text-sm text-secondary overflow-auto max-h-[10rem]">
+                        {latestTaskRunResult.value}
+                      </p>
+                    </div>
+                  )
+                }
+                {latestTaskRunResult.error && (
                   <div className="flex flex-col">
-                    <p className="text-sm text-gray-300">Value:</p>
-                    <p className="text-sm text-secondary overflow-auto max-h-[10rem]">
-                      {latestTaskRunResult.value}
+                    <p className="text-sm text-gray-300">Error:</p>
+                    <p className="text-sm text-error overflow-auto max-h-[10rem]">
+                      {latestTaskRunResult.error}
                     </p>
                   </div>
-                )
-              }
-              {
-                latestTaskRunResult.sideEffectData !== undefined
-                && latestTaskRunResult.sideEffectData.length > 0
-                && (
+                )}
+                {parsingError.length > 0 && (
                   <div className="flex flex-col">
-                    <p className="text-sm text-gray-300">Side-effect data:</p>
-                    <p className="text-sm text-blue-300 overflow-auto max-h-[10rem]">
-                      {latestTaskRunResult.sideEffectData}
+                    <p className="text-sm text-gray-300">Error:</p>
+                    <p className="text-sm text-error overflow-auto max-h-[10rem]">
+                      {parsingError}
                     </p>
                   </div>
-                )
-              }
-              {isSideEffectPrompt && <><div>SIDE EFFECT PROMPT</div>
-                <button className="border-2 border-white" onClick={handleMakeCall}>Make Eth Call</button>
-              </>}
-              {latestTaskRunResult.error && (
-                <div className="flex flex-col">
-                  <p className="text-sm text-gray-300">Error:</p>
-                  <p className="text-sm text-error overflow-auto max-h-[10rem]">
-                    {latestTaskRunResult.error}
-                  </p>
-                </div>
-              )}
-              {parsingError.length > 0 && (
-                <div className="flex flex-col">
-                  <p className="text-sm text-gray-300">Error:</p>
-                  <p className="text-sm text-error overflow-auto max-h-[10rem]">
-                    {parsingError}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+                )}
+              </div>
+            </div>}
         </div>
-        <button onClick={handlePersist}>persist</button>
-        <button onClick={handleRehydrate}>rehydrate</button>
+        {/* <button onClick={handlePersist}>persist</button>
+        <button onClick={handleRehydrate}>rehydrate</button> */}
       </div>
     </ExpanderPanel>
   );

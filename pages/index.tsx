@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Simulator } from "../modules/simulator";
 import { GlobalStateContext } from "../context/GlobalStateContext";
 import empty from "../examples/empty.json";
+import ethCall from "../examples/ethcall.json";
 import getUint256 from "../examples/getUint256.json";
 import median from "../examples/median.json";
 import { useSelector } from "@xstate/react";
@@ -110,6 +111,11 @@ const Home: NextPage = () => {
                   >
                     Empty Project
                   </div>
+                  <div className="divider divider-horizontal"></div>
+                  <div
+                    className="btn btn-outline"
+                    onClick={() => handleRehydrate(ethCall)}
+                  >{`ETH Call`}</div>
                   <div className="divider divider-horizontal"></div>
                   <div
                     className="btn btn-outline"
