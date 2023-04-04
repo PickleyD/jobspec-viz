@@ -20,6 +20,7 @@ export const TextArea = ({
     placeholder = "",
     optional = false,
     className = "",
+    disabled,
     ...rest
 }: TextAreaProps) => {
 
@@ -45,7 +46,7 @@ export const TextArea = ({
             onChange={handleChange}
             placeholder={placeholder}
             value={value}
-            className={`textarea textarea-bordered h-full ${displayJsonValidity ? getBorderClasses(isValidJson) : ""}`}
+            className={`textarea textarea-bordered h-full ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-gray-500" : ""}`}
             {...rest}
         />
     </div>
