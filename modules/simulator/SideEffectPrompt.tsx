@@ -34,28 +34,33 @@ export const SideEffectPrompt = () => {
         globalServices.workspaceService.send("TRY_RUN_CURRENT_SIDE_EFFECT");
     }
 
-    return <div className="text-sm">
+    const handleSkipCall = () => {
+        globalServices.workspaceService.send("SKIP_CURRENT_SIDE_EFFECT");
+    }
+
+    return <div className="w-full text-xs flex flex-col gap-2">
         <h4>This task would typically execute an <span className="text-secondary">ETH Call</span> with the following parameters:</h4>
-        <li className="list-none">
+        <li className="list-none w-full overflow-x-scroll bg-base-300 flex flex-col gap-1 p-2">
             {
                 Object.keys(sideEffectJson).map(key => <ul>
                     <p className="flex gap-1">
                         <span className="text-secondary">{key}:</span>
-                        <span>{sideEffectJson[key]}</span>
+                        <span className="text-gray-300">{sideEffectJson[key]}</span>
                     </p>
                 </ul>
                 )
             }
         </li>
         <p>
-            Use the currently stored mock response for this task or execute the side-effect and overwrite the stored mock response with the result?
+            Execute this side-effect and overwrite the stored mock response or skip it and use the currently stored mock response?
         </p>
+        <button className="border-2 border-white" onClick={handleMakeCall}>Execute Eth Call</button>
+        <button className="border-2 border-white" onClick={handleSkipCall}>Skip and use Mock Response</button>
         <h4>Current Mock Response</h4>
         <TextArea
             disabled
-            className="h-48"
+            className=""
             value={currentTaskMockResponseDataInput}
         />
-        <button className="border-2 border-white" onClick={handleMakeCall}>Make Eth Call</button>
     </div>
 }

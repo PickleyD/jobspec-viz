@@ -27,6 +27,7 @@ export type TaskNodeEvent =
   | { type: "SET_PENDING_RUN" }
   | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
   | { type: "TRY_RUN_SIDE_EFFECT"; provider: any; }
+  | { type: "SKIP_SIDE_EFFECT" }
   | { type: "RESET" };
 
 export const tasks = [
@@ -257,7 +258,10 @@ export const createTaskNodeMachine = (
           on: {
             TRY_RUN_SIDE_EFFECT: {
               target: "executingSideEffect"
-            }
+            },
+            SKIP_SIDE_EFFECT: {
+              target: "skippingSideEffect"
+            },
           }
         },
         executingSideEffect: {
@@ -287,6 +291,26 @@ export const createTaskNodeMachine = (
             },
             onError: { target: "error" }
           }
+        },
+        skippingSideEffect: {
+          entry: [
+            actions.pure((context, event) => {
+              return [
+                assign({
+                  // @ts-ignore
+                  mock: (context, event) => ({
+                    // @ts-ignore
+                    ...context.mock,
+                    enabled: true
+                  })
+                }),
+                sendParent(() => ({
+                  type: "TRY_RUN_CURRENT_TASK"
+                }))
+              ];
+            })
+          ],
+          always: [{ target: "pendingRun" }]
         }
       },
       on: {

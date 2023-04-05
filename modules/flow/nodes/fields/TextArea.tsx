@@ -47,6 +47,7 @@ export const TextArea = ({
             placeholder={placeholder}
             value={value}
             className={`textarea textarea-bordered h-full ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-gray-500" : ""}`}
+            disabled={disabled}
             {...rest}
         />
     </div>

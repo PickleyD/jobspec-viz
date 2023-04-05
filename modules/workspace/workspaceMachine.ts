@@ -85,7 +85,8 @@ type WorkspaceEvent =
   | { type: "SIMULATOR_PROMPT_SIDE_EFFECT" }
   | { type: "PERSIST_STATE" }
   | { type: "RESTORE_STATE"; savedContext: WorkspaceContext }
-  | { type: "TRY_RUN_CURRENT_SIDE_EFFECT" };
+  | { type: "TRY_RUN_CURRENT_SIDE_EFFECT" }
+  | { type: "SKIP_CURRENT_SIDE_EFFECT" };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -295,10 +296,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           sideEffectPrompt: {
             on: {
               TRY_RUN_CURRENT_SIDE_EFFECT: { target: "processingCurrentSideEffect" },
+              SKIP_CURRENT_SIDE_EFFECT: { target: "skippingCurrentSideEffect" }
             },
           },
           processingCurrentSideEffect: {
             entry: ["executeCurrentSideEffect"],
+            always: [{ target: "idle" }],
+          },
+          skippingCurrentSideEffect: {
+            entry: ["skipCurrentSideEffect"],
             always: [{ target: "idle" }],
           },
         },
@@ -927,7 +933,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             ? context.taskRunResults[context.taskRunResults.length - 1].result
               .vars64
             : context.jobLevelVars64;
-
+            
         return [
           send(
             { type: "TRY_RUN_TASK", input64s, vars64 },
@@ -951,6 +957,26 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         return [
           send(
             { type: "TRY_RUN_SIDE_EFFECT", provider: context.provider },
+            { to: currentTaskId }
+          ),
+        ]
+      }),
+      // @ts-ignore
+      skipCurrentSideEffect: actions.pure((context, event) => {
+        if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
+
+        // Skip the current task
+        const currentTask = context.parsedTaskOrder[context.currentTaskIndex];
+        const currentTaskCustomId = currentTask.id;
+
+        const currentTaskId = getTaskNodeByCustomId(
+          context,
+          currentTaskCustomId
+        )?.ref.id;
+
+        return [
+          send(
+            { type: "SKIP_SIDE_EFFECT", provider: context.provider },
             { to: currentTaskId }
           ),
         ]
