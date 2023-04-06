@@ -81,10 +81,10 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           <select
             disabled={true}
             className="select select-bordered select-sm"
-            defaultValue="v1.8.1"
+            defaultValue="v1.11.0"
             onChange={() => {}}
           >
-            <option value="v1.8.1">v1.8.1</option>
+            <option value="v1.11.0">v1.11.0</option>
           </select>
         </div>
 
