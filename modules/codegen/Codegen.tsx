@@ -61,7 +61,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             onClick={handleCopyToClipboard}
             tabIndex={0}
             className={`${showCheckIcon ? "swap-active" : ""
-              } swap swap-rotate pointer-events-auto btn btn-circle h-6 w-6 min-h-0 border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary`}
+              } swap swap-rotate pointer-events-auto btn btn-circle h-6 w-6 min-h-0 border-gray-700 focus:border focus:border-secondary hover:border hover:border-secondary focus:border-secondary`}
           >
             <DocumentDuplicateIcon className="h-4 w-4 swap-off" />
             <CheckIcon className="h-4 w-4 swap-on" />

@@ -82,79 +82,79 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
             disabled={true}
             className="select select-bordered select-sm"
             defaultValue="v1.11.0"
-            onChange={() => {}}
+            onChange={() => { }}
           >
             <option value="v1.11.0">v1.11.0</option>
           </select>
         </div>
 
-        <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text text-xs">Job Type</span>
-          </label>
-          <select
-            disabled={disabled}
-            className="select select-bordered select-sm"
-            value={jobType}
-            onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
-          >
-            <option value="cron">CRON</option>
-            <option value="directrequest">Direct Request</option>
-            <option value="fluxmonitor" disabled>Flux Monitor</option>
-            <option value="keeper" disabled>Keeper</option>
-            <option value="offchainreporting" disabled>Off-chain Reporting</option>
-            <option value="webhook" disabled>Webhook</option>
-          </select>
+        <div className="flex gap-2 max-w-lg">
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text text-xs">Name</span>
+              <span className="label-text-alt text-xs">(optional)</span>
+            </label>
+            <input
+              disabled={disabled}
+              type="text"
+              placeholder=""
+              className="input input-bordered input-sm w-full max-w-xs"
+              value={name}
+              onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
+            />
+          </div>
+
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text text-xs">External Job ID</span>
+              <span className="label-text-alt text-xs">(optional)</span>
+            </label>
+            <input
+              disabled={disabled}
+              type="text"
+              placeholder=""
+              className="input input-bordered input-sm w-full max-w-xs"
+              value={externalJobId}
+              onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
+            />
+          </div>
         </div>
 
-        <TaskConfigTabs
-          config={
-            <div className="flex gap-2">
-              <div className="py-2">
+        <div className="bg-base-300 p-2 rounded-lg mt-6 max-w-lg">
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text text-xs">Job Type</span>
+            </label>
+            <select
+              disabled={disabled}
+              className="select select-bordered select-sm"
+              value={jobType}
+              onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
+            >
+              <option value="cron">CRON</option>
+              <option value="directrequest">Direct Request</option>
+              <option value="fluxmonitor" disabled>Flux Monitor</option>
+              <option value="keeper" disabled>Keeper</option>
+              <option value="offchainreporting" disabled>Off-chain Reporting</option>
+              <option value="webhook" disabled>Webhook</option>
+            </select>
+          </div>
 
-                <div className="form-control w-full max-w-xs">
-                  <label className="label">
-                    <span className="label-text text-xs">Name</span>
-                    <span className="label-text-alt text-xs">(optional)</span>
-                  </label>
-                  <input
-                    disabled={disabled}
-                    type="text"
-                    placeholder=""
-                    className="input input-bordered input-sm w-full max-w-xs"
-                    value={name}
-                    onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
-                  />
-                </div>
-
-                <div className="form-control w-full max-w-xs">
-                  <label className="label">
-                    <span className="label-text text-xs">External Job ID</span>
-                    <span className="label-text-alt text-xs">(optional)</span>
-                  </label>
-                  <input
-                    disabled={disabled}
-                    type="text"
-                    placeholder=""
-                    className="input input-bordered input-sm w-full max-w-xs"
-                    value={externalJobId}
-                    onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="py-2">
+          <TaskConfigTabs
+            config={
+              <div className="flex flex-col gap-2 p-4 bg-base-100 h-full w-full">
                 {
                   renderJobTypeSpecificFields(jobType)
                 }
               </div>
-            </div>
-          }
-          test={<>
-            {
-              renderJobTypeSpecificVariableSetters(jobType, { disabled })
             }
-          </>}
-        />
+            test={<div className="bg-base-100 p-4 h-full w-full">
+              {
+                renderJobTypeSpecificVariableSetters(jobType, { disabled })
+              }
+            </div>}
+          />
+        </div>
       </div>
     </ExpanderPanel>
   );
