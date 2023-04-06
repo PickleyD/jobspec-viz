@@ -912,7 +912,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
 
         // Try to execute the current task and then proceed if successful
-        const currentTask = context.parsedTaskOrder[context.currentTaskIndex];
+        const currentTask: TaskInstructions = context.parsedTaskOrder[context.currentTaskIndex];
         const currentTaskCustomId = currentTask.id;
 
         const currentTaskId = getTaskNodeByCustomId(
@@ -976,7 +976,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
 
         return [
           send(
-            { type: "SKIP_SIDE_EFFECT", provider: context.provider },
+            { type: "SKIP_SIDE_EFFECT" },
             { to: currentTaskId }
           ),
         ]
