@@ -51,16 +51,17 @@ export const SideEffectPrompt = () => {
                 )
             }
         </li>
-        <p>
-            Execute this side-effect and overwrite the stored mock response or skip it and use the currently stored mock response?
-        </p>
-        <button className="border-2 border-white" onClick={handleMakeCall}>Execute Eth Call</button>
-        <button className="border-2 border-white" onClick={handleSkipCall}>Skip and use Mock Response</button>
-        <h4>Current Mock Response</h4>
+        <div className="flex flex-col w-full">
+            <button className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-700 hover:text-black" onClick={handleMakeCall}>Run and Overwrite the Stored Mock Response</button>
+            <div className="divider">OR</div>
+            <button className="border-2 border-secondary hover:border-white focus:border-white rounded-full p-2 flex flex-row items-center justify-center text-secondary" onClick={handleSkipCall}>Skip and Use Currently Stored Mock Response</button>
+        </div>
+        <h4>Stored Mock Response</h4>
         <TextArea
             disabled
-            className=""
+            className="text-xs"
             value={currentTaskMockResponseDataInput}
+            placeholder="No mock response set on task"
         />
     </div>
 }
