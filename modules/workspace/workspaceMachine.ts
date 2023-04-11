@@ -57,6 +57,9 @@ type WorkspaceEvent =
   | { type: "SET_JOB_TYPE"; value: JOB_TYPE }
   | { type: "SET_NAME"; value: string }
   | { type: "SET_EXTERNAL_JOB_ID"; value: string }
+  | { type: "SET_GAS_LIMIT"; value: string }
+  | { type: "SET_MAX_TASK_DURATION"; value: string }
+  | { type: "SET_FORWARDING_ALLOWED"; value: string }
   | {
     type: "SET_JOB_TYPE_SPECIFIC_PROPS";
     jobType: JOB_TYPE;
@@ -93,6 +96,9 @@ interface WorkspaceContext {
   type: JOB_TYPE;
   name: string;
   externalJobId: string;
+  gasLimit: string;
+  maxTaskDuration: string;
+  forwardingAllowed: string;
   edges: CustomEdge[];
   nodes: Nodes;
   jobTypeSpecific: JobTypeFieldMap;
@@ -394,6 +400,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       type: "cron",
       name: "",
       externalJobId: "",
+      gasLimit: "",
+      maxTaskDuration: "",
+      forwardingAllowed: "",
       edges: [],
       totalNodesAdded: 0,
       totalEdgesAdded: 0,
@@ -626,6 +635,30 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         actions: [
           assign({
             externalJobId: (context, event) => event.value,
+          }),
+          "regenerateToml",
+        ],
+      },
+      SET_GAS_LIMIT: {
+        actions: [
+          assign({
+            gasLimit: (context, event) => event.value,
+          }),
+          "regenerateToml",
+        ],
+      },
+      SET_MAX_TASK_DURATION: {
+        actions: [
+          assign({
+            maxTaskDuration: (context, event) => event.value,
+          }),
+          "regenerateToml",
+        ],
+      },
+      SET_FORWARDING_ALLOWED: {
+        actions: [
+          assign({
+            forwardingAllowed: (context, event) => event.value,
           }),
           "regenerateToml",
         ],
@@ -983,7 +1016,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       }),
       regenerateToml: assign((context, event) => {
 
-        const { type: jobType, name, externalJobId } = context;
+        const { type: jobType, name, externalJobId, gasLimit, maxTaskDuration, forwardingAllowed } = context;
 
         const lines: Array<TomlLine> = [];
 
@@ -994,6 +1027,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         name && lines.push({ value: `name = "${name}"` });
         externalJobId &&
           lines.push({ value: `externalJobId = "${externalJobId}"` });
+
+        gasLimit &&
+        lines.push({ value: `gasLimit = "${gasLimit}"` });
+
+        maxTaskDuration &&
+          lines.push({ value: `maxTaskDuration = "${maxTaskDuration}"` });
+
+        forwardingAllowed &&
+        lines.push({ value: `forwardingAllowed = "${forwardingAllowed}"` });
 
         switch (jobType) {
           case "cron": {

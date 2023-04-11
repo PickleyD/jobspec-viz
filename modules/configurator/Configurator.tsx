@@ -14,6 +14,9 @@ export interface ConfiguratorProps {
 const jobTypeSelector = (state: any) => state.context.type;
 const nameSelector = (state: any) => state.context.name;
 const externalJobIdSelector = (state: any) => state.context.externalJobId;
+const gasLimitSelector = (state: any) => state.context.gasLimit;
+const maxTaskDurationSelector = (state: any) => state.context.maxTaskDuration;
+const forwardingAllowedSelector = (state: any) => state.context.forwardingAllowed;
 const testModeSelector = (state: any) => state.matches("testMode") || state.matches("testModeLoading")
 
 const renderJobTypeSpecificFields = (jobType: JOB_TYPE) => {
@@ -52,6 +55,18 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const externalJobId = useSelector(
     globalServices.workspaceService,
     externalJobIdSelector
+  )
+  const gasLimit = useSelector(
+    globalServices.workspaceService,
+    gasLimitSelector
+  )
+  const maxTaskDuration = useSelector(
+    globalServices.workspaceService,
+    maxTaskDurationSelector
+  )
+  const forwardingAllowed = useSelector(
+    globalServices.workspaceService,
+    forwardingAllowedSelector
   )
 
   const testMode = useSelector(
@@ -116,6 +131,51 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
               className="input input-bordered input-sm w-full max-w-xs"
               value={externalJobId}
               onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
+            />
+          </div>
+
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text text-xs">Gas Limit</span>
+              <span className="label-text-alt text-xs">(optional)</span>
+            </label>
+            <input
+              disabled={disabled}
+              type="text"
+              placeholder=""
+              className="input input-bordered input-sm w-full max-w-xs"
+              value={gasLimit}
+              onChange={(event) => globalServices.workspaceService.send("SET_GAS_LIMIT", { value: event.target.value })}
+            />
+          </div>
+
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text text-xs">Max Task Duration</span>
+              <span className="label-text-alt text-xs">(optional)</span>
+            </label>
+            <input
+              disabled={disabled}
+              type="text"
+              placeholder=""
+              className="input input-bordered input-sm w-full max-w-xs"
+              value={maxTaskDuration}
+              onChange={(event) => globalServices.workspaceService.send("SET_MAX_TASK_DURATION", { value: event.target.value })}
+            />
+          </div>
+
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text text-xs">Forwarding Allowed?</span>
+              <span className="label-text-alt text-xs">(optional)</span>
+            </label>
+            <input
+              disabled={disabled}
+              type="text"
+              placeholder=""
+              className="input input-bordered input-sm w-full max-w-xs"
+              value={forwardingAllowed}
+              onChange={(event) => globalServices.workspaceService.send("SET_FORWARDING_ALLOWED", { value: event.target.value })}
             />
           </div>
         </div>
