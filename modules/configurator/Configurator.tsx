@@ -166,17 +166,17 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text text-xs">Forwarding Allowed?</span>
-              <span className="label-text-alt text-xs">(optional)</span>
+              <span className="label-text">Forwarding Allowed</span>
             </label>
-            <input
-              disabled={disabled}
-              type="text"
-              placeholder=""
-              className="input input-bordered input-sm w-full max-w-xs"
+            <select
+              className="select select-bordered"
+              defaultValue="false"
               value={forwardingAllowed}
               onChange={(event) => globalServices.workspaceService.send("SET_FORWARDING_ALLOWED", { value: event.target.value })}
-            />
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
           </div>
         </div>
 

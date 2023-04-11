@@ -98,7 +98,7 @@ interface WorkspaceContext {
   externalJobId: string;
   gasLimit: string;
   maxTaskDuration: string;
-  forwardingAllowed: string;
+  forwardingAllowed: boolean;
   edges: CustomEdge[];
   nodes: Nodes;
   jobTypeSpecific: JobTypeFieldMap;
@@ -402,7 +402,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       externalJobId: "",
       gasLimit: "",
       maxTaskDuration: "",
-      forwardingAllowed: "",
+      forwardingAllowed: false,
       edges: [],
       totalNodesAdded: 0,
       totalEdgesAdded: 0,
@@ -658,7 +658,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       SET_FORWARDING_ALLOWED: {
         actions: [
           assign({
-            forwardingAllowed: (context, event) => event.value,
+            forwardingAllowed: (context, event) => event.value === "true",
           }),
           "regenerateToml",
         ],
