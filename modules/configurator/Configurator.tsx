@@ -103,7 +103,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           </select>
         </div>
 
-        <div className="flex gap-2 max-w-lg">
+        <div className="grid grid-cols-2 gap-2 max-w-lg">
           <div className="form-control w-full max-w-xs">
             <label className="label">
               <span className="label-text text-xs">Name</span>
