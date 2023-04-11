@@ -337,6 +337,9 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 			GasFeeCap:           opts.GasFeeCap,
 			GasUnlimited:        opts.GasUnlimited,
 			ExtractRevertReason: opts.ExtractRevertReason,
+
+			// CUSTOM
+			SpecGasLimit: opts.SpecGasLimit,
 		}
 	case TaskTypeETHTx:
 		var opts pipeline.ETHTxTask
