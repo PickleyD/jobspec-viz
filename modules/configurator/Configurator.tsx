@@ -91,7 +91,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
         <div className="form-control w-full max-w-xs">
           <label className="label">
-            <span className="label-text text-xs">Chainlink Version</span>
+            <span className="label-text text-xs whitespace-nowrap">Chainlink Version</span>
           </label>
           <select
             disabled={true}
@@ -103,10 +103,10 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 max-w-lg">
+        <div className="grid grid-cols-3 gap-2 max-w-xl">
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text text-xs">Name</span>
+              <span className="label-text text-xs whitespace-nowrap">Name</span>
               <span className="label-text-alt text-xs">(optional)</span>
             </label>
             <input
@@ -121,7 +121,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text text-xs">External Job ID</span>
+              <span className="label-text text-xs whitespace-nowrap">External Job ID</span>
               <span className="label-text-alt text-xs">(optional)</span>
             </label>
             <input
@@ -136,7 +136,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text text-xs">Gas Limit</span>
+              <span className="label-text text-xs whitespace-nowrap">Gas Limit</span>
               <span className="label-text-alt text-xs">(optional)</span>
             </label>
             <input
@@ -151,7 +151,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text text-xs">Max Task Duration</span>
+              <span className="label-text text-xs whitespace-nowrap">Max Task Duration</span>
               <span className="label-text-alt text-xs">(optional)</span>
             </label>
             <input
@@ -166,10 +166,10 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text">Forwarding Allowed</span>
+              <span className="label-text text-xs whitespace-nowrap">Forwarding Allowed</span>
             </label>
             <select
-              className="select select-bordered"
+              className="select select-bordered select-sm"
               defaultValue="false"
               value={forwardingAllowed}
               onChange={(event) => globalServices.workspaceService.send("SET_FORWARDING_ALLOWED", { value: event.target.value })}
@@ -180,7 +180,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           </div>
         </div>
 
-        <div className="bg-base-300 p-2 rounded-lg mt-6 max-w-lg">
+        <div className="bg-base-300 p-2 rounded-lg mt-6 max-w-xl">
           <div className="form-control w-full max-w-xs">
             <label className="label">
               <span className="label-text text-xs">Job Type</span>
