@@ -1,6 +1,7 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { useContext } from "react"
+import { FieldLabel } from "../../../components";
 
 const contractAddressValueSelector = (state: any) => state.context.jobTypeSpecific.directrequest.contractAddress.value;
 const minContractPaymentLinkJuelsSelector = (state: any) => state.context.jobTypeSpecific.directrequest.minContractPaymentLinkJuels.value;
@@ -31,9 +32,7 @@ export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps
 
   return <>
     <div className={`${className} form-control w-60`}>
-      <label className="label">
-        <span className="label-text text-xs">Contract Address</span>
-      </label>
+      <FieldLabel name="Contract Address" />
       <input
         type="text"
         placeholder=""
@@ -43,10 +42,7 @@ export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps
       />
     </div>
     <div className={`${className} form-control w-60`}>
-      <label className="label">
-        <span className="label-text text-xs">Min. Contract Payment LINK</span>
-        <span className="label-text text-xs">(optional)</span>
-      </label>
+      <FieldLabel name="Min. Contract Payment LINK" optional />
       <input
         type="number"
         placeholder="Type amount in Juels"
@@ -56,10 +52,7 @@ export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps
       />
     </div>
     <div className={`${className} form-control w-60`}>
-      <label className="label">
-        <span className="label-text text-xs">Min. Incoming Confirmations</span>
-        <span className="label-text text-xs">(optional)</span>
-      </label>
+      <FieldLabel name="Min. Incoming Confirmations" optional />
       <input
         type="number"
         placeholder="Must be >= 1"

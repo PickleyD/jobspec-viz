@@ -1,4 +1,5 @@
 import React from "react";
+import { FieldLabel } from "../../../../components";
 
 export interface TextArrayFieldProps {
     label: string;
@@ -25,12 +26,7 @@ export const TextArrayField = ({
     }
 
     return <div className="form-control w-full">
-        <label className="label pb-0">
-            <span className="label-text">{label}</span>
-            {
-                optional && <span className="label-text-alt">(optional)</span>
-            }
-        </label>
+        <FieldLabel name={label} optional />
         <textarea
             onChange={handleChange}
             placeholder={placeholder}

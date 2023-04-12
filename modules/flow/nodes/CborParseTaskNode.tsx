@@ -3,6 +3,7 @@ import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
 import { PowerTextArea } from "./fields";
+import { FieldLabel } from "../../../components";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
@@ -35,9 +36,7 @@ export const CborParseTaskNode = (nodeProps: NodeProps) => {
                 ownerNodeCustomId={taskCustomId}
             />
             <div className="form-control w-full max-w-xs">
-                <label className="label">
-                    <span className="label-text">Mode</span>
-                </label>
+                <FieldLabel name="Mode" />
                 <select
                     className="select select-bordered"
                     defaultValue="diet"

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FieldLabel } from "../../../../components";
 
 export interface TextAreaProps extends Omit<React.ComponentProps<"textarea">, "onChange"> {
     displayJsonValidity?: boolean;
@@ -35,13 +36,7 @@ export const TextArea = ({
     }
 
     return <div className={`${className} form-control w-full`}>
-        {label && <label className="label pb-0">
-            <span className="label-text">{label}</span>
-            {
-                optional && <span className="label-text-alt">(optional)</span>
-            }
-        </label>
-        }
+        {label && <FieldLabel name={label} optional />}
         <textarea
             onChange={handleChange}
             placeholder={placeholder}

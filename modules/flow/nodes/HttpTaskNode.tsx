@@ -3,6 +3,7 @@ import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
 import { PowerTextArea, TextArea, TaskConfigTabs } from "./fields";
+import { FieldLabel } from "../../../components";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const methodSelector = (state: any) => state.context.taskSpecific.method;
@@ -33,9 +34,7 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
       <TaskConfigTabs
         config={<>
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text">Method</span>
-            </label>
+            <FieldLabel name="Method" />
             <select
               className="select select-bordered"
               defaultValue="GET"

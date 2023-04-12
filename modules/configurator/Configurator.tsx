@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { CogIcon } from "@heroicons/react/24/solid";
 import { CronFields, CronVariableSetters, DirectRequestFields, DirectRequestVariableSetters } from "./jobTypes"
 import { JOB_TYPE } from "../workspace/workspaceMachine"
-import { ExpanderPanel, Tooltip } from "../../components";
+import { ExpanderPanel, Tooltip, FieldLabel } from "../../components";
 import { TaskConfigTabs } from "../flow/nodes/fields";
 
 export interface ConfiguratorProps {
@@ -90,9 +90,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
         </div>
 
         <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text text-xs whitespace-nowrap">Chainlink Version</span>
-          </label>
+          <FieldLabel name="Chainlink Version" />
           <select
             disabled={true}
             className="select select-bordered select-sm"
@@ -105,10 +103,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
         <div className="grid grid-cols-3 gap-2 max-w-xl">
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text text-xs whitespace-nowrap">Name</span>
-              <span className="label-text-alt text-xs">(optional)</span>
-            </label>
+            <FieldLabel name="Name" optional />
             <input
               disabled={disabled}
               type="text"
@@ -120,10 +115,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           </div>
 
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text text-xs whitespace-nowrap">External Job ID</span>
-              <span className="label-text-alt text-xs">(optional)</span>
-            </label>
+            <FieldLabel name="External Job ID" optional />
             <input
               disabled={disabled}
               type="text"
@@ -135,10 +127,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           </div>
 
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text text-xs whitespace-nowrap">Gas Limit</span>
-              <span className="label-text-alt text-xs">(optional)</span>
-            </label>
+            <FieldLabel name="Gas Limit" optional />
             <input
               disabled={disabled}
               type="text"
@@ -150,10 +139,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           </div>
 
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text text-xs whitespace-nowrap">Max Task Duration</span>
-              <span className="label-text-alt text-xs">(optional)</span>
-            </label>
+            <FieldLabel name="Max. Task Duration" optional />
             <input
               disabled={disabled}
               type="text"
@@ -165,9 +151,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
           </div>
 
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text text-xs whitespace-nowrap">Forwarding Allowed</span>
-            </label>
+            <FieldLabel name="Forwarding Allowed" />
             <select
               className="select select-bordered select-sm"
               defaultValue="false"
@@ -182,9 +166,7 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
 
         <div className="bg-base-300 p-2 rounded-lg mt-6 max-w-xl">
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text text-xs">Job Type</span>
-            </label>
+            <FieldLabel name="Job Type" />
             <select
               disabled={disabled}
               className="select select-bordered select-sm"

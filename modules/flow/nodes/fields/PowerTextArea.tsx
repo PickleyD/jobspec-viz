@@ -4,7 +4,7 @@ import { GlobalStateContext } from "../../../../context/GlobalStateContext";
 import pipelineVarsData from "../../../../data/jobTypeSpecificPipelineVars.json";
 import { JOB_TYPE } from "../../../workspace/workspaceMachine";
 import { BoltIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Popover } from "../../../../components";
+import { Popover, FieldLabel } from "../../../../components";
 import { VarSelector } from "./VarSelector";
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
 
@@ -84,10 +84,7 @@ export const PowerTextArea = ({
 
   return (
     <div className={`${className} form-control w-full max-w-xs`}>
-      <label className="label pb-0">
-        <span className="label-text">{label}</span>
-        {optional && <span className="label-text-alt">(optional)</span>}
-      </label>
+      <FieldLabel name={label} optional />
       <div className="relative">
         <div className="grid grid-cols-1 grid-rows-1">
             <ContentEditable

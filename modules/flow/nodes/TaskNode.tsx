@@ -295,7 +295,7 @@ export const TaskNode = ({
           </div>
           <div className="form-control w-full max-w-xs">
             <label className="label">
-              <span className="label-text">Task ID</span>
+              <span className="label-text text-xs">Task ID</span>
               {customIdError && (
                 <span className="text-error label-text-alt text-xs">
                   Not unique

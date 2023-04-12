@@ -3,6 +3,7 @@ import { NodeProps } from "react-flow-renderer";
 import React from "react";
 import { useSelector } from "@xstate/react";
 import { PowerTextArea, TaskConfigTabs, TextArea } from "./fields";
+import { FieldLabel } from "../../../components";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const nameSelector = (state: any) => state.context.taskSpecific.name;
@@ -55,9 +56,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
             ownerNodeCustomId={taskCustomId}
           />
           <div className="form-control w-full max-w-xs">
-            <label className="label">
-              <span className="label-text">Async</span>
-            </label>
+            <FieldLabel name="Async" />
             <select
               className="select select-bordered"
               defaultValue="no"

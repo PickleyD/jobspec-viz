@@ -2,6 +2,7 @@ import cronstrue from "cronstrue"
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { useState, useEffect, useContext } from "react"
+import { FieldLabel } from "../../../components";
 
 const cronValueSelector = (state: any) => state.context.jobTypeSpecific.cron.schedule.value;
 
@@ -50,9 +51,7 @@ export const CronFields = ({ className = "" }: CronFieldsProps) => {
   const setCronValidity = (isValid: boolean) => globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "cron", prop: "schedule", valid: isValid })
 
   return <div className={`${className} form-control w-full max-w-xs`}>
-    <label className="label">
-      <span className="label-text text-xs">CRON Schedule</span>
-    </label>
+    <FieldLabel name="CRON Schedule" />
     <input
       type="text"
       placeholder=""
