@@ -1,22 +1,17 @@
+/**
+ * Typically these auth routes would all be created under a /[...thirdweb]
+ * but the combination of .ts routes under /pages/api and the .go routes under
+ * /api seems to break the catch-all feature. As a result each has been split
+ * into a separate file.
+ **/
+import { thirdwebAuthConfig } from "./_config"
 import { ThirdwebAuth } from "@thirdweb-dev/auth/next";
-import { PrivateKeyWallet } from "@thirdweb-dev/auth/evm";
-import { NextApiRequest, NextApiResponse } from 'next'
+import {
+    NextApiRequest,
+    NextApiResponse,
+  } from "next/types";
 
-export const { ThirdwebAuthHandler, getUser } = ThirdwebAuth({
-    domain: process.env.NEXT_PUBLIC_AUTH_DOMAIN || "",
-    wallet: new PrivateKeyWallet(process.env.THIRDWEB_AUTH_PRIVATE_KEY || ""),
-    callbacks: {
-        onLogin: async (address) => {
-            console.log("LOGGED IN: " + address)
-        },
-        onUser: async (user) => {
-            console.log("USER: " + user)
-        },
-        onLogout: async (user) => {
-            console.log("LOGGED OUT: " + user)
-        }
-    },
-});
+export const { ThirdwebAuthHandler, getUser } = ThirdwebAuth(thirdwebAuthConfig);
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
     
