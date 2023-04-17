@@ -1714,7 +1714,7 @@
     "@tanstack/query-core" "4.29.1"
     use-sync-external-store "^1.2.0"
 
-"@thirdweb-dev/auth@^3.0.14":
+"@thirdweb-dev/auth@^3":
   version "3.0.14"
   resolved "https://registry.yarnpkg.com/@thirdweb-dev/auth/-/auth-3.0.14.tgz#8fa740491ee4a8de2ae10e66575aa4b583738d3a"
   integrity sha512-N52tWU6dwcK7Ij05QkRH4tKAGUSNjSxDDLUZUbWWPYWmoATDqlzYfBSY6FLm/hdEUWp53iVbnaFIBtPiOf2hkQ==
@@ -1759,7 +1759,7 @@
     mime "3.0.0"
     tiny-invariant "^1.2.0"
 
-"@thirdweb-dev/react@3.11.7":
+"@thirdweb-dev/react@^3":
   version "3.11.7"
   resolved "https://registry.yarnpkg.com/@thirdweb-dev/react/-/react-3.11.7.tgz#95a087620e439fdc7dcaca88fcae08b2d6522e0b"
   integrity sha512-KZG/UMjjEjlsmK2zipGvxJPlanhU3N0xjDJXLHo4QajecHsmJzvZfzMiiNWsGDqxQB/lCGpBhAXOywK30HFmhQ==
@@ -8318,10 +8318,10 @@ typedarray-to-buffer@3.1.5, typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@4.6.3:
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
-  integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
+typescript@^5.0.4:
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.0.4.tgz#b217fd20119bd61a94d4011274e0ab369058da3b"
+  integrity sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
 
 uint8arrays@^2.0.5, uint8arrays@^2.1.2:
   version "2.1.10"
