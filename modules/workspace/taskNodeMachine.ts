@@ -1,4 +1,4 @@
-import { isAddress } from "ethers/lib/utils";
+import { ethers } from "ethers";
 import { createMachine, assign, send, actions } from "xstate";
 import { sendParent } from "xstate/lib/actions";
 
@@ -91,7 +91,7 @@ const defaultContext: TaskNodeContext = {
   runResult: undefined
 };
 
-const validateAddress = (input: string) => isAddress(input)
+const validateAddress = (input: string) => ethers.utils.isAddress(input)
 
 const validateTask = (context: TaskNodeContext) => {
   let result = true;

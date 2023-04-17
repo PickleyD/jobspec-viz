@@ -154,7 +154,6 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
             <FieldLabel name="Forwarding Allowed" />
             <select
               className="select select-bordered select-sm"
-              defaultValue="false"
               value={forwardingAllowed}
               onChange={(event) => globalServices.workspaceService.send("SET_FORWARDING_ALLOWED", { value: event.target.value })}
             >

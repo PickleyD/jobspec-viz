@@ -20,9 +20,8 @@ import {
   OnConnectStartParams,
   ReactFlowInstance,
 } from "react-flow-renderer";
-import { isAddress } from "ethers/lib/utils";
-import Web3 from "web3";
 import { ethers } from "ethers";
+import Web3 from "web3";
 
 type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
@@ -187,7 +186,7 @@ const getNextUniqueTaskId = (tasks: Array<any>) => {
   return id.toString();
 };
 
-const validateAddress = (input: string) => isAddress(input);
+const validateAddress = (input: string) => ethers.utils.isAddress(input);
 
 const validateJobTypeSpecifics = (jobTypeSpecifics: any, event: any) => {
   const { jobType, prop, value } = event;
