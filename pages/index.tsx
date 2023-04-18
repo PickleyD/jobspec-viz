@@ -4,7 +4,7 @@ import { Flow } from "../modules/flow";
 import { Configurator } from "../modules/configurator";
 import { Codegen } from "../modules/codegen";
 import { LayoutGroup } from "framer-motion";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import {
   Bars3Icon,
   BookOpenIcon,
@@ -18,7 +18,7 @@ import ethCall from "../examples/ethcall.json";
 import getUint256 from "../examples/getUint256.json";
 import median from "../examples/median.json";
 import { useSelector } from "@xstate/react";
-import { ConnectWallet, useUser, useLogin, useAddress, useLogout, useMetamask } from "@thirdweb-dev/react";
+import { ConnectWallet } from "@thirdweb-dev/react";
 
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
@@ -52,14 +52,6 @@ const Home: NextPage = () => {
       100
     );
   };
-
-  const { user, isLoggedIn } = useUser()
-  const { login } = useLogin()
-  const { logout } = useLogout()
-  const connect = useMetamask()
-  const address = useAddress()
-
-  console.log(`isLoggedIn: ${isLoggedIn}. address: ${address}. user.address: ${user?.address}`)
 
   return (
     <div className="bg-primary h-screen w-screen">
@@ -182,30 +174,18 @@ const Home: NextPage = () => {
           </div>
           <div className="p-8 absolute right-0 flex flex-col items-end gap-4">
             <LayoutGroup>
-              {/* <button className="bg-red-500 absolute pointer-events-auto">test</button> */}
               <div className="relative pointer-events-auto">
-                {/* <ConnectWallet
-                  theme="dark"
-                  btnTitle="Log In"
+                <ConnectWallet
+                  btnTitle="Connect Wallet"
+                  theme="light"
+                  className="!bg-base-100 !text-white !rounded-full !p-4 !border-solid !border-2 !border-base-100 hover:!border-secondary"
                   auth={{
                     loginOptional: false,
                     loginOptions: {
-                      domain: "linkit.com"
+                      domain: process.env.NEXT_PUBLIC_AUTH_DOMAIN
                     }
                   }}
-                   /> */}
-                <div>
-                  {isLoggedIn ? (
-                    <button onClick={() => logout()}>Logout</button>
-                  ) : address ? (
-                    <button onClick={() => login()}>Login</button>
-                  ) : (
-                    <button onClick={() => connect()}>Connect</button>
-                  )}
-
-                  <pre>Connected Wallet: {address}</pre>
-                  <pre>User: {user?.address || "N/A"}</pre>
-                </div>
+                />
               </div>
               <Configurator className="pointer-events-none w-fit" />
               <Codegen className="pointer-events-none w-fit" />
