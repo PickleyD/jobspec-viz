@@ -14,8 +14,8 @@ export const thirdwebAuthConfig: ThirdwebAuthConfig<Json, Json> = {
     callbacks: {
         onLogin: async (address) => {
             try {
-                const userExistsResult = await getUserExists(address)
-                if (!userExistsResult[0].exists) {
+                const userExists = await getUserExists(address)
+                if (!userExists) {
                     await insertUser(address)
                 }
                 else {

@@ -9,7 +9,7 @@ export const getUserExists = async (address: string) => {
 
     const client = await pool.connect();
     const result = await client.query(query);
-    return result.rows;
+    return result.rows[0].exists;
 }
 
 export const insertUser = async (address: string) => {
