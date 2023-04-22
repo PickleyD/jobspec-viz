@@ -1,15 +1,15 @@
-import { Pool } from "pg"
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getUser } from "../auth/user";
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
-})
+import { getUser } from "../auth/user"
+import { getUndeletedJobSpecExists, insertJobSpec, insertJobSpecVersion } from "./_db"
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
     const { specId, content } = request.body;
 
-    console.log(content)
+    if (!content) {
+        return response.status(400).json({
+            message: "Missing job spec content in request body.",
+        });
+    }
 
     const user = await getUser(request)
 
@@ -24,21 +24,33 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
     const { address } = user
 
-    const query = `SELECT * FROM "job_specs";`;
-
     try {
-        const client = await pool.connect();
-        const result = await client.query(query);
-        response.json(result.rows);
-    } catch (err) {
-        if (typeof err === "string") {
-            response.status(500).json({
-                message: err
-            });
-        } else if (err instanceof Error) {
-            response.status(500).json({
-                message: err.message
-            });
+        let finalSpecId = specId
+
+        const jobSpecExists = specId && await getUndeletedJobSpecExists(specId)
+
+        if (!jobSpecExists) {
+            const insertJobSpecResult = await insertJobSpec({
+                createdBy: address
+            })
+            const {id: createdJobSpecId} = insertJobSpecResult || {}
+            
+            finalSpecId = createdJobSpecId
         }
+
+        const insertJobSpecVersionResult = await insertJobSpecVersion({
+            specId: finalSpecId,
+            createdBy: address,
+            content
+        })
+        const {id: createdJobSpecVersionId } = insertJobSpecVersionResult || {}
+
+        return response.status(200).json({
+            jobSpecId: finalSpecId,
+            jobSpecVersionId: createdJobSpecVersionId
+        });
+
+    } catch (err) {
+        console.log("Failed to insert job spec version in database.", err)
     }
 }
