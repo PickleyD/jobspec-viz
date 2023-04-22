@@ -1,12 +1,28 @@
 import { Pool } from "pg"
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getUser } from "../auth/user";
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 })
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
-    // const { specId } = request.body;
+    const { specId, content } = request.body;
+
+    console.log(content)
+
+    const user = await getUser(request)
+
+    // Check if the user is authenticated
+    if (!user) {
+        return response.status(401).json({
+            message: "Not authorized.",
+        });
+    }
+
+    console.log(JSON.stringify(user))
+
+    const { address } = user
 
     const query = `SELECT * FROM "job_specs";`;
 

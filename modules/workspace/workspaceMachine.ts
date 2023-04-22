@@ -88,7 +88,8 @@ type WorkspaceEvent =
   | { type: "PERSIST_STATE" }
   | { type: "RESTORE_STATE"; savedContext: WorkspaceContext }
   | { type: "TRY_RUN_CURRENT_SIDE_EFFECT" }
-  | { type: "SKIP_CURRENT_SIDE_EFFECT" };
+  | { type: "SKIP_CURRENT_SIDE_EFFECT" }
+  | { type: "SAVE_JOB_SPEC_VERSION" };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -235,7 +236,27 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           TOGGLE_TEST_MODE: {
             target: "testModeLoading",
           },
+          SAVE_JOB_SPEC_VERSION: {
+            target: "savingJobSpecVersion",
+          }
         },
+      },
+      savingJobSpecVersion: {
+        invoke: {
+          src: "saveJobSpecVersion",
+          onDone: {
+            target: "idle",
+            actions: [
+              // TODO - add success toast
+            ]
+          },
+          onError: {
+            target: "idle",
+            actions: [
+              // TODO - add error toast
+            ]
+          }
+        }
       },
       testModeLoading: {
         initial: "parsingDag",
@@ -875,6 +896,52 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           })
           );
       },
+      saveJobSpecVersion: (context, event) => {
+
+        // Extract any context props we don't want to persist
+        const {
+          reactFlowInstance,
+          nodes,
+          isConnecting,
+          connectionParams,
+          taskRunResults,
+          parsedTaskOrder,
+          parsingError,
+          currentTaskIndex,
+          jobLevelVars64,
+          provider,
+          ...toPersist } = context
+
+        // Instead of saving the full context as-is, we'll expand the context of each spawned machine
+        const parsedContext = {
+          ...toPersist,
+          nodes: {
+            tasks: context.nodes.tasks.map((entry) => {
+
+              const { runResult, ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
+
+              return {
+                ...entry,
+                context: nodeContextToPersist,
+              }
+            }),
+          },
+        };
+
+        return fetch("/api/spec/add-version", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify({
+            content: parsedContext
+          }),
+        })
+          .then(res => res.json().then(json => {
+            return json
+          }))
+      }
     },
     actions: {
       // @ts-ignore
@@ -965,7 +1032,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             ? context.taskRunResults[context.taskRunResults.length - 1].result
               .vars64
             : context.jobLevelVars64;
-            
+
         return [
           send(
             { type: "TRY_RUN_TASK", input64s, vars64 },
@@ -1028,13 +1095,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           lines.push({ value: `externalJobId = "${externalJobId}"` });
 
         gasLimit &&
-        lines.push({ value: `gasLimit = "${gasLimit}"` });
+          lines.push({ value: `gasLimit = "${gasLimit}"` });
 
         maxTaskDuration &&
           lines.push({ value: `maxTaskDuration = "${maxTaskDuration}"` });
 
         forwardingAllowed &&
-        lines.push({ value: `forwardingAllowed = "${forwardingAllowed}"` });
+          lines.push({ value: `forwardingAllowed = "${forwardingAllowed}"` });
 
         switch (jobType) {
           case "cron": {

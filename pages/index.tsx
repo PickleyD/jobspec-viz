@@ -53,6 +53,10 @@ const Home: NextPage = () => {
     );
   };
 
+  const handleSave = () => {
+    globalServices.workspaceService.send("SAVE_JOB_SPEC_VERSION");
+  }
+
   return (
     <div className="bg-primary h-screen w-screen">
       <Head>
@@ -178,7 +182,7 @@ const Home: NextPage = () => {
                 <ConnectWallet
                   btnTitle="Connect Wallet"
                   theme="light"
-                  className="!bg-base-100 !text-white !rounded-full !p-4 !border-solid !border-2 !border-base-100 hover:!border-secondary"
+                  className="!bg-base-100 !text-white !rounded-full !p-4 !border-solid !border-2 !border-base-100 hover:!border-secondary focus:!ring-0"
                   auth={{
                     loginOptional: false,
                     loginOptions: {
@@ -186,6 +190,9 @@ const Home: NextPage = () => {
                     }
                   }}
                 />
+              </div>
+              <div className="relative pointer-events-auto">
+                <button onClick={handleSave}>Save</button>
               </div>
               <Configurator className="pointer-events-none w-fit" />
               <Codegen className="pointer-events-none w-fit" />
