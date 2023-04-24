@@ -76,6 +76,9 @@ export default async function handler(request: NextApiRequest, response: NextApi
         return response.status(200).json(jobSpecVersion)
 
     } catch (err) {
-        console.log("Failed to insert job spec version in database.", err)
+        console.error("Failed to add job spec version.", err)
+        return response.status(500).json({
+            message: "Failed to add job spec version."
+        })
     }
 }
