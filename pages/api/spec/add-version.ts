@@ -1,14 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getUser } from "../auth/user"
-import { getUndeletedJobSpecExists, insertJobSpec, insertJobSpecVersion } from "./_db"
+import prisma from '../../../lib/prisma';
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
-    const { specId, content } = request.body;
+    const { specId, content } = request.body
 
     if (!content) {
         return response.status(400).json({
             message: "Missing job spec content in request body.",
-        });
+        })
     }
 
     const user = await getUser(request)
@@ -17,38 +17,63 @@ export default async function handler(request: NextApiRequest, response: NextApi
     if (!user) {
         return response.status(401).json({
             message: "Not authorized.",
-        });
+        })
     }
-
-    console.log(JSON.stringify(user))
 
     const { address } = user
 
-    try {
-        let finalSpecId = specId
-
-        const jobSpecExists = specId && await getUndeletedJobSpecExists(specId)
-
-        if (!jobSpecExists) {
-            const insertJobSpecResult = await insertJobSpec({
-                createdBy: address
+    if (specId) {
+        // Check that the spec ID provided by the user was previously created by the user
+        try {
+            const jobSpec = await prisma.job_specs.findUniqueOrThrow({
+                where: {
+                    id: specId
+                }
             })
-            const {id: createdJobSpecId} = insertJobSpecResult || {}
-            
-            finalSpecId = createdJobSpecId
+        }
+        catch (err) {
+            return response.status(401).json({
+                message: "Not authorized to append to this job spec."
+            })
+        }
+    }
+
+    try {
+
+        let jobSpecsCreate
+        if (specId) {
+            jobSpecsCreate = {
+                connectOrCreate: {
+                    where: {
+                        id: specId
+                    },
+                    create: {
+                        created_by: address.toLowerCase()
+                    }
+                }
+            }
+        }
+        else {
+            jobSpecsCreate = {
+                create: {
+                    created_by: address.toLowerCase()
+                }
+            }
         }
 
-        const insertJobSpecVersionResult = await insertJobSpecVersion({
-            specId: finalSpecId,
-            createdBy: address,
-            content
+        const jobSpecVersion = await prisma.job_spec_versions.create({
+            data: {
+                content: content,
+                users: {
+                    connect: {
+                        address: address.toLowerCase()
+                    }
+                },
+                job_specs: jobSpecsCreate
+            }
         })
-        const {id: createdJobSpecVersionId } = insertJobSpecVersionResult || {}
 
-        return response.status(200).json({
-            jobSpecId: finalSpecId,
-            jobSpecVersionId: createdJobSpecVersionId
-        });
+        return response.status(200).json(jobSpecVersion)
 
     } catch (err) {
         console.log("Failed to insert job spec version in database.", err)
