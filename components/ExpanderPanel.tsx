@@ -6,29 +6,32 @@ export interface ExpanderPanelProps {
   className?: string;
   icon?: (props: SVGProps<SVGSVGElement>) => JSX.Element;
   children?: React.ReactNode;
+  position?: "left" | "right"
 }
 
-export const ExpanderPanel = ({ className = "", children, icon: Icon = CodeBracketIcon }: ExpanderPanelProps) => {
-  
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+export const ExpanderPanel = ({ className = "", children, icon: Icon = CodeBracketIcon, position = "right" }: ExpanderPanelProps) => {
 
-    return (
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const isLeft = position === "left"
+
+  return (
     <div className={`${className} relative transition-all ${isOpen ? "" : ""}`}>
       <label
         tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto absolute z-10 right-2 top-2 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate ${
-          isOpen ? "swap-active" : ""
-        }`}
+        className={`${isLeft ? "left-2" : "right-2"} 
+        pointer-events-auto absolute z-10 top-2 btn border-0 hover:border-2 hover:border-secondary btn-circle swap swap-rotate 
+        ${isOpen ? "swap-active" : ""}`}
       >
         <Icon className="swap-off fill-current h-5 w-5 text-white" />
         <XMarkIcon className="swap-on fill-current h-5 w-5 text-white" />
       </label>
 
       <motion.div
-        className={`${
-          isOpen ? "pointer-events-auto" : "pointer-events-none"
-        } overflow-hidden border-2 border-gray-500 relative z-0 bg-base-100 rounded-lg pr-2 rounded-tr-[32px]`}
+        className={`${isLeft ? "pl-2 rounded-tl-[32px]" : "pr-2 rounded-tr-[32px]"}
+        ${isOpen ? "pointer-events-auto" : "pointer-events-none"}
+         overflow-hidden border-2 border-gray-500 relative z-0 bg-base-100 rounded-lg`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",
@@ -37,7 +40,7 @@ export const ExpanderPanel = ({ className = "", children, icon: Icon = CodeBrack
         transition={{ duration: 0.2, type: "tween" }}
         initial={false}
       >
-          { children }
+        {children}
       </motion.div>
     </div>
   );

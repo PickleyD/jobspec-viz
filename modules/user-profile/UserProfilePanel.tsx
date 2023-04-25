@@ -26,8 +26,8 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
     }
 
     return (
-        <ExpanderPanel className={className} icon={UserIcon}>
-            <div className="flex items-center p-4 w-80">
+        <ExpanderPanel className={className} icon={UserIcon} position="left">
+            <div className="flex items-center justify-end p-4 w-80">
                 <div className="flex flex-col">
                     <h4 className="font-bold">Your Job Specs</h4>
                     <ul>

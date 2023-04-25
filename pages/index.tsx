@@ -156,12 +156,12 @@ const Home: NextPage = () => {
           </div>
         </div>
         <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
-          <div className="p-8 pt-10 absolute left-0 flex flex-col items-end gap-4">
+          <div className="p-8 pt-10 absolute left-0 flex flex-col gap-4">
             <UserProfilePanel className="pointer-events-none w-fit" />
             <label
               tabIndex={0}
               onClick={() => setNewProjectHeroDisplayed(true)}
-              className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
+              className={`ml-2 mt-2 pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
             >
               <AcademicCapIcon className="h-5 w-5" />
             </label>
@@ -172,7 +172,7 @@ const Home: NextPage = () => {
             >
               <label
                 tabIndex={0}
-                className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
+                className={`ml-2 pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
               >
                 <BookOpenIcon className="h-5 w-5" />
               </label>
