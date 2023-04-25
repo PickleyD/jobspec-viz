@@ -3,10 +3,11 @@ import Head from "next/head";
 import { Flow } from "../modules/flow";
 import { Configurator } from "../modules/configurator";
 import { Codegen } from "../modules/codegen";
+import { UserProfilePanel } from "../modules/user-profile"
 import { LayoutGroup } from "framer-motion";
 import { useState, useContext } from "react";
 import {
-  Bars3Icon,
+  AcademicCapIcon,
   BookOpenIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -156,12 +157,13 @@ const Home: NextPage = () => {
         </div>
         <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
           <div className="p-8 pt-10 absolute left-0 flex flex-col items-end gap-4">
+            <UserProfilePanel className="pointer-events-none w-fit" />
             <label
               tabIndex={0}
               onClick={() => setNewProjectHeroDisplayed(true)}
               className={`pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
             >
-              <Bars3Icon className="h-5 w-5" />
+              <AcademicCapIcon className="h-5 w-5" />
             </label>
             <a
               href="https://docs.chain.link/docs/jobs/"
