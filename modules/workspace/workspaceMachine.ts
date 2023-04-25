@@ -928,7 +928,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           },
         };
 
-        return fetch("/api/spec/add-version", {
+        return fetch("/api/job-specs/null/versions", {
           method: "POST",
           headers: {
             Accept: "application/json",
