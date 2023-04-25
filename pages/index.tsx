@@ -19,7 +19,6 @@ import ethCall from "../examples/ethcall.json";
 import getUint256 from "../examples/getUint256.json";
 import median from "../examples/median.json";
 import { useSelector } from "@xstate/react";
-import { ConnectWallet } from "@thirdweb-dev/react";
 
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
@@ -180,7 +179,7 @@ const Home: NextPage = () => {
           </div>
           <div className="p-8 absolute right-0 flex flex-col items-end gap-4">
             <LayoutGroup>
-              <div className="relative pointer-events-auto">
+              {/* <div className="relative pointer-events-auto">
                 <ConnectWallet
                   btnTitle="Connect Wallet"
                   theme="light"
@@ -192,10 +191,10 @@ const Home: NextPage = () => {
                     }
                   }}
                 />
-              </div>
-              <div className="relative pointer-events-auto">
+              </div> */}
+              {/* <div className="relative pointer-events-auto">
                 <button onClick={handleSave}>Save</button>
-              </div>
+              </div> */}
               <Configurator className="pointer-events-none w-fit" />
               <Codegen className="pointer-events-none w-fit" />
               <Simulator className="pointer-events-none w-fit" />
