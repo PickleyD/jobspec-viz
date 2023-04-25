@@ -10,19 +10,12 @@ import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-// const isTestModeSelector = (state: any) => state.matches("testMode");
-
 export interface UserProfilePanelProps {
     className?: string;
 }
 
 export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
     const globalServices = useContext(GlobalStateContext);
-
-    //   const testMode = useSelector(
-    //     globalServices.workspaceService,
-    //     isTestModeSelector
-    //   );
 
     const queryClient = useQueryClient()
 
@@ -32,7 +25,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
 
     return (
         <ExpanderPanel className={className} icon={UserIcon}>
-            <div className="flex items-center justify-center p-4">
+            <div className="flex items-center justify-center p-4 max-w-sm">
                 {isLoading ? "LOADING..." : JSON.stringify(data)}
             </div>
         </ExpanderPanel>

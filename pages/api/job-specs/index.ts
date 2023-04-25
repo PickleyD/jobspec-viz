@@ -19,7 +19,18 @@ export default async function handler(request: NextApiRequest, response: NextApi
         try {
             const jobSpecs = await prisma.job_specs.findMany({
                 where: {
-                    created_by: address.toLowerCase()
+                    created_by: {
+                        equals: address,
+                        mode: "insensitive"
+                    }
+                },
+                include: {
+                    job_spec_versions: {
+                        orderBy: { 
+                            id: 'desc'
+                        },
+                        take: 1
+                    }
                 }
             })
 
