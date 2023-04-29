@@ -8,12 +8,12 @@ import ReactFlow, {
   OnConnectEnd,
   OnConnectStart,
   Node as ReactFlowNode,
-  Connection,
-  addEdge
-} from "react-flow-renderer";
+  Connection
+} from "reactflow";
+import 'reactflow/dist/style.css';
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
-  import("react-flow-renderer").then((mod) => mod.Background) as
+  import("reactflow").then((mod) => mod.Background) as
   | DynamicOptions<{}>
   | Loader<{}>,
   { ssr: false }
@@ -239,9 +239,11 @@ export const Flow = ({ className }: FlowProps) => {
       zoom: 1,
     };
 
+    const { clientX, clientY } = "touches" in event ? event.touches[0] : event
+
     const snappedCoords = snapToGrid({
-      x: (event.clientX - viewport.x) / viewport.zoom - NODE_WIDTH / 2,
-      y: (event.clientY - viewport.y) / viewport.zoom,
+      x: (clientX - viewport.x) / viewport.zoom - NODE_WIDTH / 2,
+      y: (clientY - viewport.y) / viewport.zoom,
     });
 
     globalServices.workspaceService.send("CONNECTION_SUCCESS", {
@@ -350,7 +352,7 @@ export const Flow = ({ className }: FlowProps) => {
           nodesDraggable={!testMode}
           minZoom={0.35}
         >
-          <Controls />
+          <Controls position="bottom-right" />
           <Background gap={15} />
         </ReactFlow>
       </div>

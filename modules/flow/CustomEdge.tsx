@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { EdgeProps, getBezierEdgeCenter, getBezierPath } from 'react-flow-renderer';
+import { EdgeProps, getBezierEdgeCenter, getBezierPath } from 'reactflow';
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';

@@ -19,7 +19,7 @@ import {
   Edge,
   OnConnectStartParams,
   ReactFlowInstance,
-} from "react-flow-renderer";
+} from "reactflow";
 import { ethers } from "ethers";
 import Web3 from "web3";
 

@@ -3,7 +3,7 @@ import {
   ConnectionLineComponentProps,
   getBezierPath,
   Position,
-} from "react-flow-renderer";
+} from "reactflow";
 import { snapToGrid, NODE_WIDTH } from "./Flow";
 
 const PLACEHOLDER_HEIGHT = 100;
@@ -11,43 +11,43 @@ const PLACEHOLDER_RADIUS = 8;
 const PLACEHOLDER_STROKE_WIDTH = 4;
 
 export const CustomConnectionLine = ({
-  sourceX,
-  sourceY,
-  sourcePosition,
-  targetX,
-  targetY,
-  targetPosition,
+  fromX,
+  fromY,
+  fromPosition,
+  toX,
+  toY,
+  toPosition,
   fromHandle
 }: ConnectionLineComponentProps) => {
 
   // If fromHandle.position is bottom this means a connection is being drawn from the bottom of a node
   const isForwardsConnection = fromHandle?.position === Position.Bottom;
 
-  // In a backwards connection sourceX, sourceY are the changing coordinates, so snap them
+  // In a backwards connection fromX, fromY are the changing coordinates, so snap them
   const { snappedX: snappedSourceX, snappedY: snappedSourceY } =
     isForwardsConnection
-      ? { snappedX: sourceX, snappedY: sourceY }
+      ? { snappedX: fromX, snappedY: fromY }
       : snapToGrid({
-          x: sourceX,
-          y: sourceY,
+          x: fromX,
+          y: fromY,
         });
 
   // In a forwards connection targetX, targetY are the changing coordinates, so snap them
   const { snappedX: snappedTargetX, snappedY: snappedTargetY } =
     isForwardsConnection
       ? snapToGrid({
-          x: targetX,
-          y: targetY,
+          x: toX,
+          y: toY,
         })
-      : { snappedX: targetX, snappedY: targetY };
+      : { snappedX: toX, snappedY: toY };
 
   const pathParams = {
     sourceX: snappedSourceX,
     sourceY: snappedSourceY,
-    sourcePosition,
+    sourcePosition: fromPosition,
     targetX: snappedTargetX,
     targetY: snappedTargetY,
-    targetPosition,
+    targetPosition: toPosition,
   };
 
   return (
@@ -57,7 +57,7 @@ export const CustomConnectionLine = ({
           fill="none"
           stroke="#fff"
           strokeWidth={PLACEHOLDER_STROKE_WIDTH}
-          d={getBezierPath(pathParams)}
+          d={getBezierPath(pathParams)[0]}
         />
         <rect
           x={

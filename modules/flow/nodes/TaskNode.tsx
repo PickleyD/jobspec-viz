@@ -1,4 +1,4 @@
-import { Handle, NodeProps, Position } from "react-flow-renderer";
+import { Handle, NodeProps, Position } from "reactflow";
 import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";

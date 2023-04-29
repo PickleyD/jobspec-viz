@@ -21,22 +21,18 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'noise': `url("data:image/svg+xml,%3C!-- svg: first layer --%3E%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        'split-handle': `url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==')`
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         hand: ["PatrickHand", "cursive"],
       },
-      boxShadow: {
-        widget: [
-          "0.3px 0.3px 0.3px -0.2px hsl(254deg 100% 16% / 0.9)",
-          "0.4px 0.4px 0.4px -0.6px hsl(254deg 100% 16% / 0.8)",
-          "1.1px 1.1px 1.2px -1.2px hsl(254deg 100% 16% / 0.7)",
-          "2.9px 2.9px 3.1px -1.9px hsl(254deg 100% 16% / 0.6)",
-          "6.5px 6.4px 6.8px -2.5px hsl(254deg 100% 16% / 0.5)",
-          "12.3px 12.1px 12.9px -3.1px hsl(254deg 100% 16% / 0.4)",
-          "21.1px 20.7px 22.2px -3.7px hsl(254deg 100% 16% / 0.3)",
-          "33.3px 32.7px 35px -4.4px hsl(254deg 100% 16% / 0.2)",
-          "49.6px 48.7px 52.1px -5px hsl(254deg 100% 16% / 0.1)",
+      dropShadow: {
+        glow: [
+          "0 0px 20px rgba(255,255, 255, 0.35)",
+          "0 0px 65px rgba(255, 255,255, 0.2)",
         ],
       }
     },
@@ -45,13 +41,13 @@ module.exports = {
     themes: [
       {
         mytheme: {
-          primary: "#3406D1",
-          secondary: "#f59e0b",
-          accent: "#37CDBE",
+          primary: "#232323",
+          secondary: "#ffeeaa",
+          accent: "#aaeeff",
           neutral: "#000000",
           "neutral-content": "#FFFFFF",
           "base-100": "#000000",
-          "base-300": "#131313",
+          "base-300": "#222222",
           "base-content": "#FFFFFF",
           info: "#3ABFF8",
           success: "#22c55e",

@@ -1,5 +1,5 @@
 import { TaskNode } from "./TaskNode";
-import { NodeProps } from "react-flow-renderer";
+import { NodeProps } from "reactflow";
 import React from "react";
 import { useSelector } from "@xstate/react";
 import { PowerTextArea } from "./fields";

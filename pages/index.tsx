@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { Flow } from "../modules/flow";
-import { Configurator } from "../modules/configurator";
 import { Codegen } from "../modules/codegen";
 import { UserProfilePanel } from "../modules/user-profile"
 import { LayoutGroup } from "framer-motion";
@@ -19,6 +18,9 @@ import ethCall from "../examples/ethcall.json";
 import getUint256 from "../examples/getUint256.json";
 import median from "../examples/median.json";
 import { useSelector } from "@xstate/react";
+import { SideMenu, TopMenu } from "../components/menu";
+import Split from "react-split"
+import { Configurator } from "../modules/configurator"
 
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
@@ -55,6 +57,14 @@ const Home: NextPage = () => {
 
   const handleSave = () => {
     globalServices.workspaceService.send("SAVE_JOB_SPEC_VERSION");
+  }
+
+  const [isMenuOpen, setIsMenuOpen] = useState(true)
+  const handleMenuToggle = () => setIsMenuOpen(!isMenuOpen)
+
+  const [selectedSideMenuItem, setSelectedSideMenuItem] = useState(0)
+  const handleSelectedSideMenuItemChange = (newIndex: number) => {
+    setSelectedSideMenuItem(newIndex)
   }
 
   return (
@@ -154,8 +164,36 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
+        <div className="h-full w-screen p-4 flex flex-col">
+          <TopMenu lit={isMenuOpen} />
+          <div className="grow relative flex h-px w-full pointer-events-none">
+            <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
+            <Split
+              minSize={[100, 0]}
+              sizes={[25, 75]}
+              className="h-full w-full flex pointer-events-none" gutter={(index, direction) => {
+                const gutter = document.createElement('div')
+                gutter.className = `pointer-events-auto gutter gutter-${direction} bg-gray-300/20 rounded-br-lg
+                cursor-resize bg-split-handle bg-no-repeat bg-center hover:bg-gray-300/40`
+                return gutter
+              }}>
+              <div className="h-full pointer-events-auto overflow-auto bg-base-100 relative border-b border-gray-700 shadow-lg">
+                <div className="absolute bg-noise opacity-25 inset-0" />
+                <div className="w-max relative bg-base-100 min-h-full">
+                  <div className="absolute bg-noise opacity-25 inset-0" />
+                  <div className="p-4 relative h-full">
+                    {
+                      renderSideMenuContent(selectedSideMenuItem)
+                    }
+                  </div>
+                </div>
+              </div>
+              <div className="pointer-events-none"></div>
+            </Split>
+          </div>
+        </div>
         <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
-          <div className="p-8 pt-10 absolute left-0 flex flex-col gap-4">
+          {/* <div className="p-8 pt-10 absolute left-0 flex flex-col gap-4">
             <UserProfilePanel className="pointer-events-none w-fit" />
             <label
               tabIndex={0}
@@ -176,30 +214,14 @@ const Home: NextPage = () => {
                 <BookOpenIcon className="h-5 w-5" />
               </label>
             </a>
-          </div>
-          <div className="p-8 absolute right-0 flex flex-col items-end gap-4">
+          </div> */}
+          {/* <div className="p-8 absolute right-0 flex flex-col items-end gap-4">
             <LayoutGroup>
-              {/* <div className="relative pointer-events-auto">
-                <ConnectWallet
-                  btnTitle="Connect Wallet"
-                  theme="light"
-                  className="!bg-base-100 !text-white !rounded-full !p-4 !border-solid !border-2 !border-base-100 hover:!border-secondary focus:!ring-0"
-                  auth={{
-                    loginOptional: false,
-                    loginOptions: {
-                      domain: process.env.NEXT_PUBLIC_AUTH_DOMAIN
-                    }
-                  }}
-                />
-              </div> */}
-              {/* <div className="relative pointer-events-auto">
-                <button onClick={handleSave}>Save</button>
-              </div> */}
               <Configurator className="pointer-events-none w-fit" />
               <Codegen className="pointer-events-none w-fit" />
               <Simulator className="pointer-events-none w-fit" />
             </LayoutGroup>
-          </div>
+          </div> */}
         </div>
       </main>
     </div>
@@ -207,3 +229,14 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+const renderSideMenuContent = (index: number) => {
+  switch (index) {
+    case 0:
+      return <Configurator />
+    case 1:
+      return <Codegen />
+    default:
+      return <Simulator />
+  }
+}
