@@ -173,8 +173,8 @@ const Home: NextPage = () => {
               sizes={[25, 75]}
               className="h-full w-full flex pointer-events-none" gutter={(index, direction) => {
                 const gutter = document.createElement('div')
-                gutter.className = `pointer-events-auto gutter gutter-${direction} bg-gray-300/20 rounded-br-lg
-                cursor-resize bg-split-handle bg-no-repeat bg-center hover:bg-gray-300/40`
+                gutter.className = `pointer-events-auto gutter gutter-${direction} bg-gray-700 rounded-r-lg
+                cursor-resize bg-split-handle bg-no-repeat bg-center hover:bg-gray-500`
                 return gutter
               }}>
               <div className="h-full pointer-events-auto overflow-auto bg-base-100 relative border-y border-gray-700 shadow-lg">
