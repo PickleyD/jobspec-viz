@@ -1,4 +1,4 @@
-import { ExpanderPanel } from "../../components";
+import { ExpanderPanel, Tooltip } from "../../components";
 import {
     UserIcon
 } from "@heroicons/react/24/outline";
@@ -17,7 +17,13 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
     const queryClient = useQueryClient()
 
     const { data, error, isLoading } = useQuery({
-        queryKey: ["getJobSpecs"], queryFn: () => fetch("/api/job-specs").then(res => res.json())
+        queryKey: ["getJobSpecs"], queryFn: () => fetch("/api/job-specs").then(res => {
+            if (res.status !== 200) {
+                return new Error("An error occurred")
+            }
+
+            return res.json()
+        })
     })
 
     const handleLoadJobSpecVersion = (jsonContent: any) => {
@@ -27,7 +33,15 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
     }
 
     return (
-        <ExpanderPanel className={className} icon={UserIcon} position="left">
+        <>
+            <div className="flex items-center justify-start gap-2 mb-4">
+                <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">My profile</h4>
+                <Tooltip className="text-sm text-gray-300">
+                    <p>
+                        Connect your wallet and sign in to save your job specs and keep them synced across your devices.
+                    </p>
+                </Tooltip>
+            </div>
             <div className="flex-col items-center justify-end p-4 w-80">
                 <div className="py-8">
                     <ConnectWallet
@@ -44,11 +58,11 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                 </div>
                 <h4 className="font-bold">Your Job Specs</h4>
                 <ul>
-                    {isLoading ? "LOADING..." : data.map((spec: any, index: number) => <ul key={index} onClick={() => handleLoadJobSpecVersion(spec.job_spec_versions[0].content)}>
+                    {isLoading ? "LOADING..." : error ? data.map((spec: any, index: number) => <ul key={index} onClick={() => handleLoadJobSpecVersion(spec.job_spec_versions[0].content)}>
                         {spec.job_spec_versions[0].name ?? `Unnamed ${index + 1}`}
-                    </ul>)}
+                    </ul>) : <span>{error as string}</span>}
                 </ul>
             </div>
-        </ExpanderPanel>
+        </>
     );
 };

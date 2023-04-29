@@ -1,17 +1,9 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Flow } from "../modules/flow";
-import { Codegen } from "../modules/codegen";
-import { UserProfilePanel } from "../modules/user-profile"
-import { LayoutGroup } from "framer-motion";
+import { Flow, Codegen, Simulator, Configurator, UserProfilePanel } from "../modules"
 import { useState, useContext } from "react";
-import {
-  AcademicCapIcon,
-  BookOpenIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { Simulator } from "../modules/simulator";
 import { GlobalStateContext } from "../context/GlobalStateContext";
 import empty from "../examples/empty.json";
 import ethCall from "../examples/ethcall.json";
@@ -20,7 +12,6 @@ import median from "../examples/median.json";
 import { useSelector } from "@xstate/react";
 import { SideMenu, TopMenu } from "../components/menu";
 import Split from "react-split"
-import { Configurator } from "../modules/configurator"
 
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
@@ -192,8 +183,8 @@ const Home: NextPage = () => {
             </Split>
           </div>}
         </div>
-        <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
-          {/* <div className="p-8 pt-10 absolute left-0 flex flex-col gap-4">
+        {/* <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
+          <div className="p-8 pt-10 absolute left-0 flex flex-col gap-4">
             <UserProfilePanel className="pointer-events-none w-fit" />
             <label
               tabIndex={0}
@@ -214,15 +205,8 @@ const Home: NextPage = () => {
                 <BookOpenIcon className="h-5 w-5" />
               </label>
             </a>
-          </div> */}
-          {/* <div className="p-8 absolute right-0 flex flex-col items-end gap-4">
-            <LayoutGroup>
-              <Configurator className="pointer-events-none w-fit" />
-              <Codegen className="pointer-events-none w-fit" />
-              <Simulator className="pointer-events-none w-fit" />
-            </LayoutGroup>
-          </div> */}
-        </div>
+          </div> 
+        </div> */}
       </main>
     </div>
   );
@@ -232,9 +216,11 @@ export default Home;
 
 const renderSideMenuContent = (index: number) => {
   switch (index) {
-    case 0:
-      return <Configurator />
+    case 0: 
+      return <UserProfilePanel />
     case 1:
+      return <Configurator />
+    case 2:
       return <Codegen />
     default:
       return <Simulator />
