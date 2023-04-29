@@ -8,12 +8,11 @@ export interface SideMenuProps {
 
 export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps) => {
 
-    return <div className="pointer-events-auto relative menu h-full text-base-content shadow-lg border-gray-700 border-l border-b rounded-bl-lg bg-base-100">
+    return <div className="pointer-events-auto relative menu h-full text-base-content shadow-lg border-gray-700 border-l border-b border-t rounded-bl-lg bg-base-100">
         <div className="absolute bg-noise opacity-25 inset-0 rounded-bl-lg" />
         <div className="flex flex-col gap-8 h-full">
             <div className="relative h-full">
-                <div className={`transition-transform ${getMenuItemShineTranslate(selectedIndex)}
-            transition-opacity absolute h-[80px] w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent left-[-1px]`} />
+                <div className={`transition-transform ${getMenuItemShineTranslate(selectedIndex)} absolute h-[80px] w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent left-[-1px]`} />
                 <ul className="flex flex-col items-start">
                     <li className="group h-[60px]" onClick={() => onSelectedIndexChange(0)}>
                         <label>

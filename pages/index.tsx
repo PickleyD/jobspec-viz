@@ -165,8 +165,8 @@ const Home: NextPage = () => {
           </div>
         </div>
         <div className="h-full w-screen p-4 flex flex-col">
-          <TopMenu lit={isMenuOpen} />
-          <div className="grow relative flex h-px w-full pointer-events-none">
+          <TopMenu lit={isMenuOpen} onToggleClick={handleMenuToggle} />
+          {isMenuOpen && <div className="grow relative flex h-px w-full pointer-events-none">
             <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
             <Split
               minSize={[100, 0]}
@@ -177,7 +177,7 @@ const Home: NextPage = () => {
                 cursor-resize bg-split-handle bg-no-repeat bg-center hover:bg-gray-300/40`
                 return gutter
               }}>
-              <div className="h-full pointer-events-auto overflow-auto bg-base-100 relative border-b border-gray-700 shadow-lg">
+              <div className="h-full pointer-events-auto overflow-auto bg-base-100 relative border-y border-gray-700 shadow-lg">
                 <div className="absolute bg-noise opacity-25 inset-0" />
                 <div className="w-max relative bg-base-100 min-h-full">
                   <div className="absolute bg-noise opacity-25 inset-0" />
@@ -190,7 +190,7 @@ const Home: NextPage = () => {
               </div>
               <div className="pointer-events-none"></div>
             </Split>
-          </div>
+          </div>}
         </div>
         <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
           {/* <div className="p-8 pt-10 absolute left-0 flex flex-col gap-4">
