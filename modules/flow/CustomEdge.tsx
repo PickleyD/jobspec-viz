@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { EdgeProps, getBezierEdgeCenter, getBezierPath } from 'reactflow';
+import { EdgeProps, getBezierPath } from 'reactflow';
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
@@ -29,16 +29,7 @@ export const CustomEdge = ({
     data,
     markerEnd,
 }: EdgeProps) => {
-    const edgePath = getBezierPath({
-        sourceX,
-        sourceY,
-        sourcePosition,
-        targetX,
-        targetY,
-        targetPosition,
-    });
-
-    const [labelX, labelY] = getBezierEdgeCenter({
+    const [edgePath, labelX, labelY] = getBezierPath({
         sourceX,
         sourceY,
         sourcePosition,

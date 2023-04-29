@@ -23,23 +23,15 @@ export const CustomConnectionLine = ({
   // If fromHandle.position is bottom this means a connection is being drawn from the bottom of a node
   const isForwardsConnection = fromHandle?.position === Position.Bottom;
 
-  // In a backwards connection fromX, fromY are the changing coordinates, so snap them
-  const { snappedX: snappedSourceX, snappedY: snappedSourceY } =
-    isForwardsConnection
-      ? { snappedX: fromX, snappedY: fromY }
-      : snapToGrid({
+  const { snappedX: snappedSourceX, snappedY: snappedSourceY } = snapToGrid({
           x: fromX,
           y: fromY,
         });
 
-  // In a forwards connection targetX, targetY are the changing coordinates, so snap them
-  const { snappedX: snappedTargetX, snappedY: snappedTargetY } =
-    isForwardsConnection
-      ? snapToGrid({
+  const { snappedX: snappedTargetX, snappedY: snappedTargetY } = snapToGrid({
           x: toX,
           y: toY,
-        })
-      : { snappedX: toX, snappedY: toY };
+        });
 
   const pathParams = {
     sourceX: snappedSourceX,
@@ -61,12 +53,12 @@ export const CustomConnectionLine = ({
         />
         <rect
           x={
-            (isForwardsConnection ? snappedTargetX : snappedSourceX) -
+            (isForwardsConnection ? snappedTargetX : snappedTargetX) -
             NODE_WIDTH / 2 +
             PLACEHOLDER_STROKE_WIDTH / 2
           }
           y={
-            (isForwardsConnection ? snappedTargetY : snappedSourceY - PLACEHOLDER_HEIGHT) +
+            (isForwardsConnection ? snappedTargetY : snappedTargetY - PLACEHOLDER_HEIGHT) +
             PLACEHOLDER_STROKE_WIDTH / 2
           }
           width={NODE_WIDTH - PLACEHOLDER_STROKE_WIDTH}
@@ -75,7 +67,7 @@ export const CustomConnectionLine = ({
           ry={PLACEHOLDER_RADIUS}
           className={`fill-black/25 stroke-black/50 stroke-[4px]`}
         />
-        <circle cx={isForwardsConnection ? snappedTargetX : snappedSourceX} cy={isForwardsConnection ? snappedTargetY : snappedSourceY} fill="#fff" r={10} />
+        <circle cx={snappedTargetX} cy={snappedTargetY} fill="#fff" r={10} />
       </g>
     </>
   );
