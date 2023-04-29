@@ -1,10 +1,8 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useRef } from "react";
-import { CodeBracketIcon } from "@heroicons/react/24/solid";
 import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { ExpanderPanel } from "../../components";
 import { TomlLine } from "../workspace/workspaceMachine";
 import { Tooltip } from "../../components";
 
@@ -51,7 +49,13 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
   };
 
   return (
-    <ExpanderPanel className={className} icon={CodeBracketIcon}>
+    <>
+      <div className="flex items-center justify-start gap-2 mb-4">
+        <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Code</h4>
+        <Tooltip className="text-sm text-gray-300">
+          <p>Here is the generated TOML job spec. Copy and paste it into your Chainlink node UI when setting up your job!</p>
+        </Tooltip>
+      </div>
       <div
         className="mockup-code text-sm bg-base-100 relative"
         ref={codeRef}
@@ -66,9 +70,6 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             <DocumentDuplicateIcon className="h-4 w-4 swap-off" />
             <CheckIcon className="h-4 w-4 swap-on" />
           </label>
-          <Tooltip className="text-sm text-gray-300">
-            <p>Here is the generated TOML job spec. Copy and paste it into your Chainlink node UI when setting up your job!</p>
-          </Tooltip>
         </div>
         <div className="max-h-96 max-w-3xl overflow-auto pr-6">
           {
@@ -82,6 +83,6 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           }
         </div>
       </div>
-    </ExpanderPanel>
+    </>
   );
 };

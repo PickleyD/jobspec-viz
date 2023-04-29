@@ -1,4 +1,4 @@
-import { CogIcon, CodeBracketIcon, CodeBracketSquareIcon } from "@heroicons/react/24/solid"
+import { CogIcon, CodeBracketSquareIcon, BeakerIcon } from "@heroicons/react/24/solid"
 import { useState } from "react"
 
 export interface SideMenuProps {
@@ -22,12 +22,12 @@ export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps
                     </li>
                     <li className="group h-[60px]" onClick={() => onSelectedIndexChange(1)}>
                         <label>
-                            <CodeBracketIcon className={`${selectedIndex === 1 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                            <CodeBracketSquareIcon className={`${selectedIndex === 1 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
                         </label>
                     </li>
                     <li className="group h-[60px]" onClick={() => onSelectedIndexChange(2)}>
                         <label>
-                            <CodeBracketSquareIcon className={`${selectedIndex === 2 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                            <BeakerIcon className={`${selectedIndex === 2 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
                         </label>
                     </li>
                 </ul>

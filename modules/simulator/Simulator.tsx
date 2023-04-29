@@ -1,6 +1,5 @@
-import { ExpanderPanel, Tooltip } from "../../components";
+import { Tooltip } from "../../components";
 import {
-  BeakerIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
   CheckCircleIcon,
@@ -107,7 +106,15 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
     });
 
   return (
-    <ExpanderPanel className={className} icon={BeakerIcon}>
+    <>
+      <div className="flex items-center justify-start gap-2 mb-4">
+        <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Simulate</h4>
+        <Tooltip className="text-sm text-gray-300">
+          <p>
+            Enable test mode to parse your pipeline and step through task execution a simulated environment.
+          </p>
+        </Tooltip>
+      </div>
       <div className="flex items-center justify-center p-4">
         <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[20rem]">
           <div className="flex gap-1 items-center">
@@ -125,11 +132,6 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                 onChange={handleToggleTestMode}
               />
             </label>
-            <Tooltip className="text-sm text-gray-300" placement="bottom-end">
-              <p>
-                Enable test mode to parse your pipeline and step through task execution a simulated environment.
-              </p>
-            </Tooltip>
           </div>
           <div className="flex flex-col gap-2">
             <div className="btn-group flex flex-row w-full">
@@ -211,6 +213,6 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
         {/* <button onClick={handlePersist}>persist</button>
         <button onClick={handleRehydrate}>rehydrate</button> */}
       </div>
-    </ExpanderPanel>
+    </>
   );
 };
