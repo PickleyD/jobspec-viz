@@ -158,9 +158,8 @@ const Home: NextPage = () => {
         <div className="h-full w-screen p-4 flex flex-col">
           <TopMenu lit={isMenuOpen} onToggleClick={handleMenuToggle} />
           {isMenuOpen && <div className="grow relative flex h-px w-full pointer-events-none">
-            <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
             <Split
-              minSize={[100, 0]}
+              minSize={[200, 0]}
               sizes={[25, 75]}
               className="h-full w-full flex pointer-events-none" gutter={(index, direction) => {
                 const gutter = document.createElement('div')
@@ -168,14 +167,19 @@ const Home: NextPage = () => {
                 cursor-resize bg-split-handle bg-no-repeat bg-center hover:bg-gray-500`
                 return gutter
               }}>
-              <div className="h-full pointer-events-auto overflow-auto bg-base-100 relative border-y border-gray-700 shadow-lg">
-                <div className="absolute bg-noise opacity-25 inset-0" />
-                <div className="w-max relative bg-base-100 min-h-full">
-                  <div className="absolute bg-noise opacity-25 inset-0" />
-                  <div className="p-4 relative h-full">
-                    {
-                      renderSideMenuContent(selectedSideMenuItem)
-                    }
+              <div className="relative pointer-events-auto">
+                <div className="grow relative flex h-full w-full">
+                  <div className="absolute bg-base-100 inset-0 rounded-bl-lg border border-gray-700" />
+                  <div className="absolute bg-noise opacity-25 inset-0 rounded-bl-lg" />
+                  <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
+                  <div className="h-full overflow-auto relative">
+                    <div className="w-max relative min-h-full">
+                      <div className="p-4 relative h-full">
+                        {
+                          renderSideMenuContent(selectedSideMenuItem)
+                        }
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -216,9 +220,9 @@ export default Home;
 
 const renderSideMenuContent = (index: number) => {
   switch (index) {
-    case 0: 
+    case 0:
       return <Examples />
-    case 1: 
+    case 1:
       return <UserProfilePanel />
     case 2:
       return <Configurator />
