@@ -89,7 +89,9 @@ type WorkspaceEvent =
   | { type: "RESTORE_STATE"; savedContext: WorkspaceContext }
   | { type: "TRY_RUN_CURRENT_SIDE_EFFECT" }
   | { type: "SKIP_CURRENT_SIDE_EFFECT" }
-  | { type: "SAVE_JOB_SPEC_VERSION" };
+  | { type: "SAVE_JOB_SPEC_VERSION" }
+  | { type: "OPEN_MODAL"; name: ModalName }
+  | { type: "CLOSE_MODAL"; name: ModalName };
 
 interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -114,7 +116,11 @@ interface WorkspaceContext {
   currentTaskIndex: number;
   jobLevelVars64?: string;
   provider: ReturnType<typeof getProvider>;
+  // Would use a Set for openModals but changes aren't detected in consumers
+  openModals: Array<ModalName>;
 }
+
+type ModalName = "import"
 
 type JobTypeFieldMap = { [key in JOB_TYPE]: { [key: string]: Field } };
 
@@ -476,7 +482,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       parsingError: "",
       currentTaskIndex: 0,
       jobLevelVars64: undefined,
-      provider: getProvider()
+      provider: getProvider(),
+      openModals: []
     },
     on: {
       SET_REACT_FLOW_INSTANCE: {
@@ -832,6 +839,20 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           };
         }),
       },
+      OPEN_MODAL: {
+        actions: assign((context, { name }) => {
+          return {
+            openModals: context.openModals.includes(name) ? context.openModals : [...context.openModals, name]
+          }
+        })
+      },
+      CLOSE_MODAL: {
+        actions: assign((context, { name }) => {
+          return {
+            openModals: context.openModals.filter(entry => entry !== name)
+          }
+        })
+      }
       // SET_NETWORK: {
       //   actions: [
       //     assign((context, event) => {
