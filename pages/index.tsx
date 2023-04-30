@@ -169,7 +169,9 @@ const Home: NextPage = () => {
               }}>
               <div className="relative pointer-events-auto">
                 <div className="grow relative flex h-full w-full">
-                  <div className="absolute bg-base-100 inset-0 rounded-bl-lg border border-gray-700" />
+                  <div className="absolute bg-base-200 inset-0 rounded-bl-lg" />
+                  <div className="absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent inset-0 rounded-bl-lg" />
+                  <div className="absolute bg-gradient-to-b from-base-100 via-base-100/50 to-transparent inset-0 border border-gray-700 rounded-bl-lg" />
                   <div className="absolute bg-noise opacity-25 inset-0 rounded-bl-lg" />
                   <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
                   <div className="h-full overflow-auto relative">
