@@ -16,8 +16,6 @@ import Split from "react-split"
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
 
-const openModalsSelector = (state: any) => state.context.openModals
-
 const Home: NextPage = () => {
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
 
@@ -32,11 +30,6 @@ const Home: NextPage = () => {
     globalServices.workspaceService,
     reactFlowInstanceSelector
   );
-
-  const openModals = useSelector(
-    globalServices.workspaceService,
-    openModalsSelector
-  )
 
   const handleRehydrate = (json: any) => {
     globalServices.workspaceService.send("RESTORE_STATE", {
@@ -75,14 +68,8 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {openModals.length > 0 &&
-        <div className="absolute z-50 inset-0 pointer-events-auto backdrop-blur-sm flex items-center justify-center p-8">
-          {
-            openModals.includes("import") && <ImportModal />
-          }
-        </div>
-      }
-      {newProjectHeroDisplayed && (
+      <ImportModal />
+      {/* {newProjectHeroDisplayed && (
         <div className="absolute z-50 h-full w-full pointer-events-auto backdrop-blur-sm flex items-center justify-center p-8">
           <div className="bg-base-100 relative shadow-widget h-full w-full max-w-[800px] max-h-[500px] rounded-lg flex flex-col items-start justify-start gap-8">
             <div className="absolute top-4 right-4 h-96 w-96 z-10">
@@ -151,7 +138,7 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
       <main className="w-full h-full relative">
         <div className="w-full h-full fixed z-0">
           <Flow />
