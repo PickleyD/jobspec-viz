@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Flow, Codegen, Simulator, Configurator, UserProfilePanel } from "../modules"
+import { Flow, Codegen, Simulator, Configurator, UserProfilePanel, Examples } from "../modules"
 import { useState, useContext } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -217,10 +217,12 @@ export default Home;
 const renderSideMenuContent = (index: number) => {
   switch (index) {
     case 0: 
+      return <Examples />
+    case 1: 
       return <UserProfilePanel />
-    case 1:
-      return <Configurator />
     case 2:
+      return <Configurator />
+    case 3:
       return <Codegen />
     default:
       return <Simulator />

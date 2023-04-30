@@ -1,4 +1,4 @@
-import { CogIcon, CodeBracketSquareIcon, BeakerIcon, UserIcon } from "@heroicons/react/24/solid"
+import { CogIcon, CodeBracketSquareIcon, BeakerIcon, UserIcon, AcademicCapIcon } from "@heroicons/react/24/solid"
 
 export interface SideMenuProps {
     selectedIndex: number
@@ -15,22 +15,27 @@ export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps
                 <ul className="flex flex-col items-start">
                     <li className="group h-[60px]" onClick={() => onSelectedIndexChange(0)}>
                         <label>
-                            <UserIcon className={`${selectedIndex === 0 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                            <AcademicCapIcon className={`${selectedIndex === 0 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
                         </label>
                     </li>
                     <li className="group h-[60px]" onClick={() => onSelectedIndexChange(1)}>
                         <label>
-                            <CogIcon className={`${selectedIndex === 1 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                            <UserIcon className={`${selectedIndex === 1 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
                         </label>
                     </li>
                     <li className="group h-[60px]" onClick={() => onSelectedIndexChange(2)}>
                         <label>
-                            <CodeBracketSquareIcon className={`${selectedIndex === 2 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                            <CogIcon className={`${selectedIndex === 2 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
                         </label>
                     </li>
                     <li className="group h-[60px]" onClick={() => onSelectedIndexChange(3)}>
                         <label>
-                            <BeakerIcon className={`${selectedIndex === 3 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                            <CodeBracketSquareIcon className={`${selectedIndex === 3 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                        </label>
+                    </li>
+                    <li className="group h-[60px]" onClick={() => onSelectedIndexChange(4)}>
+                        <label>
+                            <BeakerIcon className={`${selectedIndex === 4 ? "fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
                         </label>
                     </li>
                 </ul>
@@ -49,5 +54,7 @@ const getMenuItemShineTranslate = (index: number) => {
             return "translate-y-[110px]"
         case 3:
             return "translate-y-[170px]"
+        case 4:
+            return "translate-y-[230px]"
     }
 }

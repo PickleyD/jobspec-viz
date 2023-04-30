@@ -1,5 +1,6 @@
 export * from "./codegen"
 export * from "./configurator"
+export * from "./examples"
 export * from "./flow"
 export * from "./simulator"
 export * from "./user-profile"
