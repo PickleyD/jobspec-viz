@@ -17,7 +17,7 @@ export const ImportModal = () => {
     )
 
     const handleClose = () => {
-        globalServices.workspaceService.send("CLOSE_MODAL", { name: "import" })
+        globalServices.workspaceService.send({ type: "CLOSE_MODAL", data: { name: "import" }})
     }
 
     const handleImport = () => {

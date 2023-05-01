@@ -6,6 +6,7 @@ import {
   actions,
   ActorRefFrom,
   StateMachine,
+  raise
 } from "xstate";
 import {
   createTaskNodeMachine,
@@ -23,7 +24,7 @@ import {
 import { ethers } from "ethers";
 import Web3 from "web3";
 import toml from "toml"
-import { fromDot, NodeRef, toDot, digraph, attribute as _, $keywords } from "ts-graphviz"
+import { fromDot, NodeRef, attribute as _ } from "ts-graphviz"
 
 type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
@@ -93,7 +94,7 @@ type WorkspaceEvent =
   | { type: "SKIP_CURRENT_SIDE_EFFECT" }
   | { type: "SAVE_JOB_SPEC_VERSION" }
   | { type: "OPEN_MODAL"; name: ModalName }
-  | { type: "CLOSE_MODAL"; name: ModalName }
+  | { type: "CLOSE_MODAL"; data: { name: ModalName } }
   | { type: "IMPORT_SPEC"; content: string };
 
 interface WorkspaceContext {
@@ -271,7 +272,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                     })),
                   }
                 }
-              })
+              }),
+              raise({ type: "CLOSE_MODAL", data: { name: "import" }})
               // TODO - add success toast
             ]
           },
@@ -831,6 +833,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               currentTaskIndex,
               jobLevelVars64,
               provider,
+              openModals,
               ...toPersist } = context
 
             // Instead of saving the full context as-is, we'll expand the context of each spawned machine
@@ -883,7 +886,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
         })
       },
       CLOSE_MODAL: {
-        actions: assign((context, { name }) => {
+        actions: assign((context, event) => {
+          const { name } = event.data
           return {
             openModals: context.openModals.filter(entry => entry !== name)
           }
@@ -965,6 +969,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           currentTaskIndex,
           jobLevelVars64,
           provider,
+          openModals,
           ...toPersist } = context
 
         // Instead of saving the full context as-is, we'll expand the context of each spawned machine
@@ -1042,10 +1047,12 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           }),
           totalNodesAdded: parsedObservationSrc.nodes.length,
           totalEdgesAdded: parsedObservationSrc.edges.length,
-          jobTypeSpecific: {
-            cron: {}, // TODO
-            directrequest: {} // TODO
-          },
+          // jobTypeSpecific: {
+          //   cron: {
+
+          //   }, // TODO
+          //   directrequest: {} // TODO
+          // },
           // jobTypeVariables: TODO 
           // toml: TODO,
           nodes: {
@@ -1066,19 +1073,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                     y: 0 // TODO
                   },
                   // @ts-ignore
-                  taskType: node.attributes.get("type"),
+                  taskType: node.attributes.get("type")?.toString().toUpperCase(),
                   incomingNodes: [], // TODO
                   outgoingNodes: [], // TODO
-                  taskSpecific: {
-                    ...taskSpecificNodeAttrs.map(attr => {
-                      return {
-                        [attr[0]]: {
-                          raw: attr[1],
-                          rich: attr[1] // TODO - Richify
-                        }
-                      }
-                    })
-                  },
+                  taskSpecific: taskSpecificNodeAttrs.reduce((acc, [key, value]) => {
+                    // @ts-ignore
+                    acc[key] = { raw: value, rich: value }; // TODO - format the 'rich' prop
+                    return acc;
+                  }, {}),
                   mock: {
                     mockResponseDataInput: "",
                     mockResponseData: "",

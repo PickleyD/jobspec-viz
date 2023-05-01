@@ -20,7 +20,7 @@
     "@thirdweb-dev/auth": "^3",
     "@thirdweb-dev/react": "^3",
     "@types/pg": "^8.6.6",
-    "@xstate/react": "^3.0.0",
+    "@xstate/react": "^3.2.2",
     "cronstrue": "^2.7.0",
     "daisyui": "^2.14.2",
     "ethers": "^5",
@@ -41,7 +41,7 @@
     "type-fest": "^3.1.0",
     "web3": "^1.8.1",
     "web3-utils": "^1.8.0",
-    "xstate": "^4.31.0"
+    "xstate": "^4.37.2"
   },
   "devDependencies": {
     "@types/node": "17.0.25",
