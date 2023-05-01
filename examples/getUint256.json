@@ -1,1 +1,556 @@
-{"type":"directrequest","name":"GET -> Uint256","externalJobId":"","edges":[{"id":"edge_1","source":"task_0","sourceCustomId":"decode_log","target":"task_1","targetCustomId":"decode_cbor"},{"id":"edge_2","source":"task_1","sourceCustomId":"decode_cbor","target":"task_2","targetCustomId":"fetch"},{"id":"edge_3","source":"task_2","sourceCustomId":"fetch","target":"task_3","targetCustomId":"parse"},{"id":"edge_4","source":"task_3","sourceCustomId":"parse","target":"task_4","targetCustomId":"multiply"},{"id":"edge_5","source":"task_4","sourceCustomId":"multiply","target":"task_5","targetCustomId":"encode_data"},{"id":"edge_6","source":"task_5","sourceCustomId":"encode_data","target":"task_6","targetCustomId":"encode_tx"},{"id":"edge_7","source":"task_6","sourceCustomId":"encode_tx","target":"task_7","targetCustomId":"eth_tx"}],"totalNodesAdded":8,"totalEdgesAdded":8,"jobTypeSpecific":{"cron":{"schedule":{"value":"0 0 18 * * *","valid":true}},"directrequest":{"contractAddress":{"value":"0x0000000000000000000000000000000000000000","valid":true},"minContractPaymentLinkJuels":{"value":"","valid":false},"minIncomingConfirmations":{"value":"","valid":false}}},"jobTypeVariables":{"directrequest":{"logTopics":{"value":"[0xd8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65,0x6361393833363663633733313439353762386330313263373266303561656562]","values":["0xd8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65","0x6361393833363663633733313439353762386330313263373266303561656562"],"valid":true,"type":"string"},"logData":{"value":"0x000000000000000000000000702c61d95305a5cc219eb8b923c81821f06242e4314d029bcb5ba5fa2c78cd50c4cf1272e1f5b9aaa1f7fe8d0b7a876c172a9310000000000000000000000000000000000000000000000000016345785d8a0000000000000000000000000000702c61d95305a5cc219eb8b923c81821f06242e44357855e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000636d39a400000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000007d63676574784968747470733a2f2f6d696e2d6170692e63727970746f636f6d706172652e636f6d2f646174612f70726963656d756c746966756c6c3f6673796d733d455448267473796d733d555344647061746878185241572c4554482c5553442c564f4c554d453234484f55526574696d65731b0de0b6b3a7640000000000","valid":true,"type":"bytes","fromType":"hex"}},"cron":{}},"toml":[{"value":"type = \"directrequest\""},{"value":"schemaVersion = 1"},{"value":"name = \"GET -> Uint256\""},{"value":"contractAddress = \"0x0000000000000000000000000000000000000000\"","valid":true},{"value":""},{"value":"observationSource = \"\"\""},{"value":"decode_log [type=\"ethabidecodelog\"","valid":false,"isObservationSrc":true},{"value":"            abi=\"OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)\"","valid":false,"isObservationSrc":true},{"value":"            data=\"$(jobRun.logData)\"","valid":false,"isObservationSrc":true},{"value":"            topics=\"$(jobRun.logTopics)\"]","valid":false,"isObservationSrc":true},{"value":"decode_cbor [type=\"cborparse\"","valid":true,"isObservationSrc":true},{"value":"             data=\"$(decode_log.data)\"","valid":true,"isObservationSrc":true},{"value":"             mode=\"diet\"]","valid":true,"isObservationSrc":true},{"value":"fetch [type=\"http\"","valid":true,"isObservationSrc":true},{"value":"       method=GET","valid":true,"isObservationSrc":true},{"value":"       url=\"$(decode_cbor.get)\"","valid":true,"isObservationSrc":true},{"value":"       requestData=\"\"]","valid":true,"isObservationSrc":true},{"value":"parse [type=\"jsonparse\"","valid":true,"isObservationSrc":true},{"value":"       data=\"$(fetch)\"","valid":true,"isObservationSrc":true},{"value":"       path=\"$(decode_cbor.path)\"]","valid":true,"isObservationSrc":true},{"value":"multiply [type=\"multiply\"","valid":true,"isObservationSrc":true},{"value":"          input=\"$(parse)\"","valid":true,"isObservationSrc":true},{"value":"          times=\"$(decode_cbor.times)\"]","valid":true,"isObservationSrc":true},{"value":"encode_data [type=\"ethabiencode\"","valid":false,"isObservationSrc":true},{"value":"             abi=\"(bytes32 requestId, uint256 value)\"","valid":false,"isObservationSrc":true},{"value":"             data=\"{\\\"requestId\\\": $(decode_log.requestId), \\\"value\\\": $(multiply) }\"]","valid":false,"isObservationSrc":true},{"value":"encode_tx [type=\"ethabiencode\"","valid":false,"isObservationSrc":true},{"value":"           abi=\"fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)\"","valid":false,"isObservationSrc":true},{"value":"           data=\"{\\\"requestId\\\": $(decode_log.requestId), \\\"payment\\\":   $(decode_log.payment), \\\"callbackAddress\\\": $(decode_log.callbackAddr), \\\"callbackFunctionId\\\": $(decode_log.callbackFunctionId), \\\"expiration\\\": $(decode_log.cancelExpiration), \\\"data\\\": $(encode_data)}\"]","valid":false,"isObservationSrc":true},{"value":"eth_tx [type=\"ethtx\"","valid":true,"isObservationSrc":true},{"value":"        to=\"0x0000000000000000000000000000000000000000\"","valid":true,"isObservationSrc":true},{"value":"        data=\"$(encode_tx)\"]","valid":true,"isObservationSrc":true},{"value":"","isObservationSrc":true},{"value":"decode_log -> decode_cbor","isObservationSrc":true},{"value":"decode_cbor -> fetch","isObservationSrc":true},{"value":"fetch -> parse","isObservationSrc":true},{"value":"parse -> multiply","isObservationSrc":true},{"value":"multiply -> encode_data","isObservationSrc":true},{"value":"encode_data -> encode_tx","isObservationSrc":true},{"value":"encode_tx -> eth_tx","isObservationSrc":true},{"value":"\"\"\""}],"nodes":{"tasks":[{"ref":{"id":"task_0"},"context":{"customId":"decode_log","coords":{"x":-120,"y":0},"taskType":"ETHABIDECODELOG","incomingNodes":[],"outgoingNodes":["decode_cbor"],"taskSpecific":{"abi":{"raw":"OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)","rich":"OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"},"data":{"raw":"$(jobRun.logData)","rich":"<span class=\"text-secondary\">$(jobRun.logData)</span>"},"topics":{"raw":"$(jobRun.logTopics)","rich":"<span class=\"text-secondary\">$(jobRun.logTopics)</span>"}},"mock":{"enabled":true},"isValid":false}},{"ref":{"id":"task_1"},"context":{"customId":"decode_cbor","coords":{"x":-120,"y":660},"taskType":"CBORPARSE","incomingNodes":["decode_log"],"outgoingNodes":["fetch"],"taskSpecific":{"data":{"raw":"$(decode_log.data)","rich":"<span class=\"text-secondary\">$(decode_log.data)</span>"}},"mock":{"enabled":true},"isValid":true}},{"ref":{"id":"task_2"},"context":{"customId":"fetch","coords":{"x":270,"y":0},"taskType":"HTTP","incomingNodes":["decode_cbor"],"outgoingNodes":["parse"],"taskSpecific":{"url":{"raw":"$(decode_cbor.get)","rich":"<span class=\"text-secondary\">$(decode_cbor.get)</span>"},"requestData":{"raw":"","rich":""}},"mock":{"enabled":true},"isValid":true}},{"ref":{"id":"task_3"},"context":{"customId":"parse","coords":{"x":270,"y":510},"taskType":"JSONPARSE","incomingNodes":["fetch"],"outgoingNodes":["multiply"],"taskSpecific":{"data":{"raw":"$(fetch)","rich":"<span class=\"text-secondary\">$(fetch)</span>"},"path":{"raw":"$(decode_cbor.path)","rich":"<span class=\"text-secondary\">$(decode_cbor.path)</span>"}},"mock":{"enabled":true},"isValid":true}},{"ref":{"id":"task_4"},"context":{"customId":"multiply","coords":{"x":270,"y":900},"taskType":"MULTIPLY","incomingNodes":["parse"],"outgoingNodes":["encode_data"],"taskSpecific":{"input":{"raw":"$(parse)","rich":"<span class=\"text-secondary\">$(parse)</span>"},"times":{"raw":"$(decode_cbor.times)","rich":"<span class=\"text-secondary\">$(decode_cbor.times)</span>"}},"mock":{"enabled":true},"isValid":true}},{"ref":{"id":"task_5"},"context":{"customId":"encode_data","coords":{"x":675,"y":0},"taskType":"ETHABIENCODE","incomingNodes":["multiply"],"outgoingNodes":["encode_tx"],"taskSpecific":{"abi":{"raw":"(bytes32 requestId, uint256 value)","rich":"(bytes32 requestId, uint256 value)"},"data":{"raw":"{\"requestId\": $(decode_log.requestId), \"value\": $(multiply) }","rich":"{\"requestId\": <span class=\"text-secondary\">$(decode_log.requestId)</span>, \"value\": <span class=\"text-secondary\">$(multiply)</span> }"}},"mock":{"enabled":true},"isValid":false}},{"ref":{"id":"task_6"},"context":{"customId":"encode_tx","coords":{"x":705,"y":540},"taskType":"ETHABIENCODE","incomingNodes":["encode_data"],"outgoingNodes":["eth_tx"],"taskSpecific":{"abi":{"raw":"fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)","rich":"fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"},"data":{"raw":"{\"requestId\": $(decode_log.requestId), \"payment\":   $(decode_log.payment), \"callbackAddress\": $(decode_log.callbackAddr), \"callbackFunctionId\": $(decode_log.callbackFunctionId), \"expiration\": $(decode_log.cancelExpiration), \"data\": $(encode_data)}","rich":"{\"requestId\": <span class=\"text-secondary\">$(decode_log.requestId)</span>, \"payment\":   <span class=\"text-secondary\">$(decode_log.payment)</span>, \"callbackAddress\": <span class=\"text-secondary\">$(decode_log.callbackAddr)</span>, \"callbackFunctionId\": <span class=\"text-secondary\">$(decode_log.callbackFunctionId)</span>, \"expiration\": <span class=\"text-secondary\">$(decode_log.cancelExpiration)</span>, \"data\": <span class=\"text-secondary\">$(encode_data)</span>}"}},"mock":{"enabled":true},"isValid":false}},{"ref":{"id":"task_7"},"context":{"customId":"eth_tx","coords":{"x":1080,"y":510},"taskType":"ETHTX","incomingNodes":["encode_tx"],"outgoingNodes":[],"taskSpecific":{"to":{"raw":"0x0000000000000000000000000000000000000000","rich":"0x0000000000000000000000000000000000000000"},"data":{"raw":"$(encode_tx)","rich":"<span class=\"text-secondary\">$(encode_tx)</span>"}},"mock":{"enabled":true},"isValid":true}}]}}
+{
+	"type": "directrequest",
+	"name": "GET -> Uint256",
+	"externalJobId": "",
+	"edges": [
+		{
+			"id": "edge_1",
+			"source": "task_0",
+			"sourceCustomId": "decode_log",
+			"target": "task_1",
+			"targetCustomId": "decode_cbor"
+		},
+		{
+			"id": "edge_2",
+			"source": "task_1",
+			"sourceCustomId": "decode_cbor",
+			"target": "task_2",
+			"targetCustomId": "fetch"
+		},
+		{
+			"id": "edge_3",
+			"source": "task_2",
+			"sourceCustomId": "fetch",
+			"target": "task_3",
+			"targetCustomId": "parse"
+		},
+		{
+			"id": "edge_4",
+			"source": "task_3",
+			"sourceCustomId": "parse",
+			"target": "task_4",
+			"targetCustomId": "multiply"
+		},
+		{
+			"id": "edge_5",
+			"source": "task_4",
+			"sourceCustomId": "multiply",
+			"target": "task_5",
+			"targetCustomId": "encode_data"
+		},
+		{
+			"id": "edge_6",
+			"source": "task_5",
+			"sourceCustomId": "encode_data",
+			"target": "task_6",
+			"targetCustomId": "encode_tx"
+		},
+		{
+			"id": "edge_7",
+			"source": "task_6",
+			"sourceCustomId": "encode_tx",
+			"target": "task_7",
+			"targetCustomId": "eth_tx"
+		}
+	],
+	"totalNodesAdded": 8,
+	"totalEdgesAdded": 8,
+	"jobTypeSpecific": {
+		"cron": {
+			"schedule": {
+				"value": "0 0 18 * * *",
+				"valid": true
+			}
+		},
+		"directrequest": {
+			"contractAddress": {
+				"value": "0x0000000000000000000000000000000000000000",
+				"valid": true
+			},
+			"minContractPaymentLinkJuels": {
+				"value": "",
+				"valid": false
+			},
+			"minIncomingConfirmations": {
+				"value": "",
+				"valid": false
+			}
+		}
+	},
+	"jobTypeVariables": {
+		"directrequest": {
+			"logTopics": {
+				"value": "[0xd8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65,0x6361393833363663633733313439353762386330313263373266303561656562]",
+				"values": [
+					"0xd8d7ecc4800d25fa53ce0372f13a416d98907a7ef3d8d3bdd79cf4fe75529c65",
+					"0x6361393833363663633733313439353762386330313263373266303561656562"
+				],
+				"valid": true,
+				"type": "string"
+			},
+			"logData": {
+				"value": "0x000000000000000000000000702c61d95305a5cc219eb8b923c81821f06242e4314d029bcb5ba5fa2c78cd50c4cf1272e1f5b9aaa1f7fe8d0b7a876c172a9310000000000000000000000000000000000000000000000000016345785d8a0000000000000000000000000000702c61d95305a5cc219eb8b923c81821f06242e44357855e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000636d39a400000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000007d63676574784968747470733a2f2f6d696e2d6170692e63727970746f636f6d706172652e636f6d2f646174612f70726963656d756c746966756c6c3f6673796d733d455448267473796d733d555344647061746878185241572c4554482c5553442c564f4c554d453234484f55526574696d65731b0de0b6b3a7640000000000",
+				"valid": true,
+				"type": "bytes",
+				"fromType": "hex"
+			}
+		},
+		"cron": {
+
+		}
+	},
+	"toml": [
+		{
+			"value": "type = \"directrequest\""
+		},
+		{
+			"value": "schemaVersion = 1"
+		},
+		{
+			"value": "name = \"GET -> Uint256\""
+		},
+		{
+			"value": "contractAddress = \"0x0000000000000000000000000000000000000000\"",
+			"valid": true
+		},
+		{
+			"value": ""
+		},
+		{
+			"value": "observationSource = \"\"\""
+		},
+		{
+			"value": "decode_log [type=\"ethabidecodelog\"",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "            abi=\"OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)\"",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "            data=\"$(jobRun.logData)\"",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "            topics=\"$(jobRun.logTopics)\"]",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "decode_cbor [type=\"cborparse\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "             data=\"$(decode_log.data)\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "             mode=\"diet\"]",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "fetch [type=\"http\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "       method=GET",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "       url=\"$(decode_cbor.get)\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "       requestData=\"\"]",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "parse [type=\"jsonparse\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "       data=\"$(fetch)\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "       path=\"$(decode_cbor.path)\"]",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "multiply [type=\"multiply\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "          input=\"$(parse)\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "          times=\"$(decode_cbor.times)\"]",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "encode_data [type=\"ethabiencode\"",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "             abi=\"(bytes32 requestId, uint256 value)\"",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "             data=\"{\\\"requestId\\\": $(decode_log.requestId), \\\"value\\\": $(multiply) }\"]",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "encode_tx [type=\"ethabiencode\"",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "           abi=\"fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)\"",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "           data=\"{\\\"requestId\\\": $(decode_log.requestId), \\\"payment\\\":   $(decode_log.payment), \\\"callbackAddress\\\": $(decode_log.callbackAddr), \\\"callbackFunctionId\\\": $(decode_log.callbackFunctionId), \\\"expiration\\\": $(decode_log.cancelExpiration), \\\"data\\\": $(encode_data)}\"]",
+			"valid": false,
+			"isObservationSrc": true
+		},
+		{
+			"value": "eth_tx [type=\"ethtx\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "        to=\"0x0000000000000000000000000000000000000000\"",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "        data=\"$(encode_tx)\"]",
+			"valid": true,
+			"isObservationSrc": true
+		},
+		{
+			"value": "",
+			"isObservationSrc": true
+		},
+		{
+			"value": "decode_log -> decode_cbor",
+			"isObservationSrc": true
+		},
+		{
+			"value": "decode_cbor -> fetch",
+			"isObservationSrc": true
+		},
+		{
+			"value": "fetch -> parse",
+			"isObservationSrc": true
+		},
+		{
+			"value": "parse -> multiply",
+			"isObservationSrc": true
+		},
+		{
+			"value": "multiply -> encode_data",
+			"isObservationSrc": true
+		},
+		{
+			"value": "encode_data -> encode_tx",
+			"isObservationSrc": true
+		},
+		{
+			"value": "encode_tx -> eth_tx",
+			"isObservationSrc": true
+		},
+		{
+			"value": "\"\"\""
+		}
+	],
+	"nodes": {
+		"tasks": [
+			{
+				"ref": {
+					"id": "task_0"
+				},
+				"context": {
+					"customId": "decode_log",
+					"coords": {
+						"x": -120,
+						"y": 0
+					},
+					"taskType": "ETHABIDECODELOG",
+					"incomingNodes": [
+
+					],
+					"outgoingNodes": [
+						"decode_cbor"
+					],
+					"taskSpecific": {
+						"abi": {
+							"raw": "OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)",
+							"rich": "OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+						},
+						"data": {
+							"raw": "$(jobRun.logData)",
+							"rich": "<span class=\"text-secondary\">$(jobRun.logData)</span>"
+						},
+						"topics": {
+							"raw": "$(jobRun.logTopics)",
+							"rich": "<span class=\"text-secondary\">$(jobRun.logTopics)</span>"
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": false
+				}
+			},
+			{
+				"ref": {
+					"id": "task_1"
+				},
+				"context": {
+					"customId": "decode_cbor",
+					"coords": {
+						"x": -120,
+						"y": 660
+					},
+					"taskType": "CBORPARSE",
+					"incomingNodes": [
+						"decode_log"
+					],
+					"outgoingNodes": [
+						"fetch"
+					],
+					"taskSpecific": {
+						"data": {
+							"raw": "$(decode_log.data)",
+							"rich": "<span class=\"text-secondary\">$(decode_log.data)</span>"
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": true
+				}
+			},
+			{
+				"ref": {
+					"id": "task_2"
+				},
+				"context": {
+					"customId": "fetch",
+					"coords": {
+						"x": 270,
+						"y": 0
+					},
+					"taskType": "HTTP",
+					"incomingNodes": [
+						"decode_cbor"
+					],
+					"outgoingNodes": [
+						"parse"
+					],
+					"taskSpecific": {
+						"url": {
+							"raw": "$(decode_cbor.get)",
+							"rich": "<span class=\"text-secondary\">$(decode_cbor.get)</span>"
+						},
+						"requestData": {
+							"raw": "",
+							"rich": ""
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": true
+				}
+			},
+			{
+				"ref": {
+					"id": "task_3"
+				},
+				"context": {
+					"customId": "parse",
+					"coords": {
+						"x": 270,
+						"y": 510
+					},
+					"taskType": "JSONPARSE",
+					"incomingNodes": [
+						"fetch"
+					],
+					"outgoingNodes": [
+						"multiply"
+					],
+					"taskSpecific": {
+						"data": {
+							"raw": "$(fetch)",
+							"rich": "<span class=\"text-secondary\">$(fetch)</span>"
+						},
+						"path": {
+							"raw": "$(decode_cbor.path)",
+							"rich": "<span class=\"text-secondary\">$(decode_cbor.path)</span>"
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": true
+				}
+			},
+			{
+				"ref": {
+					"id": "task_4"
+				},
+				"context": {
+					"customId": "multiply",
+					"coords": {
+						"x": 270,
+						"y": 900
+					},
+					"taskType": "MULTIPLY",
+					"incomingNodes": [
+						"parse"
+					],
+					"outgoingNodes": [
+						"encode_data"
+					],
+					"taskSpecific": {
+						"input": {
+							"raw": "$(parse)",
+							"rich": "<span class=\"text-secondary\">$(parse)</span>"
+						},
+						"times": {
+							"raw": "$(decode_cbor.times)",
+							"rich": "<span class=\"text-secondary\">$(decode_cbor.times)</span>"
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": true
+				}
+			},
+			{
+				"ref": {
+					"id": "task_5"
+				},
+				"context": {
+					"customId": "encode_data",
+					"coords": {
+						"x": 675,
+						"y": 0
+					},
+					"taskType": "ETHABIENCODE",
+					"incomingNodes": [
+						"multiply"
+					],
+					"outgoingNodes": [
+						"encode_tx"
+					],
+					"taskSpecific": {
+						"abi": {
+							"raw": "(bytes32 requestId, uint256 value)",
+							"rich": "(bytes32 requestId, uint256 value)"
+						},
+						"data": {
+							"raw": "{\"requestId\": $(decode_log.requestId), \"value\": $(multiply) }",
+							"rich": "{\"requestId\": <span class=\"text-secondary\">$(decode_log.requestId)</span>, \"value\": <span class=\"text-secondary\">$(multiply)</span> }"
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": false
+				}
+			},
+			{
+				"ref": {
+					"id": "task_6"
+				},
+				"context": {
+					"customId": "encode_tx",
+					"coords": {
+						"x": 705,
+						"y": 540
+					},
+					"taskType": "ETHABIENCODE",
+					"incomingNodes": [
+						"encode_data"
+					],
+					"outgoingNodes": [
+						"eth_tx"
+					],
+					"taskSpecific": {
+						"abi": {
+							"raw": "fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)",
+							"rich": "fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+						},
+						"data": {
+							"raw": "{\"requestId\": $(decode_log.requestId), \"payment\":   $(decode_log.payment), \"callbackAddress\": $(decode_log.callbackAddr), \"callbackFunctionId\": $(decode_log.callbackFunctionId), \"expiration\": $(decode_log.cancelExpiration), \"data\": $(encode_data)}",
+							"rich": "{\"requestId\": <span class=\"text-secondary\">$(decode_log.requestId)</span>, \"payment\":   <span class=\"text-secondary\">$(decode_log.payment)</span>, \"callbackAddress\": <span class=\"text-secondary\">$(decode_log.callbackAddr)</span>, \"callbackFunctionId\": <span class=\"text-secondary\">$(decode_log.callbackFunctionId)</span>, \"expiration\": <span class=\"text-secondary\">$(decode_log.cancelExpiration)</span>, \"data\": <span class=\"text-secondary\">$(encode_data)</span>}"
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": false
+				}
+			},
+			{
+				"ref": {
+					"id": "task_7"
+				},
+				"context": {
+					"customId": "eth_tx",
+					"coords": {
+						"x": 1080,
+						"y": 510
+					},
+					"taskType": "ETHTX",
+					"incomingNodes": [
+						"encode_tx"
+					],
+					"outgoingNodes": [
+
+					],
+					"taskSpecific": {
+						"to": {
+							"raw": "0x0000000000000000000000000000000000000000",
+							"rich": "0x0000000000000000000000000000000000000000"
+						},
+						"data": {
+							"raw": "$(encode_tx)",
+							"rich": "<span class=\"text-secondary\">$(encode_tx)</span>"
+						}
+					},
+					"mock": {
+						"enabled": true
+					},
+					"isValid": true
+				}
+			}
+		]
+	}
+}

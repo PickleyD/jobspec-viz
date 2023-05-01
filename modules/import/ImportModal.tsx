@@ -21,7 +21,7 @@ export const ImportModal = () => {
     }
 
     const handleImport = () => {
-        console.log(importedSpec)
+        globalServices.workspaceService.send("IMPORT_SPEC", { content: importedSpec })
     }
 
     const [importedSpec, setImportedSpec] = useState<string>()
