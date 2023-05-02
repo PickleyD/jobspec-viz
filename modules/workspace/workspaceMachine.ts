@@ -288,18 +288,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 return newContext
               }),
               raise({ type: "CLOSE_MODAL", data: { name: "import" } }),
-              (context, event) => {
-
-                const { warnings } = event.data
-
-                toast.success("Import successful")
-              }
+              "createImportToast"
             ]
           },
           onError: {
             target: "idle",
             actions: [
-              (context, event) => toast.error(event.data.message)
+              "createImportToast"
             ]
           }
         }

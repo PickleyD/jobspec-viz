@@ -5,6 +5,7 @@ import toml from "toml"
 import { fromDot, NodeRef, attribute as _ } from "ts-graphviz"
 import { toast } from "react-hot-toast"
 import { ethers } from "ethers"
+import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 
 export const workspaceMachineOptions: MachineOptions<WorkspaceContext, WorkspaceEvent> = {
     guards: {
@@ -116,12 +117,12 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
 
                 if (!("observationSource" in parsed)) {
                     // throw new Error("'observationSource' required in imported spec")
-                    warnings.push("'observationSource' property missing. Attempting partial import.")
+                    warnings.push("'observationSource' property missing")
                 }
 
                 if (!("type" in parsed)) {
                     // throw new Error("'type' required in imported spec")
-                    warnings.push("'type' property missing. Attempting partial import.")
+                    warnings.push("'type' property missing")
                 }
 
                 if (!JOB_TYPES.includes(parsed.type)) {
@@ -132,7 +133,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                     case "cron":
                         {
                             if (!("schedule" in parsed)) {
-                                warnings.push("'schedule' property missing. Attempting partial import.")
+                                warnings.push("'schedule' property missing")
                             }
                             else {
                                 // TODO - Validate cron expression
@@ -226,6 +227,54 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
         }
     },
     actions: {
+        createImportToast: (context, event) => {
+            // @ts-ignore
+            const { warnings, error } = event.data
+
+            if (error) {
+                toast.error(error.message ?? "An error occurred")
+            }
+            else if (!warnings || warnings.length < 1) {
+                toast.success("Import successful")
+            }
+            else {
+                toast.custom((t) => (
+                    <div
+                        className={`${t.visible ? 'animate-enter' : 'animate-leave'
+                            } max-w-md w-full bg-base-100 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-secondary`}
+                    >
+                        <div className="flex-1 w-0 p-4">
+                            <div className="flex items-center gap-4">
+                                <ExclamationTriangleIcon className="h-8 w-8"></ExclamationTriangleIcon>
+                                <div className="flex flex-col gap-4">
+                                    <p className="uppercase text-sm font-bold tracking-wider text-gray-400">
+                                        Import partially successful
+                                    </p>
+                                    <div className="flex flex-col gap-2 text-sm">
+                                        <p className="">
+                                            We imported as much as possible but there were some issues:
+                                        </p>
+                                        <ul className="flex flex-col gap-2 p-4 list-disc">
+                                            {
+                                                warnings.map((warning: string) => <li>{warning}</li>)
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex border-l border-gray-300">
+                            <button
+                                onClick={() => toast.dismiss(t.id)}
+                                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-gray-300 hover:text-white focus:outline-none focus:ring-1 focus:ring-secondary"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                ))
+            }
+        },
         // @ts-ignore
         setCurrentTaskPendingRun: actions.pure((context, _) => {
             if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
