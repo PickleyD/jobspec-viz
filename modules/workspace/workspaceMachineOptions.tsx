@@ -115,11 +115,6 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
 
                 const parsed = toml.parse(event.content)
 
-                if (!("observationSource" in parsed)) {
-                    // throw new Error("'observationSource' required in imported spec")
-                    warnings.push("'observationSource' property missing")
-                }
-
                 if (!("type" in parsed)) {
                     // throw new Error("'type' required in imported spec")
                     warnings.push("'type' property missing")
@@ -142,21 +137,36 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                         }
                 }
 
-                const input = `digraph {\n${parsed.observationSource}\n}`
-                const parsedObservationSrc = fromDot(input)
-
-                const nodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
-                    return {
-                        ...node,
-                        computedId: `task_${index}`
-                    }
-                })
-
-                const constructedMachineContext: Partial<WorkspaceContext> = {
+                let constructedMachineContext: Partial<WorkspaceContext> = {
                     type: parsed.type,
                     name: parsed.name ?? "",
                     externalJobId: parsed.externalJobId ?? "",
-                    edges: parsedObservationSrc.edges.map((edge, index) => {
+                    // jobTypeSpecific: {
+                    //   cron: {
+
+                    //   }, // TODO
+                    //   directrequest: {} // TODO
+                    // },
+                    // jobTypeVariables: TODO 
+                    // toml: TODO
+                }
+
+                if (!("observationSource" in parsed)) {
+                    // throw new Error("'observationSource' required in imported spec")
+                    warnings.push("'observationSource' property missing")
+                }
+                else {
+                    const input = `digraph {\n${parsed.observationSource}\n}`
+                    const parsedObservationSrc = fromDot(input)
+
+                    const nodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
+                        return {
+                            ...node,
+                            computedId: `task_${index}`
+                        }
+                    })
+
+                    constructedMachineContext.edges = parsedObservationSrc.edges.map((edge, index) => {
 
                         const sourceCustomId: string = (edge.targets[0] as NodeRef).id
                         const targetCustomId: string = (edge.targets[1] as NodeRef).id
@@ -170,18 +180,12 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                             target: targetWithComputedId ? targetWithComputedId.computedId : "",
                             targetCustomId: targetCustomId
                         }
-                    }),
-                    totalNodesAdded: parsedObservationSrc.nodes.length,
-                    totalEdgesAdded: parsedObservationSrc.edges.length,
-                    // jobTypeSpecific: {
-                    //   cron: {
+                    })
 
-                    //   }, // TODO
-                    //   directrequest: {} // TODO
-                    // },
-                    // jobTypeVariables: TODO 
-                    // toml: TODO,
-                    nodes: {
+                    constructedMachineContext.totalNodesAdded = parsedObservationSrc.nodes.length
+                    constructedMachineContext.totalEdgesAdded = parsedObservationSrc.edges.length
+
+                    constructedMachineContext.nodes = {
                         // @ts-ignore
                         tasks: nodesWithComputedIds.map((node, index) => {
 
