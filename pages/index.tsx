@@ -2,13 +2,8 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { Flow, Codegen, Simulator, Configurator, UserProfilePanel, Examples, ImportModal } from "../modules"
 import { useState, useContext } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { GlobalStateContext } from "../context/GlobalStateContext";
-import empty from "../examples/empty.json";
-import ethCall from "../examples/ethcall.json";
-import getUint256 from "../examples/getUint256.json";
-import median from "../examples/median.json";
 import { useSelector } from "@xstate/react";
 import { SideMenu, TopMenu } from "../components/menu";
 import Split from "react-split"

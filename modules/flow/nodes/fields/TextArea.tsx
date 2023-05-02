@@ -10,6 +10,7 @@ export interface TextAreaProps extends Omit<React.ComponentProps<"textarea">, "o
     placeholder?: string;
     optional?: boolean;
     className?: string;
+    textAreaClassName?: string;
 }
 
 export const TextArea = ({
@@ -21,6 +22,7 @@ export const TextArea = ({
     placeholder = "",
     optional = false,
     className = "",
+    textAreaClassName = "",
     disabled,
     ...rest
 }: TextAreaProps) => {
@@ -41,7 +43,7 @@ export const TextArea = ({
             onChange={handleChange}
             placeholder={placeholder}
             value={value}
-            className={`textarea textarea-bordered h-full ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-gray-500" : ""}`}
+            className={`${textAreaClassName} textarea textarea-bordered ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-gray-500" : ""}`}
             disabled={disabled}
             {...rest}
         />
