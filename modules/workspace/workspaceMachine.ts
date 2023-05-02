@@ -25,6 +25,7 @@ import { ethers } from "ethers";
 import Web3 from "web3";
 import toml from "toml"
 import { fromDot, NodeRef, attribute as _ } from "ts-graphviz"
+import { toast } from "react-hot-toast"
 
 type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
@@ -181,7 +182,8 @@ export type TomlLine = {
   isObservationSrc?: boolean;
 };
 
-export type JOB_TYPE = "cron" | "directrequest";
+const JOB_TYPES = ["cron", "directrequest", "fluxmonitor", "keeper", "offchainreporting", "webhook"]
+export type JOB_TYPE = typeof JOB_TYPES[number];
 
 const getNextUniqueTaskId = (tasks: Array<any>) => {
   const tasksCustomIdsWithDefaultFormat = tasks
@@ -273,14 +275,14 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   }
                 }
               }),
-              raise({ type: "CLOSE_MODAL", data: { name: "import" }})
-              // TODO - add success toast
+              raise({ type: "CLOSE_MODAL", data: { name: "import" } }),
+              (context, event) => toast.success("Import successful")
             ]
           },
           onError: {
             target: "idle",
             actions: [
-              // TODO - add error toast
+              (context, event) => toast.error(event.data.message)
             ]
           }
         }
@@ -291,13 +293,13 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           onDone: {
             target: "idle",
             actions: [
-              // TODO - add success toast
+              (context, event) => toast.success("Job Spec saved successful")
             ]
           },
           onError: {
             target: "idle",
             actions: [
-              // TODO - add error toast
+              (context, event) => toast.error(event.data.message)
             ]
           }
         }
@@ -1004,96 +1006,109 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       },
       // @ts-ignore
       importJobSpec: (context, event) => {
-        if (!("content" in event)) {
-          throw new Error("'content' prop required on import_spec event")
-        }
-
-        const parsed = toml.parse(event.content)
-
-        if (!("observationSource" in parsed)) {
-          throw new Error("'observationSource' required in imported spec")
-        }
-
-        // TODO - Validate parsed.type and related job-specific props
-
-        const input = `digraph {\n${parsed.observationSource}\n}`
-        const parsedObservationSrc = fromDot(input)
-
-        const nodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
-          return {
-            ...node,
-            computedId: `task_${index}`
+        try {
+          if (!("content" in event)) {
+            throw new Error("'content' prop required on import_spec event")
           }
-        })
 
-        const constructedMachineContext: Partial<WorkspaceContext> = {
-          type: parsed.type,
-          name: parsed.name ?? "",
-          externalJobId: parsed.externalJobId ?? "",
-          edges: parsedObservationSrc.edges.map((edge, index) => {
+          const parsed = toml.parse(event.content)
 
-            const sourceCustomId: string = (edge.targets[0] as NodeRef).id
-            const targetCustomId: string = (edge.targets[1] as NodeRef).id
-            const sourceWithComputedId = nodesWithComputedIds.find(entry => entry.id === sourceCustomId)
-            const targetWithComputedId = nodesWithComputedIds.find(entry => entry.id === targetCustomId)
+          if (!("observationSource" in parsed)) {
+            throw new Error("'observationSource' required in imported spec")
+          }
 
+          if (!("type" in parsed)) {
+            throw new Error("'type' required in imported spec")
+          }
+
+          if (!JOB_TYPES.includes(parsed.type)) {
+            throw new Error("Invalid 'type' property in imported spec")
+          }
+
+          // TODO - Validate related job-specific props
+
+          const input = `digraph {\n${parsed.observationSource}\n}`
+          const parsedObservationSrc = fromDot(input)
+
+          const nodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
             return {
-              id: `edge_${index}`,
-              source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
-              sourceCustomId: sourceCustomId,
-              target: targetWithComputedId ? targetWithComputedId.computedId : "",
-              targetCustomId: targetCustomId
+              ...node,
+              computedId: `task_${index}`
             }
-          }),
-          totalNodesAdded: parsedObservationSrc.nodes.length,
-          totalEdgesAdded: parsedObservationSrc.edges.length,
-          // jobTypeSpecific: {
-          //   cron: {
+          })
 
-          //   }, // TODO
-          //   directrequest: {} // TODO
-          // },
-          // jobTypeVariables: TODO 
-          // toml: TODO,
-          nodes: {
-            // @ts-ignore
-            tasks: nodesWithComputedIds.map((node, index) => {
+          const constructedMachineContext: Partial<WorkspaceContext> = {
+            type: parsed.type,
+            name: parsed.name ?? "",
+            externalJobId: parsed.externalJobId ?? "",
+            edges: parsedObservationSrc.edges.map((edge, index) => {
 
-              // @ts-ignore
-              const taskSpecificNodeAttrs = node.attributes.values.filter(val => val[0] !== "type")
+              const sourceCustomId: string = (edge.targets[0] as NodeRef).id
+              const targetCustomId: string = (edge.targets[1] as NodeRef).id
+              const sourceWithComputedId = nodesWithComputedIds.find(entry => entry.id === sourceCustomId)
+              const targetWithComputedId = nodesWithComputedIds.find(entry => entry.id === targetCustomId)
 
               return {
-                ref: {
-                  id: node.computedId
-                },
-                context: {
-                  customId: node.id,
-                  coords: {
-                    x: 0, // TODO
-                    y: 0 // TODO
-                  },
-                  // @ts-ignore
-                  taskType: node.attributes.get("type")?.toString().toUpperCase(),
-                  incomingNodes: [], // TODO
-                  outgoingNodes: [], // TODO
-                  taskSpecific: taskSpecificNodeAttrs.reduce((acc, [key, value]) => {
-                    // @ts-ignore
-                    acc[key] = { raw: value, rich: value }; // TODO - format the 'rich' prop
-                    return acc;
-                  }, {}),
-                  mock: {
-                    mockResponseDataInput: "",
-                    mockResponseData: "",
-                    enabled: false
-                  },
-                  isValid: true
-                }
+                id: `edge_${index}`,
+                source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
+                sourceCustomId: sourceCustomId,
+                target: targetWithComputedId ? targetWithComputedId.computedId : "",
+                targetCustomId: targetCustomId
               }
-            })
-          }
-        }
+            }),
+            totalNodesAdded: parsedObservationSrc.nodes.length,
+            totalEdgesAdded: parsedObservationSrc.edges.length,
+            // jobTypeSpecific: {
+            //   cron: {
 
-        return Promise.resolve(constructedMachineContext)
+            //   }, // TODO
+            //   directrequest: {} // TODO
+            // },
+            // jobTypeVariables: TODO 
+            // toml: TODO,
+            nodes: {
+              // @ts-ignore
+              tasks: nodesWithComputedIds.map((node, index) => {
+
+                // @ts-ignore
+                const taskSpecificNodeAttrs = node.attributes.values.filter(val => val[0] !== "type")
+
+                return {
+                  ref: {
+                    id: node.computedId
+                  },
+                  context: {
+                    customId: node.id,
+                    coords: {
+                      x: 0, // TODO
+                      y: 0 // TODO
+                    },
+                    // @ts-ignore
+                    taskType: node.attributes.get("type")?.toString().toUpperCase(),
+                    incomingNodes: [], // TODO
+                    outgoingNodes: [], // TODO
+                    taskSpecific: taskSpecificNodeAttrs.reduce((acc, [key, value]) => {
+                      // @ts-ignore
+                      acc[key] = { raw: value, rich: value }; // TODO - format the 'rich' prop
+                      return acc;
+                    }, {}),
+                    mock: {
+                      mockResponseDataInput: "",
+                      mockResponseData: "",
+                      enabled: false
+                    },
+                    isValid: true
+                  }
+                }
+              })
+            }
+          }
+
+          return Promise.resolve(constructedMachineContext)
+        }
+        catch (err) {
+          return Promise.reject(err)
+        }
       }
     },
     actions: {

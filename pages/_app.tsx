@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app'
 import { GlobalStateProvider } from "../context";
 import { ThirdwebProvider } from '@thirdweb-dev/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -25,6 +26,12 @@ function MyApp({ Component, pageProps }: AppProps) {
         }}
       >
         <GlobalStateProvider>
+          <Toaster toastOptions={{
+            style: {
+              backgroundColor: "#000",
+              color: "#ccc"
+            }
+          }}/>
           <Component {...pageProps} />
         </GlobalStateProvider>
       </ThirdwebProvider>
