@@ -288,7 +288,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 return newContext
               }),
               raise({ type: "CLOSE_MODAL", data: { name: "import" } }),
-              "createImportToast"
+              "createImportToast",
+              "regenerateToml",
             ]
           },
           onError: {

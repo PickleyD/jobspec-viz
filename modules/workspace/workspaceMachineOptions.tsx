@@ -147,8 +147,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                     //   }, // TODO
                     //   directrequest: {} // TODO
                     // },
-                    // jobTypeVariables: TODO 
-                    // toml: TODO
+                    // jobTypeVariables: TODO
                 }
 
                 if (!("observationSource" in parsed)) {
