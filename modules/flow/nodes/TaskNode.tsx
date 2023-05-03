@@ -234,7 +234,7 @@ export const TaskNode = ({
           {deletable &&
             <div
               onClick={handleDeleteNode}
-              className="custom-drag-handle absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
+              className="z-30 absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
             >
               <TrashIcon className="fill-current w-6" />
             </div>
