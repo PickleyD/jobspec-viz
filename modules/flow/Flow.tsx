@@ -353,7 +353,7 @@ export const Flow = ({ className }: FlowProps) => {
           minZoom={0.35}
         >
           <Controls position="bottom-right" />
-          <Background gap={15} />
+          <Background gap={15} color="#666666" />
         </ReactFlow>
       </div>
     </ReactFlowProvider>
