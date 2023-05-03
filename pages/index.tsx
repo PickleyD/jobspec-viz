@@ -160,15 +160,19 @@ const Home: NextPage = () => {
               sizes={[34, 66]}
               className="h-full w-full flex pointer-events-none" gutter={(index, direction) => {
                 const gutter = document.createElement('div')
-                gutter.className = `pointer-events-auto gutter gutter-${direction} bg-gray-700 rounded-r-lg
-                cursor-resize bg-split-handle bg-no-repeat bg-center hover:bg-gray-500`
+                gutter.innerHTML = `
+                <div class="absolute inset-0 bg-split-handle bg-no-repeat bg-center cursor-resize"></div>
+                <div class="absolute inset-0 bg-black opacity-0 hover:opacity-25"></div>
+                `
+                gutter.className = `overflow-hidden relative pointer-events-auto gutter gutter-${direction} bg-gradient-copper rounded-r-lg`
                 return gutter
               }}>
               <div className="relative pointer-events-auto">
-                <div className="grow relative flex h-full w-full overflow-hidden border border-gray-800 rounded-bl-lg">
-                  <div className="absolute bg-base-300 inset-0" />
-                  <div className="w-screen h-screen absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent" />
-                  <div className="w-screen h-screen absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40" />
+                <div className="grow relative flex h-full w-full border border-neutral rounded-bl-lg">
+                  <div className="absolute bg-base-300 inset-0 overflow-hidden">
+                    <div className="w-screen h-screen absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent" />
+                    <div className="w-screen h-screen absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40" />
+                  </div>
                   <div className="absolute bg-noise opacity-20 inset-0" />
                   <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
                   <div className="h-full overflow-auto relative">

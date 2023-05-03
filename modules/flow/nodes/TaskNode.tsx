@@ -210,7 +210,7 @@ export const TaskNode = ({
   return (
     <div className="relative overflow-visible isolate">
       {/* width divisible by grid snap size */}
-      <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-lg ring ring-secondary/20 w-[300px]">
+      <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-lg ring ring-neutral/60 w-[300px]">
         {(isPendingRun || isPendingSideEffect) && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
           <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-light via-secondary via-secondary-dark via-secondary to-secondary-light"></div>
         </div>
@@ -228,9 +228,9 @@ export const TaskNode = ({
         </div>
         }
         <div className="relative w-full h-full p-3 bg-base-100 rounded-md z-10">
-          <div className="inset-0 absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent rounded-lg" />
-          <div className="inset-0 absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40 rounded-lg" />
-          <div className="absolute bg-noise opacity-20 inset-0 rounded-lg" />
+          <div className="inset-0 absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent rounded-md" />
+          <div className="inset-0 absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40 rounded-md" />
+          <div className="absolute bg-noise opacity-20 inset-0 rounded-md" />
           {deletable &&
             <div
               onClick={handleDeleteNode}

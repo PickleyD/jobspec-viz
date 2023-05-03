@@ -22,6 +22,7 @@ module.exports = {
       backgroundImage: {
         'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-copper': 'linear-gradient(#3a200f, #5d3318, #3a200f)',
         'noise': `url("/noise.svg")`,
         'split-handle': `url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==')`
       },
@@ -48,8 +49,8 @@ module.exports = {
           primary: "#ff6a6a",
           secondary: "#6ae1ff",
           accent: "#ffe16a",
-          neutral: "#000000",
-          "neutral-content": "#cfcfcf",
+          neutral: "#3a200f",
+          "neutral-content": "#d28453",
           "base-100": "#000000",
           "base-200": "#0a0a0a",
           "base-300": "#1a1a1a",
