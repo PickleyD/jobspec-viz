@@ -169,7 +169,7 @@ const Home: NextPage = () => {
               }}>
               <div className="relative pointer-events-auto">
                 <div className="grow relative flex h-full w-full border border-neutral rounded-bl-lg">
-                  <div className="absolute bg-base-300 inset-0 overflow-hidden">
+                  <div className="rounded-bl-lg absolute bg-base-300 inset-0 overflow-hidden">
                     <div className="w-screen h-screen absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent" />
                     <div className="w-screen h-screen absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40" />
                   </div>
