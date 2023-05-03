@@ -183,7 +183,7 @@ export type TomlLine = {
   isObservationSrc?: boolean;
 };
 
-export const JOB_TYPES = ["cron", "directrequest", "fluxmonitor", "keeper", "offchainreporting", "webhook"]
+export const JOB_TYPES = ["cron", "directrequest", "fluxmonitor", "keeper", "offchainreporting", "webhook"] as const
 export type JOB_TYPE = typeof JOB_TYPES[number];
 
 const getNextUniqueTaskId = (tasks: Array<any>) => {
@@ -509,6 +509,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             valid: true,
           },
         },
+        fluxmonitor: {},
+        keeper: {},
+        offchainreporting: {},
+        webhook: {}
       },
       jobTypeVariables: {
         directrequest: {
@@ -526,6 +530,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           }
         },
         cron: {},
+        fluxmonitor: {},
+        keeper: {},
+        offchainreporting: {},
+        webhook: {},
       },
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
