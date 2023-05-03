@@ -54,7 +54,8 @@ const Home: NextPage = () => {
   }
 
   return (
-    <div className="bg-primary h-screen w-screen relative">
+    <div className="h-screen w-screen relative overflow-hidden">
+      <div className="absolute bg-gradient-to-tr from-base-100 to-base-300 min-h-[1200px] min-w-[1200px] h-full w-full" />
       <Head>
         <title>LINKIT</title>
         <meta
@@ -138,8 +139,8 @@ const Home: NextPage = () => {
         <div className="w-full h-full fixed z-0">
           <Flow />
         </div>
-        <div className="visible md:invisible fixed grid items-center justify-center h-full w-full z-50 pointer-events-auto bg-primary">
-          <div className="rounded-lg bg-base-100 p-8 flex flex-col gap-4 relative pointer-events-auto w-80">
+        <div className="visible md:invisible fixed grid items-center justify-center h-full w-full z-50 pointer-events-auto bg-base-100">
+          <div className="rounded-lg bg-base-300 p-8 flex flex-col gap-4 relative pointer-events-auto w-80">
             <div className="relative h-20 w-[141px]">
               <Image src="/linkit.svg" alt="linkit logo" layout="fill" />
             </div>
@@ -156,7 +157,7 @@ const Home: NextPage = () => {
           {isMenuOpen && <div className="grow relative flex h-px w-full pointer-events-none">
             <Split
               minSize={[200, 0]}
-              sizes={[25, 75]}
+              sizes={[34, 66]}
               className="h-full w-full flex pointer-events-none" gutter={(index, direction) => {
                 const gutter = document.createElement('div')
                 gutter.className = `pointer-events-auto gutter gutter-${direction} bg-gray-700 rounded-r-lg
@@ -164,11 +165,11 @@ const Home: NextPage = () => {
                 return gutter
               }}>
               <div className="relative pointer-events-auto">
-                <div className="grow relative flex h-full w-full">
-                  <div className="absolute bg-base-200 inset-0 rounded-bl-lg" />
-                  <div className="absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent inset-0 rounded-bl-lg" />
-                  <div className="absolute bg-gradient-to-b from-base-100 via-base-100/50 to-transparent inset-0 border border-gray-700 rounded-bl-lg" />
-                  <div className="absolute bg-noise opacity-25 inset-0 rounded-bl-lg" />
+                <div className="grow relative flex h-full w-full overflow-hidden border border-gray-800 rounded-bl-lg">
+                  <div className="absolute bg-base-300 inset-0" />
+                  <div className="w-screen h-screen absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent" />
+                  <div className="w-screen h-screen absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40" />
+                  <div className="absolute bg-noise opacity-20 inset-0" />
                   <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
                   <div className="h-full overflow-auto relative">
                     <div className="w-max relative min-h-full">

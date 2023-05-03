@@ -22,7 +22,7 @@ module.exports = {
       backgroundImage: {
         'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'noise': `url("data:image/svg+xml,%3C!-- svg: first layer --%3E%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        'noise': `url("/noise.svg")`,
         'split-handle': `url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==')`
       },
       fontFamily: {
@@ -41,15 +41,19 @@ module.exports = {
     themes: [
       {
         mytheme: {
-          primary: "#232323",
-          secondary: "#ffeeaa",
-          accent: "#aaeeff",
+          // primary: "#ffaaaa",
+          // secondary: "#aaeeff",
+          // accent: "#ffeeaa",
+          // Darkened 15%:
+          primary: "#ff6a6a",
+          secondary: "#6ae1ff",
+          accent: "#ffe16a",
           neutral: "#000000",
-          "neutral-content": "#FFFFFF",
+          "neutral-content": "#cfcfcf",
           "base-100": "#000000",
-          "base-200": "#111111",
-          "base-300": "#222222",
-          "base-content": "#FFFFFF",
+          "base-200": "#0a0a0a",
+          "base-300": "#1a1a1a",
+          "base-content": "#cfcfcf",
           info: "#3ABFF8",
           success: "#22c55e",
           warning: "#FBBD23",

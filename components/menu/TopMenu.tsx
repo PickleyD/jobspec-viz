@@ -9,7 +9,7 @@ export interface TopMenuProps {
 export const TopMenu = ({ lit = false, onToggleClick = () => { }, className = "" }: TopMenuProps) => {
 
     return <div className="">
-        <div className={`${lit ? "rounded-tl-lg rounded-tr-lg" : "rounded-lg"} w-fit pointer-events-auto relative text-base-content shadow-lg border-gray-700 border bg-base-100 flex`}>
+        <div className={`${lit ? "rounded-tl-lg rounded-tr-lg" : "rounded-lg border-b"} w-fit pointer-events-auto relative text-base-content shadow-lg border-gray-700 border-l border-t border-r bg-base-100 flex`}>
             <div className={`transition-opacity ${lit ? "opacity-100" : "opacity-0"} absolute h-px w-20 left-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent top-[-1px]`} />
             <div className={`transition-opacity ${lit ? "opacity-100" : "opacity-0"} absolute w-px h-10 top-1 bg-gradient-to-b from-transparent via-gray-500 to-transparent left-[-1px]`} />
             <div title="Toggle sidebar" className="hover:bg-white/5 rounded transition-colors flex items-start p-2 w-fit cursor-pointer" onClick={() => onToggleClick()}>
@@ -17,15 +17,15 @@ export const TopMenu = ({ lit = false, onToggleClick = () => { }, className = ""
                 <div className="p-2 flex gap-1">
                     <div className="flex items-center justify-center h-3 w-3 overflow-visible">
                         <div className={`transition-opacity ${lit ? "opacity-100" : "opacity-0"} absolute bg-gradient-radial from-white/30 via-transparent to-transparent w-12 h-12`} />
-                        <div className="rounded-full h-3 w-3 bg-[#ffaaaa]" />
+                        <div className={`${lit ? "bg-[#ffaaaa]" : "bg-[#ff6a6a]"} rounded-full h-3 w-3`} />
                     </div>
                     <div className="flex items-center justify-center h-3 w-3 overflow-visible">
                         <div className={`transition-opacity ${lit ? "opacity-100" : "opacity-0"} absolute bg-gradient-radial from-white/30 via-transparent to-transparent w-12 h-12`} />
-                        <div className="rounded-full h-3 w-3 bg-[#ffeeaa]" />
+                        <div className={`${lit ? "bg-[#aaeeff]" : "bg-[#6ae1ff]"} rounded-full h-3 w-3`} />
                     </div>
                     <div className="flex items-center justify-center h-3 w-3 overflow-visible">
                         <div className={`transition-opacity ${lit ? "opacity-100" : "opacity-0"} absolute bg-gradient-radial from-white/30 via-transparent to-transparent w-12 h-12`} />
-                        <div className="rounded-full h-3 w-3 bg-[#aaeeff]" />
+                        <div className={`${lit ? "bg-[#ffeeaa]" : "bg-[#ffe16a]"} rounded-full h-3 w-3`} />
                     </div>
                 </div>
 

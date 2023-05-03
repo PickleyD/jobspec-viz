@@ -65,7 +65,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                         <ConnectWallet
                             btnTitle="Connect Wallet"
                             theme="light"
-                            className="!bg-base-100 !text-white !rounded-full !p-4 !border-solid !border-2 !border-base-100 hover:!border-secondary focus:!ring-0"
+                            className="!bg-base-100 !text-gray-300 !rounded-full !p-4 !border-solid !border-2 !border-base-100 hover:!border-secondary focus:!ring-0"
                             auth={{
                                 loginOptional: false,
                                 loginOptions: {
