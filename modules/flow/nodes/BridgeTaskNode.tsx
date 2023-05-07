@@ -70,7 +70,7 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
         </>}
         test={<>
           <TextArea
-            className="h-48"
+            textAreaClassName="h-48"
             label="Mock Response"
             placeholder="Provide a mock bridge response to test the rest of your pipeline with"
             value={mockResponseData}

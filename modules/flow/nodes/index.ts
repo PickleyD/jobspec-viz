@@ -15,3 +15,5 @@ export * from "./EthAbiEncodeTaskNode"
 export * from "./LengthTaskNode"
 export * from "./LessThanTaskNode"
 export * from "./LookupTaskNode"
+
+export * from "./AiPromptNode"

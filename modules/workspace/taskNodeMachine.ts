@@ -1,15 +1,9 @@
 import { ethers } from "ethers";
 import { createMachine, assign, send, actions } from "xstate";
 import { sendParent } from "xstate/lib/actions";
+import { NodeContext, NodeOptions, XYCoords } from "./node"
 
-export type XYCoords = {
-  x: number;
-  y: number;
-};
-
-export type TaskNodeOptions = {
-  id: string;
-  initialCoords: XYCoords;
+export type TaskNodeOptions = NodeOptions & {
   taskType: TASK_TYPE;
 };
 
@@ -59,12 +53,9 @@ type TaskMock = {
   enabled: boolean;
 }
 
-export interface TaskNodeContext {
+export interface TaskNodeContext extends NodeContext {
   customId?: string;
-  coords: XYCoords;
   taskType: TASK_TYPE;
-  incomingNodes: Array<string>;
-  outgoingNodes: Array<string>;
   taskSpecific: {
     [key: string]: {
       raw: string;

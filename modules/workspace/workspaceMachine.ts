@@ -13,9 +13,12 @@ import {
   TaskNodeOptions,
   TaskNodeContext,
   TaskNodeEvent,
-  TASK_TYPE,
-  XYCoords,
+  TASK_TYPE
 } from "./taskNodeMachine";
+import {
+  NodeOptions,
+  XYCoords
+} from "./node"
 import {
   Edge,
   OnConnectStartParams,
@@ -27,6 +30,7 @@ import toml from "toml"
 import { fromDot, NodeRef, attribute as _ } from "ts-graphviz"
 import { toast } from "react-hot-toast"
 import { workspaceMachineOptions as defaultWorkspaceMachineOptions } from "./workspaceMachineOptions";
+import { AiNodeContext, AiNodeEvent, createAiNodeMachine } from "./aiNodeMachine";
 
 type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
@@ -45,7 +49,7 @@ export type WorkspaceEvent =
       fromNodeId: string;
     };
   }
-  | { type: "DELETE_TASK_NODE"; nodeId: string }
+  | { type: "DELETE_NODE"; nodeId: string }
   | {
     type: "REPLACE_TASK_NODE";
     nodeId: string;
@@ -97,7 +101,17 @@ export type WorkspaceEvent =
   | { type: "SAVE_JOB_SPEC_VERSION" }
   | { type: "OPEN_MODAL"; name: ModalName }
   | { type: "CLOSE_MODAL"; data: { name: ModalName } }
-  | { type: "IMPORT_SPEC"; content: string };
+  | { type: "IMPORT_SPEC"; content: string }
+  | { type: "TOGGLE_AI_WAND" }
+  | {
+    type: "ADD_AI_PROMPT_NODE";
+    options: NodeOptions;
+    edgeDetails: {
+      newNodeType: NEW_NODE_TYPE;
+      fromHandleId: string;
+      fromNodeId: string;
+    };
+  };
 
 export interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -175,6 +189,9 @@ type Nodes = {
   tasks: Array<{
     ref: ActorRefFrom<StateMachine<TaskNodeContext, any, TaskNodeEvent>>;
   }>;
+  ai: Array<{
+    ref: ActorRefFrom<StateMachine<AiNodeContext, any, AiNodeEvent>>;
+  }>;
 };
 
 export type TomlLine = {
@@ -245,6 +262,29 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
     initial: "idle",
     states: {
       idle: {
+        initial: "defaultMode",
+        states: {
+          defaultMode: {
+            on: {
+              TOGGLE_AI_WAND: {
+                target: "aiWandMode"
+              },
+              CONNECTION_SUCCESS: {
+                actions: ["handleConnectionSuccessTaskNodeAddition", "regenerateToml"],
+              }
+            }
+          },
+          aiWandMode: {
+            on: {
+              TOGGLE_AI_WAND: {
+                target: "defaultMode"
+              },
+              CONNECTION_SUCCESS: {
+                actions: ["handleConnectionSuccessAiPromptNodeAddition"],
+              }
+            }
+          },
+        },
         on: {
           TOGGLE_TEST_MODE: {
             target: "testModeLoading",
@@ -254,6 +294,19 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           },
           IMPORT_SPEC: {
             target: "importing"
+          },
+          CONNECTION_START: {
+            actions: assign({
+              isConnecting: (_context, _event) => true,
+              connectionParams: (_context, event) => event.params,
+            }),
+          },
+          CONNECTION_END: {
+            actions: [
+              assign({
+                isConnecting: (_context, _event) => false,
+              }),
+            ],
           }
         },
       },
@@ -276,6 +329,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                   newContext = {
                     ...newContext,
                     nodes: {
+                      ...newContext.nodes,
                       tasks: newPartialContext.nodes.tasks.map((entry: any) => ({
                         ...entry,
                         // @ts-ignore
@@ -487,6 +541,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       totalEdgesAdded: 0,
       nodes: {
         tasks: [],
+        ai: []
       },
       jobTypeSpecific: {
         cron: {
@@ -631,14 +686,95 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           ];
         }),
       },
-      DELETE_TASK_NODE: {
+      ADD_AI_PROMPT_NODE: {
+        // @ts-ignore
+        actions: actions.pure((context, event) => {
+          const { fromHandleId, fromNodeId, newNodeType } = event.edgeDetails;
+
+          // from will be a task (or other) node
+          const fromNodeCustomId =
+            context.nodes.tasks.find((taskNode) => taskNode.ref.id === fromNodeId)?.ref
+              .state.context.customId || "";
+
+          const isFirstNode = !fromHandleId || !newNodeType;
+          const isForwardConnection = newNodeType === "target";
+
+          const newNodeId = `ai_${event.options.id ?? context.totalNodesAdded
+            }`;
+
+          const fromId = isForwardConnection ? fromNodeId : newNodeId;
+          const toId = isForwardConnection ? newNodeId : fromNodeId;
+
+          const fromPresentationId = isForwardConnection
+            ? fromNodeCustomId
+            : newNodeId;
+          const toPresentationId = isForwardConnection
+            ? newNodeId
+            : fromNodeCustomId;
+
+          return [
+            assign({
+              totalNodesAdded: context.totalNodesAdded + 1,
+              totalEdgesAdded: context.totalEdgesAdded + 1,
+              nodes: {
+                ...context.nodes,
+                ai: [
+                  ...context.nodes.ai,
+                  {
+                    // add a new aiNodeMachine actor with a unique name
+                    ref: spawn(
+                      createAiNodeMachine({
+                        coords: event.options.initialCoords,
+                        ...(!isFirstNode &&
+                          (isForwardConnection
+                            ? { incomingNodes: [fromNodeCustomId] }
+                            : { outgoingNodes: [fromNodeCustomId] })),
+                      }),
+                      newNodeId
+                    ),
+                  },
+                ],
+              },
+              edges:
+                fromNodeId && fromHandleId
+                  ? [
+                    ...context.edges,
+                    {
+                      id: `edge_${context.totalEdgesAdded}`,
+                      source: fromId,
+                      sourceCustomId: fromPresentationId,
+                      target: toId,
+                      targetCustomId: toPresentationId,
+                    },
+                  ]
+                  : context.edges,
+            }),
+            send(
+              {
+                type: isForwardConnection
+                  ? "ADD_OUTGOING_NODE"
+                  : "ADD_INCOMING_NODE",
+                nodeId: newNodeId,
+              },
+              { to: fromNodeId }
+            ),
+            "regenerateToml",
+          ];
+        }),
+      },
+      DELETE_NODE: {
         actions: [
           assign({
             nodes: (context, event) => ({
               ...context.nodes,
               tasks: [
                 ...context.nodes.tasks.filter(
-                  (task) => task.ref.state.context.customId !== event.nodeId
+                  (node) => node.ref.id !== event.nodeId
+                ),
+              ],
+              ai: [
+                ...context.nodes.ai.filter(
+                  (node) => node.ref.id !== event.nodeId
                 ),
               ],
             }),
@@ -794,22 +930,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           // "regenerateToml"
         ],
       },
-      CONNECTION_START: {
-        actions: assign({
-          isConnecting: (_context, _event) => true,
-          connectionParams: (_context, event) => event.params,
-        }),
-      },
-      CONNECTION_END: {
-        actions: [
-          assign({
-            isConnecting: (_context, _event) => false,
-          }),
-        ],
-      },
-      CONNECTION_SUCCESS: {
-        actions: ["addTaskNode", "regenerateToml"],
-      },
       STORE_TASK_RUN_RESULT: {
         actions: assign((context, event) => {
           console.log(event)
@@ -892,6 +1012,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             ...context,
             ...savedContext,
             nodes: {
+              ...context.nodes,
               tasks: savedContext.nodes.tasks.map((entry) => ({
                 ...entry,
                 // @ts-ignore

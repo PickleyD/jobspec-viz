@@ -19,6 +19,7 @@ const Background = dynamic<BackgroundProps>(
   { ssr: false }
 ); // disable ssr
 import {
+  AiPromptNode,
   TaskNode,
   HttpTaskNode,
   BridgeTaskNode,
@@ -41,15 +42,19 @@ import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
+import { TASK_TYPE } from "../workspace/taskNodeMachine";
+import { XYCoords } from "../workspace/node";
 import { CustomConnectionLine } from "./CustomConnectionLine";
 import { CustomEdge } from "./CustomEdge";
 import { NEW_NODE_TYPE } from "../workspace/workspaceMachine";
 
 const taskNodesSelector = (state: any) => state.context.nodes.tasks;
+const aiNodesSelector = (state: any) => state.context.nodes.ai;
 const edgesSelector = (state: any) => state.context.edges;
 const reactFlowInstanceSelector = (state: any) => state.context.reactFlowInstance;
 const testModeSelector = (state: any) => state.matches("testModeLoading") || state.matches("testMode")
+const defaultModeSelector = (state: any) => state.matches("idle.defaultMode")
+const aiWandModeSelector = (state: any) => state.matches("idle.aiWandMode")
 
 export const NODE_WIDTH = 300;
 export const SNAP_GRID = 15;
@@ -78,10 +83,17 @@ export const Flow = ({ className }: FlowProps) => {
     taskNodesSelector
   );
 
+  const aiNodesFromMachine = useSelector(
+    globalServices.workspaceService,
+    aiNodesSelector
+  );
+
   const edgesFromMachine = useSelector(
     globalServices.workspaceService,
     edgesSelector
   );
+
+  console.log(edgesFromMachine)
 
   const reactFlowInstance = useSelector(
     globalServices.workspaceService,
@@ -93,7 +105,17 @@ export const Flow = ({ className }: FlowProps) => {
     testModeSelector
   )
 
-  const nodeToFlowElement = (node: any, index: number, numNodes: number) => {
+  const isDefaultMode = useSelector(
+    globalServices.workspaceService,
+    defaultModeSelector
+  )
+
+  const isAiWandMode = useSelector(
+    globalServices.workspaceService,
+    aiWandModeSelector
+  )
+
+  const taskNodeToFlowElement = (node: any, index: number, numNodes: number) => {
     const nodeType = node.ref.machine.id;
 
     const { coords, taskType } = node.ref.state.context;
@@ -168,7 +190,29 @@ export const Flow = ({ className }: FlowProps) => {
     return flowElement;
   };
 
-  const elements = [...taskNodesFromMachine.map((node: any, index: number) => nodeToFlowElement(node, index, taskNodesFromMachine.length))];
+  const aiNodeToFlowElement = (node: any, index: number, numNodes: number) => {
+    const nodeType = node.ref.machine.id;
+
+    const { coords } = node.ref.state.context;
+
+    let flowElement = {
+      id: node.ref.id,
+      type: nodeType,
+      data: {
+        machine: node.ref,
+        numNodes: numNodes
+      },
+      position: coords,
+      dragHandle: ".custom-drag-handle",
+    };
+
+    return flowElement
+  }
+
+  const elements = [
+    ...taskNodesFromMachine.map((node: any, index: number) => taskNodeToFlowElement(node, index, taskNodesFromMachine.length)),
+    ...aiNodesFromMachine.map((node: any, index: number) => aiNodeToFlowElement(node, index, aiNodesFromMachine.length))
+  ];
 
   const [prevElements, setPrevElements] = useState<Array<{
     id: string;
@@ -297,6 +341,7 @@ export const Flow = ({ className }: FlowProps) => {
 
   const nodeTypes = useMemo(
     () => ({
+      aiPrompt: AiPromptNode,
       task: TaskNode,
       httpTask: HttpTaskNode,
       bridgeTask: BridgeTaskNode,
@@ -344,6 +389,8 @@ export const Flow = ({ className }: FlowProps) => {
           onConnectEnd={handleConnectEnd}
           onConnect={handleConnect}
           connectionLineComponent={CustomConnectionLine}
+          panOnDrag={isDefaultMode}
+          selectionOnDrag={isAiWandMode}
           fitView
           fitViewOptions={{
             duration: 500,

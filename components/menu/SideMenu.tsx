@@ -1,4 +1,4 @@
-import { CogIcon, CodeBracketSquareIcon, BeakerIcon, UserIcon, AcademicCapIcon } from "@heroicons/react/24/solid"
+import { CogIcon, CodeBracketSquareIcon, BeakerIcon, UserIcon, AcademicCapIcon, ChatBubbleLeftRightIcon } from "@heroicons/react/24/solid"
 
 export interface SideMenuProps {
     selectedIndex: number
@@ -8,6 +8,8 @@ export interface SideMenuProps {
 export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps) => {
 
     return <div className="pointer-events-auto relative menu h-full text-base-content rounded-bl-lg bg-transparent">
+
+        <div className={`transition-opacity absolute h-px w-20 left-1 bg-gradient-to-r from-transparent via-neutral-content to-transparent top-[-1px]`} />
         <div className="flex flex-col gap-8 h-full">
             <div className="relative h-full">
                 <div className={`transition-transform ${getMenuItemShineTranslate(selectedIndex)} absolute h-[80px] w-[2px] bg-gradient-to-b from-transparent via-neutral-content to-transparent left-[-1px] opacity-50`} />
@@ -37,6 +39,11 @@ export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps
                             <BeakerIcon className={`${selectedIndex === 4 ? "drop-shadow-[0_0_8px_rgba(255,255,255,1)] fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
                         </label>
                     </li>
+                    <li className="group h-[60px]" onClick={() => onSelectedIndexChange(5)}>
+                        <label>
+                            <ChatBubbleLeftRightIcon className={`${selectedIndex === 5 ? "drop-shadow-[0_0_8px_rgba(255,255,255,1)] fill-white" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-white`} />
+                        </label>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -55,5 +62,7 @@ const getMenuItemShineTranslate = (index: number) => {
             return "translate-y-[170px]"
         case 4:
             return "translate-y-[230px]"
+        case 5:
+            return "translate-y-[290px]"
     }
 }

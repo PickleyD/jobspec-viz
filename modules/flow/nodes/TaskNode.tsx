@@ -4,7 +4,8 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { Squares2X2Icon, XMarkIcon, PlayIcon } from "@heroicons/react/24/outline";
-import { TASK_TYPE, XYCoords } from "../../workspace/taskNodeMachine";
+import { TASK_TYPE } from "../../workspace/taskNodeMachine";
+import { XYCoords } from "../../workspace/node";
 import { TaskSelector } from "../taskSelector/TaskSelector";
 import { Popover } from "../../../components";
 
@@ -168,8 +169,8 @@ export const TaskNode = ({
 
   const handleDeleteNode = () => {
     notifyExistingConnectionsOfDeletion();
-    globalServices.workspaceService.send("DELETE_TASK_NODE", {
-      nodeId: machine.state.context.customId,
+    globalServices.workspaceService.send("DELETE_NODE", {
+      nodeId: machine.id,
     });
   };
 

@@ -82,7 +82,7 @@ export const EthAbiDecodeLogTaskNode = (nodeProps: NodeProps) => {
           </div>
           <TextArea
             disabled={!enabledMock}
-            className="h-48"
+            textAreaClassName="h-48"
             placeholder="Provide a mock response to test the rest of your pipeline with"
             value={mockResponseDataInput}
             onChange={(newValue) => machine.send("SET_MOCK_RESPONSE", { value: { mockResponseDataInput: newValue, mockResponseData: newValue } })}

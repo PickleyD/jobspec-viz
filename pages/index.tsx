@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Flow, Codegen, Simulator, Configurator, UserProfilePanel, Examples, ImportModal } from "../modules"
+import { Flow, Codegen, Simulator, Configurator, UserProfilePanel, Examples, ImportModal, Chat } from "../modules"
 import { useState, useContext } from "react";
 import Image from "next/image";
 import { GlobalStateContext } from "../context/GlobalStateContext";
@@ -10,6 +10,10 @@ import Split from "react-split"
 
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
+
+const isIdleSelector = (state: any) => state.matches("idle")
+
+const isAiWandModeSelector = (state: any) => state.matches("idle.aiWandMode")
 
 const Home: NextPage = () => {
   const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
@@ -25,6 +29,16 @@ const Home: NextPage = () => {
     globalServices.workspaceService,
     reactFlowInstanceSelector
   );
+
+  const isIdle = useSelector(
+    globalServices.workspaceService,
+    isIdleSelector
+  )
+
+  const isAiWandMode = useSelector(
+    globalServices.workspaceService,
+    isAiWandModeSelector
+  )
 
   const handleRehydrate = (json: any) => {
     globalServices.workspaceService.send("RESTORE_STATE", {
@@ -53,9 +67,13 @@ const Home: NextPage = () => {
     setSelectedSideMenuItem(newIndex)
   }
 
+  const handleToggleAiWandMode = () => {
+    globalServices.workspaceService.send("TOGGLE_AI_WAND")
+  }
+
   return (
     <div className="h-screen w-screen relative overflow-hidden">
-      <div className="absolute bg-gradient-to-tr from-base-100 to-base-300 min-h-[1200px] min-w-[1200px] h-full w-full" />
+      <div className="absolute bg-gradient-to-tr from-base-200 to-base-300 min-h-[1200px] min-w-[1200px] h-full w-full" />
       <Head>
         <title>LINKIT</title>
         <meta
@@ -153,7 +171,10 @@ const Home: NextPage = () => {
           </div>
         </div>
         <div className="h-full w-screen p-4 flex flex-col">
-          <TopMenu lit={isMenuOpen} onToggleClick={handleMenuToggle} />
+          <div className="w-full flex items-center justify-between">
+            <TopMenu lit={isMenuOpen} onToggleClick={handleMenuToggle} />
+            {isIdle && <div className="relative pointer-events-auto" onClick={handleToggleAiWandMode}>{isAiWandMode ? "disabled" : "enable"} ai wand mode</div>}
+          </div>
           {isMenuOpen && <div className="grow relative flex h-px w-full pointer-events-none">
             <Split
               minSize={[200, 0]}
@@ -231,7 +252,9 @@ const renderSideMenuContent = (index: number) => {
       return <Configurator />
     case 3:
       return <Codegen />
-    default:
+    case 4:
       return <Simulator />
+    default:
+      return <Chat />
   }
 }

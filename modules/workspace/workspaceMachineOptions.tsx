@@ -282,7 +282,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
         setCurrentTaskPendingRun: actions.pure((context, _) => {
             if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
 
-            const currentTask = context.parsedTaskOrder[context.currentTaskIndex];
+            const currentTask: TaskInstructions = context.parsedTaskOrder[context.currentTaskIndex];
             const currentTaskCustomId = currentTask.id;
 
             const currentTaskId = getTaskNodeByCustomId(
@@ -310,7 +310,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
             jobTypeSpecific: (context, event) =>
                 validateJobTypeSpecifics(context.jobTypeSpecific, event),
         }),
-        addTaskNode: send((context: WorkspaceContext, event: WorkspaceEvent) => {
+        handleConnectionSuccessTaskNodeAddition: send((context: WorkspaceContext, event: WorkspaceEvent) => {
             const isForwardConnection =
                 context.connectionParams?.handleType === "source";
             const newNodeType = isForwardConnection ? "target" : "source";
@@ -332,6 +332,37 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                 options: {
                     initialCoords,
                     taskType,
+                },
+                edgeDetails: {
+                    newNodeType,
+                    fromHandleId,
+                    fromNodeId,
+                },
+            };
+        }),
+        handleConnectionSuccessAiPromptNodeAddition: send((context: WorkspaceContext, event: WorkspaceEvent) => {
+            const isForwardConnection =
+                context.connectionParams?.handleType === "source";
+            const newNodeType = isForwardConnection ? "target" : "source";
+            const fromHandleId = context.connectionParams?.handleId || "";
+            const fromNodeId = context.connectionParams?.nodeId || "";
+
+            const initialCoords =
+                "initialCoords" in event
+                    ? adjustNewSourceNodeHeight(
+                        event.initialCoords,
+                        200,
+                        isForwardConnection
+                    )
+                    : { x: 0, y: 0 };
+
+            return {
+                type: "ADD_AI_PROMPT_NODE",
+                options: {
+                    initialCoords,
+                    // TODO
+                    // child node id
+                    // parent node id
                 },
                 edgeDetails: {
                     newNodeType,
@@ -799,15 +830,25 @@ const adjustNewSourceNodeHeightByTypeDefault = (
     taskType: TASK_TYPE,
     isForwardConnection: boolean = true
 ) => {
+
+    // TODO - Take account of task type
     const taskNodeDefaultHeight = 144;
 
+    return adjustNewSourceNodeHeight(initialCoords, taskNodeDefaultHeight, isForwardConnection)
+};
+
+const adjustNewSourceNodeHeight = (
+    initialCoords: { x: number; y: number },
+    amount: number,
+    isForwardConnection: boolean = true
+) => {
     return {
         x: initialCoords.x,
         y: isForwardConnection
             ? initialCoords.y
-            : initialCoords.y - taskNodeDefaultHeight,
+            : initialCoords.y - amount,
     };
-};
+}
 
 const validateAddress = (input: string) => ethers.utils.isAddress(input);
 
