@@ -4,15 +4,18 @@ import { sendParent } from "xstate/lib/actions";
 import { XYCoords, NodeContext } from "./node"
 
 export type AiNodeEvent =
-  | { type: "ADD_INCOMING_NODE"; nodeId: string }
-  | { type: "ADD_OUTGOING_NODE"; nodeId: string }
-  | { type: "UPDATE_INCOMING_NODE"; nodeId: string; prevNodeId: string; }
-  | { type: "UPDATE_OUTGOING_NODE"; nodeId: string; prevNodeId: string; }
-  | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
-  | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
-  | { type: "UPDATE_COORDS"; value: XYCoords };
+    | { type: "ADD_INCOMING_NODE"; nodeId: string }
+    | { type: "ADD_OUTGOING_NODE"; nodeId: string }
+    | { type: "UPDATE_INCOMING_NODE"; nodeId: string; prevNodeId: string; }
+    | { type: "UPDATE_OUTGOING_NODE"; nodeId: string; prevNodeId: string; }
+    | { type: "REMOVE_INCOMING_NODE"; nodeId: string }
+    | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
+    | { type: "UPDATE_COORDS"; value: XYCoords }
+    | { type: "SET_PROMPT"; value: string }
+    | { type: "PROCESS_PROMPT" };
 
 export interface AiNodeContext extends NodeContext {
+    prompt: string;
     promptResult: any;
 }
 
@@ -20,6 +23,7 @@ const defaultContext: AiNodeContext = {
     coords: { x: 0, y: 0 },
     incomingNodes: [],
     outgoingNodes: [],
+    prompt: "",
     promptResult: undefined
 };
 
@@ -40,6 +44,16 @@ export const createAiNodeMachine = (
             initial: "idle",
             states: {
                 idle: {
+                    on: {
+                        PROCESS_PROMPT: {
+                            target: "running"
+                        },
+                        SET_PROMPT: {
+                            actions: assign({
+                                prompt: (context, event) => event.value,
+                            })
+                        }
+                    }
                 },
 
                 running: {
@@ -51,7 +65,7 @@ export const createAiNodeMachine = (
                             actions: [
                                 assign((_, event) => ({
                                     promptResult: event.data
-                                }))
+                                })),
                             ]
                         },
                         onError: { target: "error" }
@@ -64,10 +78,13 @@ export const createAiNodeMachine = (
                     ]
                 },
                 success: {
-
+                    entry: ["TODO:successToast", sendParent((context, event) => ({
+                        value: context.promptResult.choices[0].message.content,
+                        type: "HANDLE_AI_PROMPT_COMPLETION"
+                    })),]
                 },
                 error: {
-
+                    entry: ["TODO:errorToast"]
                 },
             },
             on: {
@@ -141,30 +158,30 @@ export const createAiNodeMachine = (
             },
             services: {
                 submitAiPrompt: (context, event) => {
-                    console.log(context)
-                    console.log(event)
-                    //   return fetch("/api/generate", {
-                    //     method: "POST",
-                    //     headers: {
-                    //       'Accept': 'application/json',
-                    //       'Content-Type': 'application/json'
-                    //     },
-                    //     body: JSON.stringify(
-                    //       {
-                    //         // TODO
-                    //       }
-                    //     )
-                    //   })
-                    //     .then(res => res.json().then(json => {
-                    //       return res.ok ? json : {
-                    //         error: json.error.message
-                    //       }
-                    //     }))
-
-                    return Promise.resolve()
+                    return fetch("/api/generate", {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(
+                            {
+                                prompt: context.prompt
+                            }
+                        )
+                    })
+                        .then(res => res.json().then(json => {
+                            console.log(json)
+                            return res.ok ? json : {
+                                error: json.error.message
+                            }
+                        }))
                 },
             },
             guards: {
+                resultHasError: (context, event) => {
+                    return context.promptResult.error
+                },
             }
         },
     );

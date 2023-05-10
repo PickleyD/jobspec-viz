@@ -480,7 +480,7 @@ export const createTaskNodeMachine = (
           return context.incomingNodes.length === 0
         },
         resultHasError: (context, event) => {
-          return context.runResult.error.length > 0
+          return context.runResult.error && context.runResult.error.length > 0
         },
         resultHasPendingSideEffectData: (context, event) => {
           return context.runResult.sideEffectData.length > 0 && context.mock.enabled !== true

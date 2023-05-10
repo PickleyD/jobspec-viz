@@ -110,8 +110,9 @@ export type WorkspaceEvent =
       newNodeType: NEW_NODE_TYPE;
       fromHandleId: string;
       fromNodeId: string;
-    };
-  };
+    }
+  }
+  | { type: "HANDLE_AI_PROMPT_COMPLETION"; value: string };
 
 export interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -281,6 +282,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               },
               CONNECTION_SUCCESS: {
                 actions: ["handleConnectionSuccessAiPromptNodeAddition"],
+              },
+              HANDLE_AI_PROMPT_COMPLETION: {
+                actions: ["handleAiPromptCompletion"]
               }
             }
           },

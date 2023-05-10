@@ -371,6 +371,12 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                 },
             };
         }),
+        handleAiPromptCompletion: assign((context, event) => {
+            console.log("inside handleAiPromptCompletion")
+            console.log(event)
+
+            return {}
+        }),
         processCurrentTask: actions.pure((context: WorkspaceContext, _) => {
             if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
 

@@ -79,6 +79,10 @@ export const AiPromptNode = ({
     });
   };
 
+  const handleSubmit = () => {
+    machine.send("PROCESS_PROMPT")
+  }
+
   return (
     <div className="relative overflow-visible isolate">
       {/* width divisible by grid snap size */}
@@ -129,6 +133,12 @@ export const AiPromptNode = ({
               value={prompt}
               onChange={(newValue) => machine.send("SET_PROMPT", { value: newValue })}
             />
+            <div
+              className="btn btn-outline"
+              onClick={handleSubmit}
+            >
+              Generate
+            </div>
           </div>
         </div>
         {useDefaultHandles && (
