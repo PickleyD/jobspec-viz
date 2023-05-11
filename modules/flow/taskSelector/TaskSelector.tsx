@@ -36,7 +36,7 @@ export type TaskSelectorProps = {
 
 export const TaskSelector = ({ onTaskSelected, value }: TaskSelectorProps) => {
 
-    return <div className="flex flex-col gap-4 p-4 w-60 bg-base-100 rounded-lg">
+    return <div className="flex flex-col gap-4 p-4 w-60 bg-background rounded-lg">
         {
             categories.map((category, catIndex) => <section key={`cat_${catIndex}`} className="flex flex-col align-start gap-2">
                 <p className="whitespace-nowrap text-xs underline text-gray-500">{category.name}</p>

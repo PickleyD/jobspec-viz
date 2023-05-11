@@ -155,7 +155,7 @@ export const Configurator = () => {
         </div>
       </div>
 
-      <div className="bg-base-300 p-2 rounded-lg mt-6 max-w-xl">
+      <div className="bg-muted p-2 rounded-lg mt-6 max-w-xl">
         <div className="form-control w-full max-w-xs">
           <FieldLabel name="Job Type" />
           <select
@@ -175,13 +175,13 @@ export const Configurator = () => {
 
         <TaskConfigTabs
           config={
-            <div className="flex flex-col gap-2 p-4 bg-base-100 h-full w-full">
+            <div className="flex flex-col gap-2 p-4 bg-background h-full w-full">
               {
                 renderJobTypeSpecificFields(jobType)
               }
             </div>
           }
-          test={<div className="bg-base-100 p-4 h-full w-full">
+          test={<div className="bg-background p-4 h-full w-full">
             {
               renderJobTypeSpecificVariableSetters(jobType, { disabled })
             }

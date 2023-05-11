@@ -56,15 +56,15 @@ export const ImportModal = () => {
                     leaveFrom="opacity-100 scale-100"
                     leaveTo="opacity-0 scale-95"
                 >
-                    <div className="flex flex-col gap-4 max-w-md border border-gray-700 p-4 transition-all transform bg-base-100 shadow-lg rounded-lg relative">
-                        <div className="bg-noise opacity-25 absolute inset-0 rounded-lg pointer-events-none"/>
+                    <div className="flex flex-col gap-4 max-w-md border border-gray-700 p-4 transition-all transform bg-background shadow-lg rounded-lg relative">
+                        <div className="bg-noise opacity-[.15] absolute inset-0 rounded-lg pointer-events-none"/>
                         <Dialog.Title
                             as="h3"
                             className="uppercase text-sm font-bold tracking-wider text-gray-400"
                         >
                             Import Job Spec
                         </Dialog.Title>
-                        <div className="flex flex-col bg-base-100">
+                        <div className="flex flex-col bg-background">
                             <TextArea
                                 textAreaClassName="h-96 w-full"
                                 placeholder="Paste your job spec here"

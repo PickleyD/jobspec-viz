@@ -40,7 +40,7 @@ export const SideEffectPrompt = () => {
 
     return <div className="w-full text-xs flex flex-col gap-2">
         <h4>This task would typically execute an <span className="text-secondary">ETH Call</span> with the following parameters:</h4>
-        <li className="list-none w-full overflow-x-scroll bg-base-300 flex flex-col gap-1 p-2">
+        <li className="list-none w-full overflow-x-scroll bg-muted flex flex-col gap-1 p-2">
             {
                 Object.keys(sideEffectJson).map(key => <ul>
                     <p className="flex gap-1">
@@ -52,9 +52,9 @@ export const SideEffectPrompt = () => {
             }
         </li>
         <div className="flex flex-col w-full">
-            <button className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-700 hover:text-black" onClick={handleMakeCall}>Run and Overwrite the Stored Mock Response</button>
+            <button className="border-2 hover:border-foreground focus:border-foreground rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-700 hover:text-black" onClick={handleMakeCall}>Run and Overwrite the Stored Mock Response</button>
             <div className="divider">OR</div>
-            <button className="border-2 border-secondary hover:border-white focus:border-white rounded-full p-2 flex flex-row items-center justify-center text-secondary" onClick={handleSkipCall}>Skip and Use Currently Stored Mock Response</button>
+            <button className="border-2 border-secondary hover:border-foreground focus:border-foreground rounded-full p-2 flex flex-row items-center justify-center text-secondary" onClick={handleSkipCall}>Skip and Use Currently Stored Mock Response</button>
         </div>
         <h4>Stored Mock Response</h4>
         <TextArea

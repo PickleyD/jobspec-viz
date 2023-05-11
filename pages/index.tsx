@@ -73,7 +73,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="h-screen w-screen relative overflow-hidden">
-      <div className="absolute bg-gradient-to-tr from-base-200 to-base-300 min-h-[1200px] min-w-[1200px] h-full w-full" />
+      <div className="absolute bg-gradient-to-tl from-background to-muted min-h-[1200px] min-w-[1200px] h-full w-full" />
       <Head>
         <title>LINKIT</title>
         <meta
@@ -85,7 +85,7 @@ const Home: NextPage = () => {
       <ImportModal />
       {/* {newProjectHeroDisplayed && (
         <div className="absolute z-50 h-full w-full pointer-events-auto backdrop-blur-sm flex items-center justify-center p-8">
-          <div className="bg-base-100 relative shadow-widget h-full w-full max-w-[800px] max-h-[500px] rounded-lg flex flex-col items-start justify-start gap-8">
+          <div className="bg-background relative shadow-widget h-full w-full max-w-[800px] max-h-[500px] rounded-lg flex flex-col items-start justify-start gap-8">
             <div className="absolute top-4 right-4 h-96 w-96 z-10">
               <div className="relative h-96 w-96">
                 <Image src="/blob.svg" layout="fill" />
@@ -157,8 +157,8 @@ const Home: NextPage = () => {
         <div className="w-full h-full fixed z-0">
           <Flow />
         </div>
-        <div className="visible md:invisible fixed grid items-center justify-center h-full w-full z-50 pointer-events-auto bg-base-100">
-          <div className="rounded-lg bg-base-300 p-8 flex flex-col gap-4 relative pointer-events-auto w-80">
+        <div className="visible md:invisible fixed grid items-center justify-center h-full w-full z-50 pointer-events-auto bg-background">
+          <div className="rounded-lg bg-muted p-8 flex flex-col gap-4 relative pointer-events-auto w-80">
             <div className="relative h-20 w-[141px]">
               <Image src="/linkit.svg" alt="linkit logo" layout="fill" />
             </div>
@@ -189,12 +189,12 @@ const Home: NextPage = () => {
                 return gutter
               }}>
               <div className="relative pointer-events-auto">
-                <div className="grow relative flex h-full w-full border border-neutral rounded-bl-lg">
-                  <div className="rounded-bl-lg absolute bg-base-300 inset-0 overflow-hidden">
-                    <div className="w-screen h-screen absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent" />
-                    <div className="w-screen h-screen absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40" />
+                <div className="grow relative flex h-full w-full border border-accent rounded-bl-lg">
+                  <div className="rounded-bl-lg absolute bg-card inset-0 overflow-hidden">
+                    <div className="w-screen h-screen absolute bg-gradient-to-t from-card via-muted/20 to-transparent" />
+                    <div className="w-screen h-screen absolute bg-gradient-to-br from-card to-muted/50" />
                   </div>
-                  <div className="absolute bg-noise opacity-20 inset-0" />
+                  <div className="absolute bg-noise opacity-[.15] inset-0" />
                   <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
                   <div className="h-full overflow-auto relative">
                     <div className="w-max relative min-h-full">

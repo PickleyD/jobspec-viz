@@ -31,7 +31,7 @@ export const ExpanderPanel = ({ className = "", children, icon: Icon = CodeBrack
       <motion.div
         className={`${isLeft ? "pl-2 rounded-tl-[32px]" : "pr-2 rounded-tr-[32px]"}
         ${isOpen ? "pointer-events-auto" : "pointer-events-none"}
-         overflow-hidden border-2 border-gray-500 relative z-0 bg-base-100 rounded-lg`}
+         overflow-hidden border-2 border-gray-500 relative z-0 bg-background rounded-lg`}
         layout="size"
         animate={{
           height: isOpen ? "auto" : "48px",

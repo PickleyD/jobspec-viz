@@ -93,8 +93,6 @@ export const Flow = ({ className }: FlowProps) => {
     edgesSelector
   );
 
-  console.log(edgesFromMachine)
-
   const reactFlowInstance = useSelector(
     globalServices.workspaceService,
     reactFlowInstanceSelector

@@ -211,13 +211,13 @@ export const TaskNode = ({
   return (
     <div className="relative overflow-visible isolate">
       {/* width divisible by grid snap size */}
-      <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-lg ring ring-neutral/60 w-[300px]">
+      <div className="bg-popover flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-lg ring ring-accent/60 w-[300px]">
         {(isPendingRun || isPendingSideEffect) && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
           <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-light via-secondary via-secondary-dark via-secondary to-secondary-light"></div>
         </div>
         }
         {(isRunning || isRunningSideEffect) && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
-          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-base-100 to-secondary"></div>
+          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-background to-secondary"></div>
         </div>
         }
         {isSuccess && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
@@ -228,10 +228,12 @@ export const TaskNode = ({
           <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-error-light via-error via-error-dark via-error to-error-light"></div>
         </div>
         }
-        <div className="relative w-full h-full p-3 bg-base-100 rounded-md z-10">
-          <div className="inset-0 absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent rounded-md" />
-          <div className="inset-0 absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40 rounded-md" />
-          <div className="absolute bg-noise opacity-20 inset-0 rounded-md" />
+        <div className="relative w-full h-full p-3 bg-background rounded-md z-10">
+          {/* <div className="inset-0 absolute bg-gradient-to-t from-background via-foreground/[.02] to-foreground/[.03] rounded-md" />
+          <div className="inset-0 absolute bg-gradient-to-br from-background via-transparent to-transparent rounded-md" /> */}
+          <div className="inset-0 absolute bg-gradient-radial-top from-foreground/5 to-transarent rounded-md" />
+          <div className="inset-0 absolute bg-gradient-radial-bottom from-foreground/5 to-transparent rounded-md" />
+          <div className="absolute bg-noise opacity-[.15] inset-0 rounded-md" />
           {deletable &&
             <div
               onClick={handleDeleteNode}
@@ -242,7 +244,7 @@ export const TaskNode = ({
           }
           {testMode &&
             <div className="absolute inset-0 transparent z-20">
-              <div className="absolute inset-0 bg-base-100 opacity-20 rounded-lg" />
+              <div className="absolute inset-0 bg-background opacity-20 rounded-lg" />
 
               {/* {
                 isPendingRun && <div className="relative w-full h-full p-6 flex items-end justify-center">
@@ -291,7 +293,7 @@ export const TaskNode = ({
               <div className="relative flex flex-col items-center">
                 <Popover label={(open) => <label
                   tabIndex={0}
-                  className={`border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+                  className={`border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
                 >
                   <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
                   <XMarkIcon className="swap-on h-4 w-4 text-white" />

@@ -6,13 +6,14 @@ import empty from "../../examples/empty.json";
 import ethCall from "../../examples/ethcall.json";
 import getUint256 from "../../examples/getUint256.json";
 import median from "../../examples/median.json";
+import { Button } from "@/components/ui/button";
 
 export interface ExamplesProps {
     className?: string;
 }
 
 const reactFlowInstanceSelector = (state: any) =>
-  state.context.reactFlowInstance;
+    state.context.reactFlowInstance;
 
 export const Examples = ({ className = "" }: ExamplesProps) => {
     const globalServices = useContext(GlobalStateContext);
@@ -47,27 +48,23 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                 </Tooltip>
             </div>
             <div className="flex flex-col">
-                <div
-                    className="btn btn-outline"
+                <Button variant="ghost"
                     onClick={() => handleRehydrate(empty)}
                 >
                     Empty Project
-                </div>
+                </Button>
                 <div className="divider divider-horizontal"></div>
-                <div
-                    className="btn btn-outline"
+                <Button variant="ghost"
                     onClick={() => handleRehydrate(ethCall)}
-                >{`ETH Call`}</div>
+                >{`ETH Call`}</Button>
                 <div className="divider divider-horizontal"></div>
-                <div
-                    className="btn btn-outline"
+                <Button variant="ghost"
                     onClick={() => handleRehydrate(getUint256)}
-                >{`Get -> Uint256`}</div>
+                >{`Get -> Uint256`}</Button>
                 <div className="divider divider-horizontal"></div>
-                <div
-                    className="btn btn-outline"
+                <Button variant="ghost"
                     onClick={() => handleRehydrate(median)}
-                >{`Median Answer`}</div>
+                >{`Median Answer`}</Button>
             </div>
         </>
     );

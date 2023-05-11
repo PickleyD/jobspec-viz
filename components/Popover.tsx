@@ -32,10 +32,10 @@ export const Popover = ({ className = "", content, label, placement = "bottom" }
                 ${placement === "bottom" ? "items-center" : ""}
                 ${placement === "bottom-end" ? "items-end" : ""}
                 `}>
-                    <svg width="24" height="10" viewBox="0 0 10 10" className="fill-secondary">
+                    <svg width="24" height="10" viewBox="0 0 10 10" className="fill-border">
                     <polygon points="0,10 5,5 10,10" />
                     </svg>
-                    <div className={`bg-base-300 rounded-lg border border-secondary`}>
+                    <div className={`bg-popover rounded-lg border`}>
                         {content}
                     </div>
                 </HeadlessPopover.Panel>

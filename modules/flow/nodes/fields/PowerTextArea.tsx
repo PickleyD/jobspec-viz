@@ -106,7 +106,7 @@ export const PowerTextArea = ({
             label={(open) => (
               <label
                 tabIndex={0}
-                className={`border-gray-700 focus:border hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""
+                className={`border-gray-700 focus:border hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""
                   }`}
               >
                 <BoltIcon className="swap-off h-4 w-4 text-white" />

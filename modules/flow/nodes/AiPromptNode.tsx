@@ -86,13 +86,13 @@ export const AiPromptNode = ({
   return (
     <div className="relative overflow-visible isolate">
       {/* width divisible by grid snap size */}
-      <div className="bg-base-100 flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-lg ring ring-neutral/60 w-[300px]">
+      <div className="bg-background flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-lg ring ring-accent/60 w-[300px]">
         {isIdle && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
           <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-light via-secondary via-secondary-dark via-secondary to-secondary-light"></div>
         </div>
         }
         {isRunning && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
-          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-base-100 to-secondary"></div>
+          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-background to-secondary"></div>
         </div>
         }
         {isSuccess && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
@@ -103,10 +103,10 @@ export const AiPromptNode = ({
           <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-error-light via-error via-error-dark via-error to-error-light"></div>
         </div>
         }
-        <div className="relative w-full h-full p-3 bg-base-100 rounded-md z-10">
-          <div className="inset-0 absolute bg-gradient-to-t from-base-100 via-base-200/20 to-transparent rounded-md" />
-          <div className="inset-0 absolute bg-gradient-to-br from-base-100 via-base-200/50 to-base-300/40 rounded-md" />
-          <div className="absolute bg-noise opacity-20 inset-0 rounded-md" />
+        <div className="relative w-full h-full p-3 bg-background rounded-md z-10">
+          <div className="inset-0 absolute bg-gradient-to-t from-background via-muted/20 to-transparent rounded-md" />
+          <div className="inset-0 absolute bg-gradient-to-br from-background via-muted/50 to-muted-foreground/40 rounded-md" />
+          <div className="absolute bg-noise opacity-[.15] inset-0 rounded-md" />
           <div
             onClick={handleDeleteNode}
             className="z-30 absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
