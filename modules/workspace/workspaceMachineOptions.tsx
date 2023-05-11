@@ -1,6 +1,6 @@
-import { MachineOptions, assign, send, actions } from "xstate";
-import { WorkspaceContext, WorkspaceEvent, JOB_TYPES, TomlLine, TaskInstructions } from "./workspaceMachine"
-import { TASK_TYPE } from "./taskNodeMachine"
+import { MachineOptions, assign, send, actions, spawn } from "xstate";
+import { WorkspaceContext, WorkspaceEvent, JOB_TYPES, TomlLine, TaskInstructions, Nodes, Edges } from "./workspaceMachine"
+import { createTaskNodeMachine, TASK_TYPE } from "./taskNodeMachine"
 import toml from "toml"
 import { fromDot, NodeRef, attribute as _ } from "ts-graphviz"
 import { toast } from "react-hot-toast"
@@ -155,71 +155,12 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                     warnings.push("'observationSource' property missing")
                 }
                 else {
-                    const input = `digraph {\n${parsed.observationSource}\n}`
-                    const parsedObservationSrc = fromDot(input)
+                    const { nodes, edges } = constructTaskNodesAndEdgesFromObsSrc(context.nodes, context.edges, parsed.observationSource)
 
-                    const nodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
-                        return {
-                            ...node,
-                            computedId: `task_${index}`
-                        }
-                    })
-
-                    constructedMachineContext.edges = parsedObservationSrc.edges.map((edge, index) => {
-
-                        const sourceCustomId: string = (edge.targets[0] as NodeRef).id
-                        const targetCustomId: string = (edge.targets[1] as NodeRef).id
-                        const sourceWithComputedId = nodesWithComputedIds.find(entry => entry.id === sourceCustomId)
-                        const targetWithComputedId = nodesWithComputedIds.find(entry => entry.id === targetCustomId)
-
-                        return {
-                            id: `edge_${index}`,
-                            source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
-                            sourceCustomId: sourceCustomId,
-                            target: targetWithComputedId ? targetWithComputedId.computedId : "",
-                            targetCustomId: targetCustomId
-                        }
-                    })
-
-                    constructedMachineContext.totalNodesAdded = parsedObservationSrc.nodes.length
-                    constructedMachineContext.totalEdgesAdded = parsedObservationSrc.edges.length
-
-                    constructedMachineContext.nodes = {
-                        // @ts-ignore
-                        tasks: nodesWithComputedIds.map((node, index) => {
-
-                            // @ts-ignore
-                            const taskSpecificNodeAttrs = node.attributes.values.filter(val => val[0] !== "type")
-
-                            return {
-                                ref: {
-                                    id: node.computedId
-                                },
-                                context: {
-                                    customId: node.id,
-                                    coords: {
-                                        x: 0, // TODO
-                                        y: 0 // TODO
-                                    },
-                                    // @ts-ignore
-                                    taskType: node.attributes.get("type")?.toString().toUpperCase(),
-                                    incomingNodes: [], // TODO
-                                    outgoingNodes: [], // TODO
-                                    taskSpecific: taskSpecificNodeAttrs.reduce((acc, [key, value]) => {
-                                        // @ts-ignore
-                                        acc[key] = { raw: value, rich: value }; // TODO - format the 'rich' prop
-                                        return acc;
-                                    }, {}),
-                                    mock: {
-                                        mockResponseDataInput: "",
-                                        mockResponseData: "",
-                                        enabled: false
-                                    },
-                                    isValid: true
-                                }
-                            }
-                        })
-                    }
+                    constructedMachineContext.nodes = { tasks: nodes, ai: [] }
+                    constructedMachineContext.edges = edges
+                    constructedMachineContext.totalNodesAdded = nodes.length
+                    constructedMachineContext.totalEdgesAdded = edges.length
                 }
 
                 return Promise.resolve({ constructedMachineContext, warnings })
@@ -372,10 +313,76 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
             };
         }),
         handleAiPromptCompletion: assign((context, event) => {
-            console.log("inside handleAiPromptCompletion")
-            console.log(event)
+            if (!("value" in event)) {
+                console.error("'value' required on event")
+                return {}
+            }
 
-            return {}
+            if (!("aiNodeId" in event)) {
+                console.error("'aiNodeId' required on event")
+                return {}
+            }
+
+            let constructedMachineContext: Partial<WorkspaceContext> = {}
+
+            const { nodes, edges } = constructTaskNodesAndEdgesFromObsSrc(context.nodes, context.edges, event.value)
+
+            // Take position, incomingNodes, outgoingNodes info from AI node to be replaced
+            const aiNodeToReplace = context.nodes.ai.find(aiNode => aiNode.ref.id === event.aiNodeId)
+
+            let newNodes = nodes
+            if (aiNodeToReplace && newNodes.length > 0) {
+                const { coords, incomingNodes, outgoingNodes } = aiNodeToReplace.ref.state.context
+
+                // Replace position of new nodes with old AI node position
+                newNodes.forEach(node => node.ref.state.context.coords = coords)
+
+                // Replace incomingNodes of first generated node with those from AI node
+                newNodes[0].ref.state.context.incomingNodes = incomingNodes
+
+                // Replace outgoingNodes of last generated node with those from AI node
+                newNodes[newNodes.length - 1].ref.state.context.outgoingNodes = outgoingNodes
+            }
+
+            const totalTaskNodes = [...context.nodes.tasks, ...newNodes]
+
+            let totalEdges = [...context.edges, ...edges]
+            if (aiNodeToReplace && newNodes.length > 0) {
+                totalEdges = totalEdges.map(edge => {
+
+                    let result = edge
+
+                    // Replace instances of the AI node in edge sources with the last new node
+                    if (edge.source === aiNodeToReplace.ref.id) {
+
+                        const lastNewNode = newNodes[newNodes.length - 1]
+
+                        result.source = lastNewNode.ref.id
+                        result.sourceCustomId = lastNewNode.ref.state.context.customId || ""
+                    }
+
+                    // Replace instances of the AI node in edge targets with the first new node
+                    if (edge.target === aiNodeToReplace.ref.id) {
+
+                        const firstNewNode = newNodes[0]
+
+                        result.target = firstNewNode.ref.id
+                        result.targetCustomId = firstNewNode.ref.state.context.customId || ""
+                    }
+
+                    return result
+                })
+            }
+
+            // Remove AI node
+            const newAiNodes = [ ...context.nodes.ai.filter(aiNode => aiNode.ref.id !== aiNodeToReplace?.ref.id) ]
+
+            constructedMachineContext.nodes = { ...context.nodes, ai: newAiNodes, tasks: totalTaskNodes }
+            constructedMachineContext.edges = totalEdges
+            constructedMachineContext.totalNodesAdded = context.totalNodesAdded + nodes.length
+            constructedMachineContext.totalEdgesAdded = context.totalEdgesAdded + edges.length
+
+            return { ...constructedMachineContext }
         }),
         processCurrentTask: actions.pure((context: WorkspaceContext, _) => {
             if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
@@ -893,4 +900,74 @@ const getProvider = (network = "") => {
         // TODO: Add more services
         alchemy: process.env.NEXT_PUBLIC_ALCHEMY_ID
     })
+}
+
+const constructTaskNodesAndEdgesFromObsSrc = (currNodes: Nodes, currEdges: Edges, obsSrc: string) => {
+    const input = `digraph {\n${obsSrc}\n}`
+    const parsedObservationSrc = fromDot(input)
+
+    const currNumTaskNodes = currNodes.tasks.length
+
+    const nodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
+        return {
+            ...node,
+            computedId: `task_${index + currNumTaskNodes}`
+        }
+    })
+
+    const edges = parsedObservationSrc.edges.map((edge, index) => {
+
+        const sourceCustomId: string = (edge.targets[0] as NodeRef).id
+        const targetCustomId: string = (edge.targets[1] as NodeRef).id
+        const sourceWithComputedId = nodesWithComputedIds.find(entry => entry.id === sourceCustomId)
+        const targetWithComputedId = nodesWithComputedIds.find(entry => entry.id === targetCustomId)
+
+        return {
+            id: `edge_${index}`,
+            source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
+            sourceCustomId: sourceCustomId,
+            target: targetWithComputedId ? targetWithComputedId.computedId : "",
+            targetCustomId: targetCustomId
+        }
+    })
+
+
+    const nodes = nodesWithComputedIds.map((node, index) => {
+
+        // @ts-ignore
+        const taskSpecificNodeAttrs = node.attributes.values.filter(val => val[0] !== "type")
+
+        let nodeContext = {
+            customId: node.id,
+            coords: {
+                x: 0, // TODO
+                y: 0 // TODO
+            },
+            // @ts-ignore
+            taskType: node.attributes.get("type")?.toString().toUpperCase(),
+            incomingNodes: [], // TODO
+            outgoingNodes: [], // TODO
+            taskSpecific: taskSpecificNodeAttrs.reduce((acc: any, [key, value]) => {
+                // @ts-ignore
+                acc[key] = { raw: value, rich: value }; // TODO - format the 'rich' prop
+                return acc;
+            }, {}),
+            mock: {
+                mockResponseDataInput: "",
+                mockResponseData: "",
+                enabled: false
+            },
+            isValid: true
+        }
+
+        return {
+            ref: spawn(
+                // @ts-ignore
+                createTaskNodeMachine(nodeContext),
+                node.computedId
+            )
+        }
+    })
+
+    return { nodes, edges }
 }

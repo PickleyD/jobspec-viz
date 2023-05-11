@@ -1,5 +1,4 @@
-import { ethers } from "ethers";
-import { createMachine, assign, send, actions } from "xstate";
+import { createMachine, assign } from "xstate";
 import { sendParent } from "xstate/lib/actions";
 import { XYCoords, NodeContext } from "./node"
 
@@ -15,11 +14,13 @@ export type AiNodeEvent =
     | { type: "PROCESS_PROMPT" };
 
 export interface AiNodeContext extends NodeContext {
+    id: string;
     prompt: string;
     promptResult: any;
 }
 
 const defaultContext: AiNodeContext = {
+    id: "aiPrompt-0",
     coords: { x: 0, y: 0 },
     incomingNodes: [],
     outgoingNodes: [],
@@ -80,8 +81,11 @@ export const createAiNodeMachine = (
                 success: {
                     entry: ["TODO:successToast", sendParent((context, event) => ({
                         value: context.promptResult.choices[0].message.content,
+                        parentNodes: context.incomingNodes,
+                        childNodes: context.outgoingNodes,
+                        aiNodeId: context.id,
                         type: "HANDLE_AI_PROMPT_COMPLETION"
-                    })),]
+                    }))]
                 },
                 error: {
                     entry: ["TODO:errorToast"]

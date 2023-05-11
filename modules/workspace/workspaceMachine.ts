@@ -35,6 +35,8 @@ import { AiNodeContext, AiNodeEvent, createAiNodeMachine } from "./aiNodeMachine
 type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
 
+export type Edges = Array<CustomEdge>
+
 export type WorkspaceEvent =
   | {
     type: "SET_REACT_FLOW_INSTANCE";
@@ -112,7 +114,7 @@ export type WorkspaceEvent =
       fromNodeId: string;
     }
   }
-  | { type: "HANDLE_AI_PROMPT_COMPLETION"; value: string };
+  | { type: "HANDLE_AI_PROMPT_COMPLETION", value: string, parentNodes: Array<string>, childNodes: Array<string>, aiNodeId: string  };
 
 export interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
@@ -122,7 +124,7 @@ export interface WorkspaceContext {
   gasLimit: string;
   maxTaskDuration: string;
   forwardingAllowed: boolean;
-  edges: CustomEdge[];
+  edges: Edges;
   nodes: Nodes;
   jobTypeSpecific: JobTypeFieldMap;
   jobTypeVariables: JobTypeVarFieldMap;
@@ -186,7 +188,7 @@ type Result = {
   vars: { [key: string]: any };
 };
 
-type Nodes = {
+export type Nodes = {
   tasks: Array<{
     ref: ActorRefFrom<StateMachine<TaskNodeContext, any, TaskNodeEvent>>;
   }>;
@@ -728,6 +730,7 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                     // add a new aiNodeMachine actor with a unique name
                     ref: spawn(
                       createAiNodeMachine({
+                        id: newNodeId,
                         coords: event.options.initialCoords,
                         ...(!isFirstNode &&
                           (isForwardConnection
