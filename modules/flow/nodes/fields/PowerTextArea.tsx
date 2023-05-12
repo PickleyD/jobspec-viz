@@ -1,5 +1,5 @@
 import { useSelector } from "@xstate/react";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useId } from "react";
 import { GlobalStateContext } from "../../../../context/GlobalStateContext";
 import pipelineVarsData from "../../../../data/jobTypeSpecificPipelineVars.json";
 import { JOB_TYPE } from "../../../workspace/workspaceMachine";
@@ -82,31 +82,34 @@ export const PowerTextArea = ({
 
   const [showRich, setShowRich] = useState<boolean>(true)
 
+  const fieldId = useId()
+
   return (
     <div className={`${className} form-control w-full max-w-xs`}>
-      <FieldLabel name={label} optional />
+      <FieldLabel htmlFor={fieldId} name={label} optional />
       <div className="relative">
         <div className="grid grid-cols-1 grid-rows-1">
-            <ContentEditable
-              html={value.raw || ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onFocus={handleFocus}
-              onPaste={handlePaste}
-              className="row-span-full col-span-full textarea textarea-bordered h-full w-full pr-8"
-            />
-            <ContentEditable
-              html={value.rich || `<div class="text-gray-300">${placeholder}</div>`}
-              onChange={() => { }}
-              className={`${showRich ? "" : "invisible"} row-span-full col-span-full textarea textarea-bordered pr-8 pointer-events-none`}
-            />
+          <ContentEditable
+            id={fieldId}
+            html={value.raw || ""}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+            onPaste={handlePaste}
+            className="row-span-full col-span-full textarea textarea-bordered h-full w-full pr-8"
+          />
+          <ContentEditable
+            html={value.rich || `<div class="text-gray-300">${placeholder}</div>`}
+            onChange={() => { }}
+            className={`${showRich ? "" : "invisible"} row-span-full col-span-full textarea textarea-bordered pr-8 pointer-events-none`}
+          />
         </div>
         <div className="absolute right-1 bottom-1">
           <Popover
             label={(open) => (
               <label
                 tabIndex={0}
-                className={`border-gray-700 focus:border hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""
+                className={`focus:border hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""
                   }`}
               >
                 <BoltIcon className="swap-off h-4 w-4 text-white" />

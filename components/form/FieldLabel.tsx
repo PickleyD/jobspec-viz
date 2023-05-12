@@ -1,14 +1,19 @@
-interface FieldLabelProps {
+import { Label } from "../ui/label";
+
+interface FieldLabelProps extends React.ComponentProps<typeof Label> {
     name: string;
     optional?: boolean;
 }
 
 export const FieldLabel = ({
     name = "",
-    optional = false
+    optional = false,
+    ...rest
 }: FieldLabelProps) => {
-    return <label className="label">
-        <span className="label-text text-xs whitespace-nowrap capitalize">{name}</span>
-        { optional && <span className="label-text-alt text-[10px] text-gray-300 italic">optional</span> }
-    </label>
+    return <Label {...rest}>
+        <div className="flex items-center justify-between mb-1 mt-3">
+            <span>{name}</span>
+            {optional && <span className="font-light italic text-[.8em]">optional</span>}
+        </div>
+    </Label>
 }
