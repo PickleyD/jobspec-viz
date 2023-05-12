@@ -1,5 +1,5 @@
 import { Handle, NodeProps, Position } from "reactflow";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useId, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
@@ -7,7 +7,7 @@ import { Squares2X2Icon, XMarkIcon, PlayIcon } from "@heroicons/react/24/outline
 import { TASK_TYPE } from "../../workspace/taskNodeMachine";
 import { XYCoords } from "../../workspace/node";
 import { TaskSelector } from "../taskSelector/TaskSelector";
-import { Popover } from "../../../components";
+import { FieldLabel, Popover } from "../../../components";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -208,6 +208,8 @@ export const TaskNode = ({
     isConnecting && setHasDraggedFromHandle(true)
   }, [isConnecting])
 
+  const taskIdFieldId = useId()
+
   return (
     <div className="relative overflow-visible isolate">
       {/* width divisible by grid snap size */}
@@ -302,15 +304,16 @@ export const TaskNode = ({
               </div>
             </div>
             <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text text-xs">Task ID</span>
+              <div className="flex items-end justify-between">
+                <FieldLabel name="Task ID" htmlFor={taskIdFieldId} />
                 {customIdError && (
-                  <span className="text-error label-text-alt text-xs">
+                  <span className="text-error label-text-alt text-xs mb-[2px]">
                     Not unique
                   </span>
                 )}
-              </label>
+              </div>
               <input
+                id={taskIdFieldId}
                 value={tempCustomId}
                 onChange={handleCustomIdChange}
                 type="text"

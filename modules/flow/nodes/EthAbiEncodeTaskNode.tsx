@@ -3,6 +3,8 @@ import { NodeProps } from "reactflow";
 import React from "react";
 import { useSelector } from "@xstate/react";
 import { PowerTextArea, TextArea, TaskConfigTabs } from "./fields";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const abiSelector = (state: any) => state.context.taskSpecific.abi;
@@ -59,14 +61,12 @@ export const EthAbiEncodeTaskNode = (nodeProps: NodeProps) => {
         </>
         }
         test={<>
-          <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className={`label-text ${enabledMock ? "" : "text-gray-500"}`}>Mock response</span>
-              <input type="checkbox" checked={enabledMock} className="toggle toggle-secondary" onChange={handleToggleMockEnabled} />
-            </label>
+          <div className="flex items-center gap-2 mb-2 mt-3">
+            <Switch id="enable-mock" checked={enabledMock} onCheckedChange={handleToggleMockEnabled} />
+            <Label htmlFor="enable-mock">Enable Mock Response</Label>
           </div>
           <TextArea
-          displayJsonValidity
+            displayJsonValidity
             disabled={!enabledMock}
             textAreaClassName="h-48"
             placeholder="Provide a mock response to test the rest of your pipeline with"
