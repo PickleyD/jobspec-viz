@@ -1344,6 +1344,15 @@
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-slot" "1.0.1"
 
+"@radix-ui/react-progress@^1.0.2":
+  "integrity" "sha512-c16RVM43ct2koRcMmPw4b47JWFNs89qe5p4Um9dwoPs0yi+d7It1MJ35EpsX+93o31Mqdwe4vQyu0SrHrygdCg=="
+  "resolved" "https://registry.npmjs.org/@radix-ui/react-progress/-/react-progress-1.0.2.tgz"
+  "version" "1.0.2"
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-context" "1.0.0"
+    "@radix-ui/react-primitive" "1.0.2"
+
 "@radix-ui/react-roving-focus@1.0.3":
   "integrity" "sha512-stjCkIoMe6h+1fWtXlA6cRfikdBzCLp3SnVk7c48cv/uy3DTGoXhN76YaOYUJuy3aEDvDIKwKR5KSmvrtPvQPQ=="
   "resolved" "https://registry.npmjs.org/@radix-ui/react-roving-focus/-/react-roving-focus-1.0.3.tgz"
@@ -1418,7 +1427,7 @@
     "@radix-ui/react-use-previous" "1.0.0"
     "@radix-ui/react-use-size" "1.0.0"
 
-"@radix-ui/react-tabs@^1.0.2":
+"@radix-ui/react-tabs@^1.0.2", "@radix-ui/react-tabs@^1.0.3":
   "integrity" "sha512-4CkF/Rx1GcrusI/JZ1Rvyx4okGUs6wEenWA0RG/N+CwkRhTy7t54y7BLsWUXrAz/GRbBfHQg/Odfs/RoW0CiRA=="
   "resolved" "https://registry.npmjs.org/@radix-ui/react-tabs/-/react-tabs-1.0.3.tgz"
   "version" "1.0.3"

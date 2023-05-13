@@ -84,6 +84,8 @@ export const PowerTextArea = ({
 
   const fieldId = useId()
 
+  const textAreaClasses = 'h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+
   return (
     <div className={`${className} flex flex-col w-full max-w-xs`}>
       <FieldLabel htmlFor={fieldId} name={label} optional />
@@ -96,12 +98,12 @@ export const PowerTextArea = ({
             onBlur={handleBlur}
             onFocus={handleFocus}
             onPaste={handlePaste}
-            className="row-span-full col-span-full textarea textarea-bordered h-full w-full pr-8"
+            className={`${textAreaClasses} row-span-full col-span-full h-full w-full pr-8`}
           />
           <ContentEditable
             html={value.rich || `<div class="text-gray-300">${placeholder}</div>`}
             onChange={() => { }}
-            className={`${showRich ? "" : "invisible"} row-span-full col-span-full textarea textarea-bordered pr-8 pointer-events-none`}
+            className={`${textAreaClasses} ${showRich ? "" : "invisible"} h-full row-span-full col-span-full pr-8 pointer-events-none`}
           />
         </div>
         <div className="absolute right-1 bottom-1">
@@ -109,7 +111,7 @@ export const PowerTextArea = ({
             label={(open) => (
               <label
                 tabIndex={0}
-                className={`focus:border hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""
+                className={`rounded-full focus:border hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 swap swap-rotate ${open ? "swap-active" : ""
                   }`}
               >
                 <BoltIcon className="swap-off h-4 w-4 text-white" />

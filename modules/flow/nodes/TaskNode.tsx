@@ -8,6 +8,7 @@ import { TASK_TYPE } from "../../workspace/taskNodeMachine";
 import { XYCoords } from "../../workspace/node";
 import { TaskSelector } from "../taskSelector/TaskSelector";
 import { FieldLabel, Popover } from "../../../components";
+import { Input } from "@/components/ui/input";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -312,14 +313,13 @@ export const TaskNode = ({
                   </span>
                 )}
               </div>
-              <input
+              <Input
                 id={taskIdFieldId}
                 value={tempCustomId}
                 onChange={handleCustomIdChange}
                 type="text"
                 placeholder="Give the task a unique ID"
-                className={`${customIdError ? "input-error" : ""
-                  } input input-bordered w-full max-w-xs`}
+                className={`w-full max-w-xs`}
               />
             </div>
             {children}

@@ -3,6 +3,7 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { useState, useEffect, useContext } from "react"
 import { FieldLabel } from "../../../components";
+import { Input } from "@/components/ui/input";
 
 const cronValueSelector = (state: any) => state.context.jobTypeSpecific.cron.schedule.value;
 
@@ -52,10 +53,10 @@ export const CronFields = ({ className = "" }: CronFieldsProps) => {
 
   return <div className={`${className} flex flex-col w-full max-w-xs`}>
     <FieldLabel name="CRON Schedule" />
-    <input
+    <Input
       type="text"
       placeholder=""
-      className="input input-bordered input-sm w-full max-w-xs"
+      className="w-full max-w-xs"
       value={cron}
       onChange={(event) => (globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "cron", prop: "schedule", value: event.target.value }))}
     />

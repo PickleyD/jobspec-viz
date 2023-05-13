@@ -8,6 +8,10 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { SideEffectPrompt } from "./SideEffectPrompt";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 const isTestModeSelector = (state: any) => state.matches("testMode");
 const isTestModeLoadingSelector = (state: any) => state.matches("testModeLoading");
@@ -117,35 +121,22 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
       </div>
       <div className="flex items-center justify-center p-4">
         <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[20rem]">
-          <div className="flex gap-1 items-center">
-            <label className="label cursor-pointer flex gap-2 items-center">
-              <span
-                className={`label-text ${testMode || testModeLoading ? "" : "text-gray-500"
-                  }`}
-              >
-                Test Mode
-              </span>
-              <input
-                type="checkbox"
-                className="toggle toggle-secondary"
-                checked={testMode || testModeLoading}
-                onChange={handleToggleTestMode}
-              />
-            </label>
+          <div className="flex items-center gap-2 mb-2 mt-3">
+            <Switch id="test-mode" checked={testMode || testModeLoading} onCheckedChange={handleToggleTestMode} />
+            <Label htmlFor="test-mode">Test Mode</Label>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="btn-group flex flex-row w-full">
-              <button
+            <div className="flex flex-row w-full">
+              <Button
                 onClick={handlePrevIndex}
                 disabled={!testMode || currentTaskIndex === 0}
-                className={`${testMode ? "" : "btn-disabled"
-                  } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
+                className={`border-gray-700 hover:border-secondary focus:border-secondary`}
               >
                 <ChevronLeftIcon className="w-5 h-5" />
-              </button>
-              <div
-                className={`${testMode ? "" : "btn-disabled"
-                  } btn grow pointer-events-none cursor-default btn-sm normal-case`}
+              </Button>
+              <Button
+                disabled={!testMode}
+                className={`grow pointer-events-none cursor-default normal-case`}
               >
                 {testModeLoading ? (
                   "Loading..."
@@ -154,24 +145,21 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                 ) : (
                   getTaskId(currentTaskIndex)
                 )}
-              </div>
-              <button
+              </Button>
+              <Button
                 onClick={handleNextIndex}
                 disabled={
                   !testMode || currentTaskIndex >= taskInstructions.length
                 }
-                className={`${testMode ? "" : "btn-disabled"
-                  } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
+                className={`border-gray-700 hover:border-secondary focus:border-secondary`}
               >
                 <ChevronRightIcon className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
-            <progress
-              className={`${testMode ? "" : "disabled"} progress bg-gray-700 ${testModeLoading ? "" : "progress-secondary"
-                } w-56`}
+            <Progress
+              className={`bg-gray-700 w-56`}
               value={testModeLoading ? undefined : progress}
-              max="100"
-            ></progress>
+            ></Progress>
           </div>
           {isSideEffectPrompt ? <SideEffectPrompt /> :
             <div className="flex flex-col gap-1 w-full">

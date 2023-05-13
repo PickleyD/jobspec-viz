@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export interface TaskConfigTabsProps {
     defaultValue?: string;
@@ -8,16 +8,18 @@ export interface TaskConfigTabsProps {
 
 export const TaskConfigTabs = ({ defaultValue = "config", config = <></>, test = <></> }: TaskConfigTabsProps) => {
 
-    const [currentTab, setCurrentTab] = useState(defaultValue)
-
-    return <div className="flex flex-col w-full py-2">
-        <div className="tabs">
-            <a onClick={() => setCurrentTab("config")} className={`w-1/2 ${currentTab === "config" ? "tab-active before:!hidden after:!hidden" : ""} tab tab-lifted !border-gray-700`}>Config</a>
-            <a onClick={() => setCurrentTab("test")} className={`w-1/2 ${currentTab === "test" ? "tab-active before:!hidden after:!hidden" : ""} tab tab-lifted !border-gray-700`}>Test</a>
-        </div>
-        <div className="grid grid-cols-1 grid-rows-1">
-            <div className={`row-span-full col-span-full ${currentTab !== "config" ? "invisible" : ""}`}>{config}</div>
-            <div className={`row-span-full col-span-full ${currentTab !== "test" ? "invisible" : ""}`}>{test}</div>
-        </div>
+    return <div className="w-full py-2">
+        <Tabs defaultValue={defaultValue} className="">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="config">Config</TabsTrigger>
+                <TabsTrigger value="test">Test</TabsTrigger>
+            </TabsList>
+            <TabsContent value="config">
+                {config}
+            </TabsContent>
+            <TabsContent value="test">
+                {test}
+            </TabsContent>
+        </Tabs>
     </div>
 }

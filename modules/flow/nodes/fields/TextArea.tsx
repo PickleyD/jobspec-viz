@@ -1,5 +1,6 @@
+import { Textarea } from "@/components/ui/textarea";
 import React, { useState } from "react";
-import { FieldLabel } from "../../../../components";
+import { FieldLabel } from "@/components";
 
 export interface TextAreaProps extends Omit<React.ComponentProps<"textarea">, "onChange"> {
     displayJsonValidity?: boolean;
@@ -23,8 +24,7 @@ export const TextArea = ({
     optional = false,
     className = "",
     textAreaClassName = "",
-    disabled,
-    ...rest
+    disabled
 }: TextAreaProps) => {
 
     const [isValidJson, setIsValidJson] = useState<boolean>(true)
@@ -39,13 +39,12 @@ export const TextArea = ({
 
     return <div className={`${className} flex flex-col w-full`}>
         {label && <FieldLabel name={label} optional />}
-        <textarea
+        <Textarea
             onChange={handleChange}
             placeholder={placeholder}
             value={value}
-            className={`${textAreaClassName} textarea textarea-bordered ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-gray-500" : ""}`}
+            className={`${textAreaClassName} ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-gray-500" : ""}`}
             disabled={disabled}
-            {...rest}
         />
     </div>
 }
