@@ -5,6 +5,8 @@ import { CronFields, CronVariableSetters, DirectRequestFields, DirectRequestVari
 import { JOB_TYPE } from "../workspace/workspaceMachine"
 import { Tooltip, FieldLabel } from "../../components";
 import { TaskConfigTabs } from "../flow/nodes/fields";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 const jobTypeSelector = (state: any) => state.context.type;
 const nameSelector = (state: any) => state.context.name;
@@ -81,96 +83,99 @@ export const Configurator = () => {
         </Tooltip>
       </div>
 
-      <div className="form-control w-full max-w-xs">
-        <FieldLabel name="Chainlink Version" />
-        <select
-          disabled={true}
-          className="select select-bordered select-sm"
-          defaultValue="v1.11.0"
-          onChange={() => { }}
-        >
-          <option value="v1.11.0">v1.11.0</option>
-        </select>
-      </div>
+      <FieldLabel name="Chainlink Version" />
+      <Select disabled={true} value="v1.11.0">
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Chainlink Version" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="v1.11.0">v1.11.0</SelectItem>
+        </SelectContent>
+      </Select>
 
       <div className="grid grid-cols-3 gap-2 max-w-xl">
-        <div className="form-control w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-xs">
           <FieldLabel name="Name" optional />
-          <input
+          <Input
             disabled={disabled}
             type="text"
             placeholder=""
-            className="input input-bordered input-sm w-full max-w-xs"
             value={name}
             onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
           />
         </div>
 
-        <div className="form-control w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-xs">
           <FieldLabel name="External Job ID" optional />
-          <input
+          <Input
             disabled={disabled}
             type="text"
             placeholder=""
-            className="input input-bordered input-sm w-full max-w-xs"
             value={externalJobId}
             onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
           />
         </div>
 
-        <div className="form-control w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-xs">
           <FieldLabel name="Gas Limit" optional />
-          <input
+          <Input
             disabled={disabled}
             type="text"
             placeholder=""
-            className="input input-bordered input-sm w-full max-w-xs"
             value={gasLimit}
             onChange={(event) => globalServices.workspaceService.send("SET_GAS_LIMIT", { value: event.target.value })}
           />
         </div>
 
-        <div className="form-control w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-xs">
           <FieldLabel name="Max. Task Duration" optional />
-          <input
+          <Input
             disabled={disabled}
             type="text"
             placeholder=""
-            className="input input-bordered input-sm w-full max-w-xs"
             value={maxTaskDuration}
             onChange={(event) => globalServices.workspaceService.send("SET_MAX_TASK_DURATION", { value: event.target.value })}
           />
         </div>
 
-        <div className="form-control w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-xs">
           <FieldLabel name="Forwarding Allowed" />
-          <select
-            className="select select-bordered select-sm"
-            value={forwardingAllowed}
-            onChange={(event) => globalServices.workspaceService.send("SET_FORWARDING_ALLOWED", { value: event.target.value })}
+          <Select
+            disabled={disabled}
+            value={forwardingAllowed.toString()}
+            onValueChange={(newValue) => globalServices.workspaceService.send("SET_FORWARDING_ALLOWED", { value: newValue })}
           >
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-          </select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="false">No</SelectItem>
+              <SelectItem value="true">Yes</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <div className="bg-muted p-2 rounded-lg mt-6 max-w-xl">
-        <div className="form-control w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-xs">
           <FieldLabel name="Job Type" />
-          <select
+          <Select
             disabled={disabled}
-            className="select select-bordered select-sm"
             value={jobType}
-            onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
+            onValueChange={(newValue) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: newValue })}
           >
-            <option value="cron">CRON</option>
-            <option value="directrequest">Direct Request</option>
-            <option value="fluxmonitor" disabled>Flux Monitor</option>
-            <option value="keeper" disabled>Keeper</option>
-            <option value="offchainreporting" disabled>Off-chain Reporting</option>
-            <option value="webhook" disabled>Webhook</option>
-          </select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cron">CRON</SelectItem>
+              <SelectItem value="directrequest">Direct Request</SelectItem>
+              <SelectItem value="fluxmonitor" disabled>Flux Monitor</SelectItem>
+              <SelectItem value="keeper" disabled>Keeper</SelectItem>
+              <SelectItem value="offchainreporting" disabled>Off-chain Reporting</SelectItem>
+              <SelectItem value="webhook" disabled>Webhook</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <TaskConfigTabs

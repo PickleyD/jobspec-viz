@@ -37,7 +37,7 @@ export const TextArea = ({
         isValidJson && onValidJsonChange(JSON.stringify(JSON.parse(value)))
     }
 
-    return <div className={`${className} form-control w-full`}>
+    return <div className={`${className} flex flex-col w-full`}>
         {label && <FieldLabel name={label} optional />}
         <textarea
             onChange={handleChange}

@@ -18,8 +18,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
         // user: TODO
     };
 
-    console.log(process.env.OPENAI_API_KEY)
-
     const completion = await fetch("https://api.openai.com/v1/chat/completions", {
         headers: {
             "Content-Type": "application/json",

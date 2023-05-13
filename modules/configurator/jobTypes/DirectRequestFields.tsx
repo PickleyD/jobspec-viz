@@ -31,7 +31,7 @@ export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps
   )
 
   return <>
-    <div className={`${className} form-control w-60`}>
+    <div className={`${className} flex flex-col w-60`}>
       <FieldLabel name="Contract Address" />
       <input
         type="text"
@@ -41,7 +41,7 @@ export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps
         onChange={(event) => (globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "directrequest", prop: "contractAddress", value: event.target.value }))}
       />
     </div>
-    <div className={`${className} form-control w-60`}>
+    <div className={`${className} flex flex-col w-60`}>
       <FieldLabel name="Min. Contract Payment LINK" optional />
       <input
         type="number"
@@ -51,7 +51,7 @@ export const DirectRequestFields = ({ className = "" }: DirectRequestFieldsProps
         onChange={(event) => (globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "directrequest", prop: "minContractPaymentLinkJuels", value: event.target.value }))}
       />
     </div>
-    <div className={`${className} form-control w-60`}>
+    <div className={`${className} flex flex-col w-60`}>
       <FieldLabel name="Min. Incoming Confirmations" optional />
       <input
         type="number"

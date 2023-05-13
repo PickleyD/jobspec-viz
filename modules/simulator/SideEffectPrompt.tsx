@@ -2,6 +2,7 @@ import { TextArea } from "../flow/nodes/fields";
 import { useContext } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
+import { Separator } from "@/components/ui/separator";
 
 const taskRunResultsSelector = (state: any) => state.context.taskRunResults;
 const currentTaskMockResponseDataInputSelector = (state: any) => {
@@ -53,7 +54,11 @@ export const SideEffectPrompt = () => {
         </li>
         <div className="flex flex-col w-full">
             <button className="border-2 hover:border-foreground focus:border-foreground rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-700 hover:text-black" onClick={handleMakeCall}>Run and Overwrite the Stored Mock Response</button>
-            <div className="divider">OR</div>
+            <div className="flex gap-2">
+                <Separator orientation="vertical" />
+                <span>OR</span>
+                <Separator orientation="vertical" />
+            </div>
             <button className="border-2 border-secondary hover:border-foreground focus:border-foreground rounded-full p-2 flex flex-row items-center justify-center text-secondary" onClick={handleSkipCall}>Skip and Use Currently Stored Mock Response</button>
         </div>
         <h4>Stored Mock Response</h4>

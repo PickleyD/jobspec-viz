@@ -6,9 +6,10 @@ import { PowerTextArea, TextArea, TaskConfigTabs } from "./fields";
 import { FieldLabel } from "../../../components";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
-const methodSelector = (state: any) => state.context.taskSpecific.method;
+const methodSelector = (state: any) => state.context.taskSpecific.method?.raw;
 const urlSelector = (state: any) => state.context.taskSpecific.url;
 const requestDataSelector = (state: any) => state.context.taskSpecific.requestData;
 const enabledMockSelector = (state: any) => state.context.mock.enabled;
@@ -35,19 +36,23 @@ export const HttpTaskNode = (nodeProps: NodeProps) => {
     <TaskNode {...nodeProps}>
       <TaskConfigTabs
         config={<>
-          <div className="form-control w-full max-w-xs">
+          <div className="flex flex-col w-full max-w-xs">
             <FieldLabel name="Method" />
-            <select
-              className="select select-bordered"
-              defaultValue="GET"
+            <Select
               value={method}
-              onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { method: event.target.value } })}
+              defaultValue="GET"
+              onValueChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { method: { raw: newValue, rich: newValue } } })}
             >
-              <option value="GET">GET</option>
-              <option value="POST">POST</option>
-              <option value="PUT">PUT</option>
-              <option value="DELETE">DELETE</option>
-            </select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="GET">GET</SelectItem>
+                <SelectItem value="POST">POST</SelectItem>
+                <SelectItem value="PUT">PUT</SelectItem>
+                <SelectItem value="DELETE">DELETE</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <PowerTextArea
             label="URL"

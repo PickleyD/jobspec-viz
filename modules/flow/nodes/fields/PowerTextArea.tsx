@@ -85,7 +85,7 @@ export const PowerTextArea = ({
   const fieldId = useId()
 
   return (
-    <div className={`${className} form-control w-full max-w-xs`}>
+    <div className={`${className} flex flex-col w-full max-w-xs`}>
       <FieldLabel htmlFor={fieldId} name={label} optional />
       <div className="relative">
         <div className="grid grid-cols-1 grid-rows-1">

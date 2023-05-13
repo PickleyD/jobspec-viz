@@ -291,11 +291,11 @@ export const TaskNode = ({
           )}
           <div className="relative">
             <div className="flex flex-row items-center gap-2">
-              <p className="text-xl font-bold">{data.type}</p>
+              <p className="text-xl font-bold text-primary">{data.type}</p>
               <div className="relative flex flex-col items-center">
                 <Popover label={(open) => <label
                   tabIndex={0}
-                  className={`border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
+                  className={`border-gray-700 focus:border focus:border-primary hover:border hover:border-primary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
                 >
                   <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
                   <XMarkIcon className="swap-on h-4 w-4 text-white" />
@@ -303,7 +303,7 @@ export const TaskNode = ({
                   content={<TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />} />
               </div>
             </div>
-            <div className="form-control w-full max-w-xs">
+            <div className="flex flex-col w-full max-w-xs">
               <div className="flex items-end justify-between">
                 <FieldLabel name="Task ID" htmlFor={taskIdFieldId} />
                 {customIdError && (

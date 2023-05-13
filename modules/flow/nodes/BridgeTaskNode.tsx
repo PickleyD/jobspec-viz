@@ -4,12 +4,13 @@ import React from "react";
 import { useSelector } from "@xstate/react";
 import { PowerTextArea, TaskConfigTabs, TextArea } from "./fields";
 import { FieldLabel } from "../../../components";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const nameSelector = (state: any) => state.context.taskSpecific.name;
 const requestDataSelector = (state: any) => state.context.taskSpecific.requestData;
 const mockResponseDataSelector = (state: any) => state.context.mock.mockResponseData;
-const asyncSelector = (state: any) => state.context.taskSpecific.async;
+const asyncSelector = (state: any) => state.context.taskSpecific.async?.raw;
 const customIdSelector = (state: any) => state.context.customId
 
 export const BridgeTaskNode = (nodeProps: NodeProps) => {
@@ -55,17 +56,21 @@ export const BridgeTaskNode = (nodeProps: NodeProps) => {
             })}
             ownerNodeCustomId={taskCustomId}
           />
-          <div className="form-control w-full max-w-xs">
+          <div className="flex flex-col w-full max-w-xs">
             <FieldLabel name="Async" />
-            <select
-              className="select select-bordered"
-              defaultValue="no"
+            <Select
               value={async}
-              onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { async: event.target.value } })}
+              defaultValue="no"
+              onValueChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { async: { raw: newValue, rich: newValue } } })}
             >
-              <option value="no">No</option>
-              <option value="yes">Yes</option>
-            </select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No</SelectItem>
+                <SelectItem value="yes">Yes</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </>}
         test={<>

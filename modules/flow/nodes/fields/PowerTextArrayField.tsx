@@ -88,7 +88,7 @@ export const PowerTextArrayField = ({
     const [showRich, setShowRich] = useState<boolean>(true)
 
     return (
-        <div className="form-control w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-xs">
             <FieldLabel name={label} optional />
             <div className="relative">
                 <div className="grid grid-cols-1 grid-rows-1">

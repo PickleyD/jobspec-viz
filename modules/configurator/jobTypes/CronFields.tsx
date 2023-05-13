@@ -50,7 +50,7 @@ export const CronFields = ({ className = "" }: CronFieldsProps) => {
 
   const setCronValidity = (isValid: boolean) => globalServices.workspaceService.send("SET_JOB_TYPE_SPECIFIC_PROPS", { jobType: "cron", prop: "schedule", valid: isValid })
 
-  return <div className={`${className} form-control w-full max-w-xs`}>
+  return <div className={`${className} flex flex-col w-full max-w-xs`}>
     <FieldLabel name="CRON Schedule" />
     <input
       type="text"

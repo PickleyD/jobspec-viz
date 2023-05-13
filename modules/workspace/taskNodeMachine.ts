@@ -384,10 +384,9 @@ export const createTaskNodeMachine = (
           actions: [
             assign({
               taskSpecific: (context, event) => {
-                const rawAndRich = typeof event.value === "string" ? { raw: event.value, rich: event.value } : event.value
                 return {
                   ...context.taskSpecific,
-                  ...rawAndRich,
+                  ...event.value,
                 }
               },
             }),

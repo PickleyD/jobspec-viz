@@ -25,7 +25,7 @@ export const TextArrayField = ({
         onChangeAsArray && onChangeAsArray(asArray)
     }
 
-    return <div className="form-control w-full">
+    return <div className="flex flex-col w-full">
         <FieldLabel name={label} optional />
         <textarea
             onChange={handleChange}

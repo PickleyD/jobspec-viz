@@ -7,6 +7,7 @@ import ethCall from "../../examples/ethcall.json";
 import getUint256 from "../../examples/getUint256.json";
 import median from "../../examples/median.json";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 export interface ExamplesProps {
     className?: string;
@@ -53,15 +54,15 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                 >
                     Empty Project
                 </Button>
-                <div className="divider divider-horizontal"></div>
+                <Separator orientation="vertical" />
                 <Button variant="ghost"
                     onClick={() => handleRehydrate(ethCall)}
                 >{`ETH Call`}</Button>
-                <div className="divider divider-horizontal"></div>
+                <Separator orientation="vertical" />
                 <Button variant="ghost"
                     onClick={() => handleRehydrate(getUint256)}
                 >{`Get -> Uint256`}</Button>
-                <div className="divider divider-horizontal"></div>
+                <Separator orientation="vertical" />
                 <Button variant="ghost"
                     onClick={() => handleRehydrate(median)}
                 >{`Median Answer`}</Button>
