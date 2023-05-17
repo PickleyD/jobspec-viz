@@ -4,10 +4,47 @@ import { GlobalStateProvider } from "../context";
 import { ThirdwebProvider } from '@thirdweb-dev/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import { useEffect } from 'react';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
   const queryClient = new QueryClient()
+
+  // Set theme on first load 
+  useEffect(() => {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark')
+      localStorage.theme = 'dark'
+      dispatchEvent(new Event("storage"));
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.theme = 'light'
+      dispatchEvent(new Event("storage"));
+    }
+  })
+
+  // Listen for theme toggles
+  useEffect(() => {
+    const checkTheme = () => {
+      const theme = localStorage.getItem('theme')
+  
+      if (theme === "dark") {
+        document.documentElement.classList.add('dark')
+        document.documentElement.classList.remove('light')
+      }
+
+      if (theme === "light") {
+        document.documentElement.classList.add('light')
+        document.documentElement.classList.remove('dark')
+      }
+    }
+  
+    addEventListener('storage', checkTheme)
+  
+    return () => {
+      removeEventListener('storage', checkTheme)
+    }
+  }, [])
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -31,7 +68,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               backgroundColor: "#000",
               color: "#ccc"
             }
-          }}/>
+          }} />
           <Component {...pageProps} />
         </GlobalStateProvider>
       </ThirdwebProvider>
