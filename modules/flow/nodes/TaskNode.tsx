@@ -7,8 +7,10 @@ import { Squares2X2Icon, XMarkIcon, PlayIcon } from "@heroicons/react/24/outline
 import { TASK_TYPE } from "../../workspace/taskNodeMachine";
 import { XYCoords } from "../../workspace/node";
 import { TaskSelector } from "../taskSelector/TaskSelector";
-import { FieldLabel, Popover } from "../../../components";
+import { FieldLabel } from "../../../components";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
@@ -216,11 +218,11 @@ export const TaskNode = ({
       {/* width divisible by grid snap size */}
       <div className="bg-popover flex flex-col justify-center items-center p-1 rounded-lg relative cursor-default shadow-lg ring ring-accent/60 w-[300px]">
         {(isPendingRun || isPendingSideEffect) && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
-          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-secondary-light via-secondary via-secondary-dark via-secondary to-secondary-light"></div>
+          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-pending-light via-pending via-pending-dark via-pending to-pending-light"></div>
         </div>
         }
         {(isRunning || isRunningSideEffect) && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
-          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-background to-secondary"></div>
+          <div className="animate-spin absolute w-[2000px] h-[2000px] bg-gradient-conic from-background to-pending"></div>
         </div>
         }
         {isSuccess && <div className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden flex flex-col justify-center items-center rounded-lg z-0">
@@ -293,16 +295,17 @@ export const TaskNode = ({
           <div className="relative">
             <div className="flex flex-row items-center gap-2">
               <p className="text-xl font-bold text-primary">{data.type}</p>
-              <div className="relative flex flex-col items-center">
-                <Popover label={(open) => <label
-                  tabIndex={0}
-                  className={`border-gray-700 focus:border focus:border-primary hover:border hover:border-primary bg-background h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
-                >
-                  <Squares2X2Icon className="swap-off h-4 w-4 text-white" />
-                  <XMarkIcon className="swap-on h-4 w-4 text-white" />
-                </label>}
-                  content={<TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />} />
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-6 h-6 rounded-full p-0">
+                    <Squares2X2Icon className="h-4 w-4" />
+                    <span className="sr-only">Open task selector</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <TaskSelector onTaskSelected={handleTaskSelected} value={data.type} />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex flex-col w-full max-w-xs">
               <div className="flex items-end justify-between">

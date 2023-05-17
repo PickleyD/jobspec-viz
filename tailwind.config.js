@@ -50,12 +50,21 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        'success-light': "#3ddd78",
-        'success-dark': "#1a9a49",
-        'error-light': "#ef4444",
-        'error-dark': "#bd1010",
-        'secondary-light': "#f7b13c",
-        'secondary-dark': "#c57f08"
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          light: "hsl(var(--success-light))",
+          dark: "hsl(var(--success-dark))",
+        },
+        error: {
+          DEFAULT: "hsl(var(--error))",
+          light: "hsl(var(--error-light))",
+          dark: "hsl(var(--error-dark))",
+        },
+        pending: {
+          DEFAULT: "hsl(var(--pending))",
+          light: "hsl(var(--pending-light))",
+          dark: "hsl(var(--pending-dark))",
+        }
       },
       animation: {
         'spin-slow': 'spin 3s linear infinite',
@@ -98,34 +107,8 @@ module.exports = {
       },
     },
   },
-  daisyui: {
-    themes: [
-      // {
-      //   mytheme: {
-      //     // primary: "#ffaaaa",
-      //     // secondary: "#aaeeff",
-      //     // accent: "#ffeeaa",
-      //     // Darkened 15%:
-      //     primary: "#ff6a6a",
-      //     secondary: "#6ae1ff",
-      //     accent: "#ffe16a",
-      //     neutral: "#3a200f",
-      //     "neutral-content": "#d28453",
-      //     "background": "#000000",
-      //     "muted": "#0a0a0a",
-      //     "muted": "#1a1a1a",
-      //     "base-content": "#cfcfcf",
-      //     info: "#3ABFF8",
-      //     success: "#22c55e",
-      //     warning: "#FBBD23",
-      //     error: "#eb1515",
-      //   },
-      // },
-    ],
-  },
   plugins: [
     require('@headlessui/tailwindcss'),
-    require("daisyui"), // TODO replace usages of daisyui and remove
     require("tailwindcss-animate")
   ],
 };

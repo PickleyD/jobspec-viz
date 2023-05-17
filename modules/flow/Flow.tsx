@@ -387,7 +387,7 @@ export const Flow = ({ className }: FlowProps) => {
           onConnectEnd={handleConnectEnd}
           onConnect={handleConnect}
           connectionLineComponent={CustomConnectionLine}
-          panOnDrag={isDefaultMode}
+          panOnDrag={isDefaultMode || testMode}
           selectionOnDrag={isAiWandMode}
           fitView
           fitViewOptions={{

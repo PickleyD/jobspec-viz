@@ -8,7 +8,7 @@ export type VarSelectorProps = {
 
 export const VarSelector = ({ onVarSelected, jobVariables, taskVariables }: VarSelectorProps) => {
   return (
-    <div className="flex flex-col gap-4 p-4 w-96">
+    <div className="flex flex-col gap-4 p-4 w-fit max-w-xs">
       <section className="flex flex-col align-start gap-2">
         <p className="whitespace-nowrap text-xs underline text-gray-400">
           Job-level

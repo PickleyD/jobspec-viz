@@ -112,10 +112,10 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
   return (
     <>
       <div className="flex items-center justify-start gap-2 mb-4">
-        <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Simulate</h4>
+        <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Test</h4>
         <Tooltip className="text-sm text-gray-300">
           <p>
-            Enable test mode to parse your pipeline and step through task execution a simulated environment.
+            Enable test mode to parse your pipeline and step through task execution in a simulated environment.
           </p>
         </Tooltip>
       </div>
@@ -126,15 +126,15 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
             <Label htmlFor="test-mode">Test Mode</Label>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="flex flex-row w-full">
+            <div className="flex flex-row w-full gap-1">
               <Button
                 onClick={handlePrevIndex}
                 disabled={!testMode || currentTaskIndex === 0}
-                className={`border-gray-700 hover:border-secondary focus:border-secondary`}
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </Button>
               <Button
+                variant="outline"
                 disabled={!testMode}
                 className={`grow pointer-events-none cursor-default normal-case`}
               >
@@ -151,7 +151,6 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                 disabled={
                   !testMode || currentTaskIndex >= taskInstructions.length
                 }
-                className={`border-gray-700 hover:border-secondary focus:border-secondary`}
               >
                 <ChevronRightIcon className="w-5 h-5" />
               </Button>

@@ -5,6 +5,7 @@ import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { TomlLine } from "../workspace/workspaceMachine";
 import { Tooltip } from "../../components";
+import { Button } from "@/components/ui/button";
 
 export interface CodegenProps {
   className?: string;
@@ -64,21 +65,21 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
         <button className="hover:underline text-gray-300 font-bold" onClick={handleImportClick}>Import</button>
       </div>
       <div
-        className="mockup-code text-sm bg-background relative"
+        className="p-4 mockup-code text-sm bg-black relative rounded-lg"
         ref={codeRef}
       >
-        <div className="absolute top-3.5 left-20 flex items-center gap-2">
-          <label
-            onClick={handleCopyToClipboard}
-            tabIndex={0}
-            className={`${showCheckIcon ? "swap-active" : ""
-              } swap swap-rotate pointer-events-auto btn btn-circle h-6 w-6 min-h-0 border-gray-700 focus:border focus:border-secondary hover:border hover:border-secondary focus:border-secondary`}
-          >
-            <DocumentDuplicateIcon className="h-4 w-4 swap-off" />
-            <CheckIcon className="h-4 w-4 swap-on" />
-          </label>
+        <div className="relative flex items-center justify-start gap-2 mb-4">
+          <div className="p-2 flex gap-1">
+            <div className={`grayscale-[70%] bg-[#ff6a6a] rounded-full h-3 w-3`} />
+            <div className={`grayscale-[70%] bg-[#6ae1ff] rounded-full h-3 w-3`} />
+            <div className={`grayscale-[70%] bg-[#ffe16a] rounded-full h-3 w-3`} />
+          </div>
+          <Button onClick={handleCopyToClipboard} variant="outline" className="w-6 h-6 rounded-full p-0">
+            {showCheckIcon ? <CheckIcon className="h-4 w-4" /> : <DocumentDuplicateIcon className="h-4 w-4" />}
+            <span className="sr-only">Open task selector</span>
+          </Button>
         </div>
-        <div className="max-h-96 max-w-3xl overflow-auto pr-6">
+        <div className="max-h-96 max-w-3xl overflow-auto px-4">
           {
             toml.map((line, index) => <pre key={index} data-prefix=">"
             // Disable red/green validity indication unless can think of a way to handle 'propagateResult' of false on inputs,

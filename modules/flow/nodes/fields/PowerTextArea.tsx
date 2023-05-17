@@ -3,10 +3,12 @@ import React, { useContext, useState, useId } from "react";
 import { GlobalStateContext } from "../../../../context/GlobalStateContext";
 import pipelineVarsData from "../../../../data/jobTypeSpecificPipelineVars.json";
 import { JOB_TYPE } from "../../../workspace/workspaceMachine";
-import { BoltIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Popover, FieldLabel } from "../../../../components";
+import { BoltIcon } from "@heroicons/react/24/outline";
+import { FieldLabel } from "../../../../components";
 import { VarSelector } from "./VarSelector";
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 export interface PowerTextAreaProps {
   label: string;
@@ -107,25 +109,21 @@ export const PowerTextArea = ({
           />
         </div>
         <div className="absolute right-1 bottom-1">
-          <Popover
-            label={(open) => (
-              <label
-                tabIndex={0}
-                className={`rounded-full focus:border hover:border hover:border-secondary focus:border-secondary bg-background h-6 w-6 min-h-0 swap swap-rotate ${open ? "swap-active" : ""
-                  }`}
-              >
-                <BoltIcon className="swap-off h-4 w-4 text-white" />
-                <XMarkIcon className="swap-on h-4 w-4 text-white" />
-              </label>
-            )}
-            content={
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-6 h-6 rounded-full p-0">
+                <BoltIcon className="h-4 w-4" />
+                <span className="sr-only">Open task selector</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-fit">
               <VarSelector
                 onVarSelected={handleItemSelected}
                 jobVariables={jobTypeSpecificPipelineVars}
                 taskVariables={tasks.filter((customId: string) => customId !== ownerNodeCustomId) ?? []}
               />
-            }
-          />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </div>
