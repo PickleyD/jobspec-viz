@@ -26,8 +26,8 @@ export const Chat = ({ className = "" }: ChatProps) => {
     return (
         <>
             <div className="flex items-center justify-start gap-2 mb-4">
-                <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Linkit AI</h4>
-                <Tooltip className="text-sm text-gray-300">
+                <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Linkit AI</h4>
+                <Tooltip className="text-sm text-muted-foreground">
                     <p>Let our AI assistant help you out</p>
                 </Tooltip>
             </div>

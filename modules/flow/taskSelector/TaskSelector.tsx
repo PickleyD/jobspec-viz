@@ -39,7 +39,7 @@ export const TaskSelector = ({ onTaskSelected, value }: TaskSelectorProps) => {
     return <div className="flex flex-col gap-4 w-60 rounded-lg">
         {
             categories.map((category, catIndex) => <section key={`cat_${catIndex}`} className="flex flex-col align-start gap-2">
-                <p className="whitespace-nowrap text-xs underline text-gray-500">{category.name}</p>
+                <p className="whitespace-nowrap text-xs underline text-muted-foreground">{category.name}</p>
                 <div className="flex flex-row flex-wrap gap-1">
                     {
                         category.tasks.map((task, taskIndex) => <TaskChip

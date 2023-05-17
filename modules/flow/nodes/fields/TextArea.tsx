@@ -43,7 +43,7 @@ export const TextArea = ({
             onChange={handleChange}
             placeholder={placeholder}
             value={value}
-            className={`${textAreaClassName} ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-gray-500" : ""}`}
+            className={`${textAreaClassName} ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-muted-foreground" : ""}`}
             disabled={disabled}
         />
     </div>

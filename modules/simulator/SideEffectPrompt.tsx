@@ -47,7 +47,7 @@ export const SideEffectPrompt = () => {
                 Object.keys(sideEffectJson).map(key => <ul>
                     <p className="flex gap-1">
                         <span className="text-secondary">{key}:</span>
-                        <span className="text-gray-300">{sideEffectJson[key]}</span>
+                        <span className="text-muted-foreground">{sideEffectJson[key]}</span>
                     </p>
                 </ul>
                 )

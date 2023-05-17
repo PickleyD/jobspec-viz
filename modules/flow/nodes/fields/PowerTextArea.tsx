@@ -103,7 +103,7 @@ export const PowerTextArea = ({
             className={`${textAreaClasses} row-span-full col-span-full h-full w-full pr-8`}
           />
           <ContentEditable
-            html={value.rich || `<div class="text-gray-300">${placeholder}</div>`}
+            html={value.rich || `<div class="text-muted-foreground">${placeholder}</div>`}
             onChange={() => { }}
             className={`${textAreaClasses} ${showRich ? "" : "invisible"} h-full row-span-full col-span-full pr-8 pointer-events-none`}
           />

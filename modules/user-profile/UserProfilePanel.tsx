@@ -52,8 +52,8 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
     return (
         <>
             <div className="flex items-center justify-start gap-2 mb-4">
-                <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">My profile</h4>
-                <Tooltip className="text-sm text-gray-300">
+                <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">My profile</h4>
+                <Tooltip className="text-sm text-muted-foreground">
                     <p>
                         Connect your wallet and sign in to save your job specs and keep them synced across your devices.
                     </p>
@@ -65,7 +65,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                         <ConnectWallet
                             btnTitle="Connect Wallet"
                             theme="light"
-                            className="!bg-background !text-gray-300 !rounded-full !p-4 !border-solid !border-2 !border-background hover:!border-secondary focus:!ring-0"
+                            className="!bg-background !text-muted-foreground !rounded-full !p-4 !border-solid !border-2 !border-background hover:!border-secondary focus:!ring-0"
                             auth={{
                                 loginOptional: false,
                                 loginOptions: {
@@ -75,7 +75,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                         />
                     </div>
                 </div>
-                <h4 className={`${isLoggedIn ? "" : "text-gray-500"} font-bold`}>My Saved Job Specs</h4>
+                <h4 className={`${isLoggedIn ? "" : "text-muted-foreground"} font-bold`}>My Saved Job Specs</h4>
                 <ul>
                     {renderJobSpecs({ data, error, isLoading, isFetching })}
                 </ul>

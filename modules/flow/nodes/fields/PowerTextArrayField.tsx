@@ -101,7 +101,7 @@ export const PowerTextArrayField = ({
                         className="row-span-full col-span-full textarea textarea-bordered h-full whitespace-nowrap overflow-auto"
                     />
                     <ContentEditable
-                        html={value.rich || `<div class="text-gray-300">${placeholder}</div>`}
+                        html={value.rich || `<div class="text-muted-foreground">${placeholder}</div>`}
                         onChange={() => { }}
                         className={`${showRich ? "" : "invisible"} row-span-full col-span-full whitespace-nowrap overflow-auto textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
                     />

@@ -60,7 +60,7 @@ export const ImportModal = () => {
                         <div className="bg-noise opacity-[.15] absolute inset-0 rounded-lg pointer-events-none"/>
                         <Dialog.Title
                             as="h3"
-                            className="uppercase text-sm font-bold tracking-wider text-gray-400"
+                            className="uppercase text-sm font-bold tracking-wider text-muted-foreground"
                         >
                             Import Job Spec
                         </Dialog.Title>
@@ -77,7 +77,7 @@ export const ImportModal = () => {
 
                         <div className="w-full flex justify-center align-items">
                             <button
-                                className={`uppercase font-lg font-bold text-gray-300 border-gray-700 border px-6 py-2 rounded-lg ${isButtonDisabled ? "" : "hover:border-white hover:text-white"}`}
+                                className={`uppercase font-lg font-bold text-muted-foreground border-gray-700 border px-6 py-2 rounded-lg ${isButtonDisabled ? "" : "hover:border-white hover:text-white"}`}
                                 onClick={handleImport}
                                 disabled={isButtonDisabled}
                             >

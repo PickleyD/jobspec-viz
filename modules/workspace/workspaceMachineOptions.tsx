@@ -191,7 +191,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                             <div className="flex items-center gap-4">
                                 <ExclamationTriangleIcon className="h-8 w-8"></ExclamationTriangleIcon>
                                 <div className="flex flex-col gap-4">
-                                    <p className="uppercase text-sm font-bold tracking-wider text-gray-400">
+                                    <p className="uppercase text-sm font-bold tracking-wider text-muted-foreground">
                                         Import partially successful
                                     </p>
                                     <div className="flex flex-col gap-2 text-sm">
@@ -210,7 +210,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                         <div className="flex border-l border-gray-300">
                             <button
                                 onClick={() => toast.dismiss(t.id)}
-                                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-gray-300 hover:text-white focus:outline-none focus:ring-1 focus:ring-secondary"
+                                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-muted-foreground hover:text-white focus:outline-none focus:ring-1 focus:ring-secondary"
                             >
                                 Close
                             </button>

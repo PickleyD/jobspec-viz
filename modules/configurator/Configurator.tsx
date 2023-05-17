@@ -76,8 +76,8 @@ export const Configurator = () => {
   return (
     <div className="">
       <div className="flex items-center justify-start gap-2 mb-4">
-        <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Config</h4>
-        <Tooltip className="text-sm text-gray-300">
+        <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Config</h4>
+        <Tooltip className="text-sm text-muted-foreground">
           <p>Chainlink nodes support the execution of a number of job types. Each job type has some unique fields and pipeline variables.</p>
           <p>Here you can select your job's type and the relevant configuration fields will become available.</p>
         </Tooltip>

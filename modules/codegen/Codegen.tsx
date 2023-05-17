@@ -57,12 +57,12 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     <>
       <div className="flex items-center justify-start gap-12 mb-4">
         <div className="flex items-center justify-start gap-2">
-          <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Code</h4>
-          <Tooltip className="text-sm text-gray-300">
+          <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Code</h4>
+          <Tooltip className="text-sm text-muted-foreground">
             <p>Here is the generated TOML job spec. Copy and paste it into your Chainlink node UI when setting up your job!</p>
           </Tooltip>
         </div>
-        <button className="hover:underline text-gray-300 font-bold" onClick={handleImportClick}>Import</button>
+        <button className="hover:underline text-muted-foreground font-bold" onClick={handleImportClick}>Import</button>
       </div>
       <div
         className="p-4 mockup-code text-sm bg-black relative rounded-lg"

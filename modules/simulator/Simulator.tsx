@@ -112,8 +112,8 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
   return (
     <>
       <div className="flex items-center justify-start gap-2 mb-4">
-        <h4 className="uppercase text-sm font-bold tracking-wider text-gray-400">Test</h4>
-        <Tooltip className="text-sm text-gray-300">
+        <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Test</h4>
+        <Tooltip className="text-sm text-muted-foreground">
           <p>
             Enable test mode to parse your pipeline and step through task execution in a simulated environment.
           </p>
@@ -163,7 +163,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
           {isSideEffectPrompt ? <SideEffectPrompt /> :
             <div className="flex flex-col gap-1 w-full">
               {(latestTaskRunResult.value || latestTaskRunResult.error) && (
-                <p className="text-xs text-gray-300">Current Result:</p>
+                <p className="text-xs text-muted-foreground">Current Result:</p>
               )}
               <div className="flex flex-col gap-1">
                 {
@@ -171,7 +171,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                   && latestTaskRunResult.value.length > 0
                   && (
                     <div className="flex flex-col">
-                      <p className="text-sm text-gray-300">Value:</p>
+                      <p className="text-sm text-muted-foreground">Value:</p>
                       <p className="text-sm text-secondary overflow-auto max-h-[10rem]">
                         {latestTaskRunResult.value}
                       </p>
@@ -180,7 +180,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                 }
                 {latestTaskRunResult.error && (
                   <div className="flex flex-col">
-                    <p className="text-sm text-gray-300">Error:</p>
+                    <p className="text-sm text-muted-foreground">Error:</p>
                     <p className="text-sm text-error overflow-auto max-h-[10rem]">
                       {latestTaskRunResult.error}
                     </p>
@@ -188,7 +188,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                 )}
                 {parsingError.length > 0 && (
                   <div className="flex flex-col">
-                    <p className="text-sm text-gray-300">Error:</p>
+                    <p className="text-sm text-muted-foreground">Error:</p>
                     <p className="text-sm text-error overflow-auto max-h-[10rem]">
                       {parsingError}
                     </p>

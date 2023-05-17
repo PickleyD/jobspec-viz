@@ -255,7 +255,7 @@ export const TaskNode = ({
                 isPendingRun && <div className="relative w-full h-full p-6 flex items-end justify-center">
                   <button
                     onClick={handleTaskRun}
-                    className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-gray-700 hover:text-black"
+                    className="border-2 border-secondary hover:border-white focus:border-white rounded-full bg-secondary p-2 flex flex-row items-center justify-center text-muted-foreground hover:text-black"
                   >
                     <span className="px-2">Run Task</span>
                     <PlayIcon className="fill-current w-6 h-6" />
