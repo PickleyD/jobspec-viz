@@ -234,11 +234,9 @@ export const TaskNode = ({
         </div>
         }
         <div className="relative w-full h-full p-3 bg-background rounded-md z-10">
-          {/* <div className="inset-0 absolute bg-gradient-to-t from-background via-foreground/[.02] to-foreground/[.03] rounded-md" />
-          <div className="inset-0 absolute bg-gradient-to-br from-background via-transparent to-transparent rounded-md" /> */}
-          <div className="inset-0 absolute bg-gradient-radial-top from-foreground/5 to-transarent rounded-md" />
-          <div className="inset-0 absolute bg-gradient-radial-bottom from-foreground/5 to-transparent rounded-md" />
-          <div className="absolute bg-noise opacity-[.15] inset-0 rounded-md" />
+          <div className="inset-0 absolute bg-gradient-radial-top dark:from-foreground/[.06] from-foreground/[.15] to-transarent rounded-md" />
+          <div className="inset-0 absolute bg-gradient-radial-bottom dark:from-foreground/[.06] from-foreground/[.15] to-transparent rounded-md" />
+          <div className="absolute invert dark:invert-0 bg-noise opacity-20 inset-0 rounded-md" />
           {deletable &&
             <div
               onClick={handleDeleteNode}
@@ -282,13 +280,13 @@ export const TaskNode = ({
                 id={`${id}-top`}
                 type="target"
                 position={Position.Top}
-                className="!w-6 !h-6 !bg-white !border-black !border-2 !-top-3 z-30"
+                className="!w-6 !h-6 !bg-foreground !border-background !border-2 !-top-3 z-30"
               />
               <Handle
                 id={`${id}-bottom`}
                 type="source"
                 position={Position.Bottom}
-                className="!w-6 !h-6 !bg-white !border-black !border-2 !-bottom-3 shadow-widget z-30"
+                className="!w-6 !h-6 !bg-foreground !border-background !border-2 !-bottom-3 shadow-widget z-30"
               />
             </>
           )}

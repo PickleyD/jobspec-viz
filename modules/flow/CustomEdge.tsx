@@ -49,7 +49,7 @@ export const CustomEdge = ({
     return (
         <svg xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <path id={id} d={edgePath} />
+                <path id={id} d={edgePath} className="stroke-foreground" />
             </defs>
             <use href={`#${id}`} className="react-flow__edge-path" />
             {sourceTaskRunResult && <svg xmlns="http://www.w3.org/2000/svg">

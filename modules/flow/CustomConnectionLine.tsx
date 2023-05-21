@@ -47,7 +47,7 @@ export const CustomConnectionLine = ({
       <g>
         <path
           fill="none"
-          stroke="#fff"
+          className="stroke-foreground"
           strokeWidth={PLACEHOLDER_STROKE_WIDTH}
           d={getBezierPath(pathParams)[0]}
         />

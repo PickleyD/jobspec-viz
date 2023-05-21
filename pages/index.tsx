@@ -124,7 +124,7 @@ const Home: NextPage = () => {
                     <div className="w-screen h-screen absolute bg-gradient-to-t from-card via-muted/20 to-transparent" />
                     <div className="w-screen h-screen absolute bg-gradient-to-br from-card to-muted/50" />
                   </div>
-                  <div className="absolute bg-noise opacity-[.15] inset-0" />
+                  <div className="absolute invert dark:invert-0 bg-noise opacity-20 inset-0" />
                   <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
                   <div className="h-full overflow-auto relative">
                     <div className="w-max relative min-h-full">

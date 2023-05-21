@@ -57,7 +57,7 @@ export const ImportModal = () => {
                     leaveTo="opacity-0 scale-95"
                 >
                     <div className="flex flex-col gap-4 max-w-md border border-gray-700 p-4 transition-all transform bg-background shadow-lg rounded-lg relative">
-                        <div className="bg-noise opacity-[.15] absolute inset-0 rounded-lg pointer-events-none"/>
+                        <div className="bg-noise invert dark:invert-0 opacity-20 absolute inset-0 rounded-lg pointer-events-none"/>
                         <Dialog.Title
                             as="h3"
                             className="uppercase text-sm font-bold tracking-wider text-muted-foreground"
