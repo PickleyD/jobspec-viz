@@ -295,8 +295,8 @@ export const TaskNode = ({
               <p className="text-xl font-bold text-primary">{data.type}</p>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-6 h-6 rounded-full p-0">
-                    <Squares2X2Icon className="h-4 w-4" />
+                  <Button variant="outline" className="w-6 h-6 group transition-colors hover:bg-foreground rounded-full p-0">
+                    <Squares2X2Icon className="h-4 w-4 group-hover:stroke-background" />
                     <span className="sr-only">Open task selector</span>
                   </Button>
                 </PopoverTrigger>

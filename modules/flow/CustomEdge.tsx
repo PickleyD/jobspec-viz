@@ -61,9 +61,9 @@ export const CustomEdge = ({
                         <div className="h-full w-full flex items-center justify-center">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="secondary" className="w-6 h-6 rounded-full p-0">
-                                        <CameraIcon className="h-4 w-4" />
-                                        <span className="sr-only">Open task selector</span>
+                                    <Button variant="secondary" className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+                                        <CameraIcon className="h-4 w-4 group-hover:stroke-background" />
+                                        <span className="sr-only">View variables snapshot</span>
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent>

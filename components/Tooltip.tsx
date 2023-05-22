@@ -11,8 +11,8 @@ export const Tooltip = ({ children, className = "" }: TooltipProps) => {
 
     return <Popover>
         <PopoverTrigger asChild>
-            <Button variant="outline" className="w-6 h-6 rounded-full p-0">
-                <InformationCircleIcon className="h-4 w-4" />
+            <Button variant="outline" className="w-6 h-6 rounded-full group transition-colors hover:bg-foreground p-0">
+                <InformationCircleIcon className="h-4 w-4 group-hover:stroke-background" />
                 <span className="sr-only">Open tooltip</span>
             </Button>
         </PopoverTrigger>

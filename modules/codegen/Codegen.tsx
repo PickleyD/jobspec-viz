@@ -74,9 +74,9 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
             <div className={`grayscale-[70%] bg-[#6ae1ff] rounded-full h-3 w-3`} />
             <div className={`grayscale-[70%] bg-[#ffe16a] rounded-full h-3 w-3`} />
           </div>
-          <Button onClick={handleCopyToClipboard} variant="outline" className="w-6 h-6 rounded-full p-0">
-            {showCheckIcon ? <CheckIcon className="h-4 w-4" /> : <DocumentDuplicateIcon className="h-4 w-4" />}
-            <span className="sr-only">Open task selector</span>
+          <Button onClick={handleCopyToClipboard} variant="outline" className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+            {showCheckIcon ? <CheckIcon className="h-4 w-4 group-hover:stroke-background" /> : <DocumentDuplicateIcon className="h-4 w-4 group-hover:stroke-background" />}
+            <span className="sr-only">Copy to clipboard</span>
           </Button>
         </div>
         <div className="max-h-96 max-w-3xl overflow-auto px-4">

@@ -111,9 +111,9 @@ export const PowerTextArea = ({
         <div className="absolute right-1 bottom-1">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-6 h-6 rounded-full p-0">
-                <BoltIcon className="h-4 w-4" />
-                <span className="sr-only">Open task selector</span>
+              <Button variant="outline" className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+                <BoltIcon className="h-4 w-4 group-hover:stroke-background" />
+                <span className="sr-only">Open variables picker</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0 w-fit">
