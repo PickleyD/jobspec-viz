@@ -75,10 +75,11 @@ export const EthCallTaskNode = (nodeProps: NodeProps) => {
                         label="Gas"
                         value={gas}
                         placeholder={`The amount of gas to attach to the transaction. Defaults to first set value out of:
-                job spec gas limit, <- (TODO: Take account of this)
-                job type specific env variable,
-                global env variable,
-                or chain default (normally 500,000)`}
+                            job spec gas limit,
+                            job type specific env variable,
+                            global env variable,
+                            or chain default (normally 500,000)`}
+                        // TODO: Take account of job spec gas limit
                         onChange={(newValue, newRichValue) => machine.send("SET_TASK_SPECIFIC_PROPS", {
                             value: {
                                 gas: {

@@ -112,22 +112,8 @@ export const PowerTextArrayField = ({
                     <ContentEditable
                         html={value.rich || `<div class="text-muted-foreground">${placeholder}</div>`}
                         onChange={() => { }}
-                        className={`${textAreaClasses} ${showRich ? "" : "invisible"} row-span-full col-span-full whitespace-nowrap overflow-auto textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
+                        className={`${textAreaClasses} ${showRich ? "" : "invisible"} h-full row-span-full col-span-full whitespace-nowrap overflow-auto textarea textarea-bordered pr-8 pointer-events-none`}
                     />
-                    {/* <ContentEditable
-                        id={fieldId}
-                        html={value.raw || ""}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        onFocus={handleFocus}
-                        onPaste={handlePaste}
-                        className={`${textAreaClasses} row-span-full col-span-full h-full w-full pr-8`}
-                    />
-                    <ContentEditable
-                        html={value.rich || `<div class="text-muted-foreground">${placeholder}</div>`}
-                        onChange={() => { }}
-                        className={`${textAreaClasses} ${showRich ? "" : "invisible"} h-full row-span-full col-span-full pr-8 pointer-events-none`}
-                    /> */}
                 </div>
                 <div className="absolute right-1 bottom-1">
                     <Popover>
