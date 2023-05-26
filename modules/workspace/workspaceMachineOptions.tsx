@@ -89,6 +89,15 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                         }
                     }),
                 },
+                ai: context.nodes.ai.map((entry) => {
+
+                    const { ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
+
+                    return {
+                        ...entry,
+                        context: nodeContextToPersist,
+                    }
+                }),
             };
 
             return fetch("/api/job-specs/null/versions", {
@@ -375,7 +384,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
             }
 
             // Remove AI node
-            const newAiNodes = [ ...context.nodes.ai.filter(aiNode => aiNode.ref.id !== aiNodeToReplace?.ref.id) ]
+            const newAiNodes = [...context.nodes.ai.filter(aiNode => aiNode.ref.id !== aiNodeToReplace?.ref.id)]
 
             constructedMachineContext.nodes = { ...context.nodes, ai: newAiNodes, tasks: totalTaskNodes }
             constructedMachineContext.edges = totalEdges

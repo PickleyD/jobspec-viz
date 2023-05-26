@@ -7,6 +7,8 @@ import { GlobalStateContext } from "../context/GlobalStateContext";
 import { useSelector } from "@xstate/react";
 import { SideMenu, TopMenu } from "../components/menu";
 import Split from "react-split"
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
@@ -103,7 +105,10 @@ const Home: NextPage = () => {
         <div className="h-full w-screen p-4 flex flex-col">
           <div className="w-full flex items-center justify-between">
             <TopMenu lit={isMenuOpen} onToggleClick={handleMenuToggle} />
-            {isIdle && <div className="relative pointer-events-auto" onClick={handleToggleAiWandMode}>{isAiWandMode ? "disabled" : "enable"} ai wand mode</div>}
+            {isIdle && <div className="relative pointer-events-auto flex items-center space-x-2">
+              <Switch id="ai-mode" checked={isAiWandMode} onCheckedChange={handleToggleAiWandMode} />
+              <Label htmlFor="ai-mode">AI Mode</Label>
+            </div>}
           </div>
           {isMenuOpen && <div className="grow relative flex h-px w-full pointer-events-none">
             <Split
@@ -149,7 +154,7 @@ const Home: NextPage = () => {
               onClick={() => setNewProjectHeroDisplayed(true)}
               className={`ml-2 mt-2 pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
             >
-              <AcademicCapIcon className="h-5 w-5" />
+              <ForwardIcon className="h-5 w-5" />
             </label>
             <a
               href="https://docs.chain.link/docs/jobs/"

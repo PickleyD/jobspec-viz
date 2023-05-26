@@ -113,7 +113,7 @@ export const Flow = ({ className }: FlowProps) => {
     aiWandModeSelector
   )
 
-  const taskNodeToFlowElement = (node: any, index: number, numNodes: number) => {
+  const taskNodeToFlowElement = (node: any, index: number, numTaskNodes: number, numTotalNodes: number) => {
     const nodeType = node.ref.machine.id;
 
     const { coords, taskType } = node.ref.state.context;
@@ -124,8 +124,8 @@ export const Flow = ({ className }: FlowProps) => {
       data: {
         type: taskType,
         machine: node.ref,
-        deletable: numNodes > 1,
-        numNodes: numNodes
+        deletable: numTaskNodes > 1,
+        numNodes: numTotalNodes
       },
       position: coords,
       dragHandle: ".custom-drag-handle",
@@ -188,7 +188,7 @@ export const Flow = ({ className }: FlowProps) => {
     return flowElement;
   };
 
-  const aiNodeToFlowElement = (node: any, index: number, numNodes: number) => {
+  const aiNodeToFlowElement = (node: any, index: number, numTotalNodes: number) => {
     const nodeType = node.ref.machine.id;
 
     const { coords } = node.ref.state.context;
@@ -198,7 +198,7 @@ export const Flow = ({ className }: FlowProps) => {
       type: nodeType,
       data: {
         machine: node.ref,
-        numNodes: numNodes
+        numNodes: numTotalNodes
       },
       position: coords,
       dragHandle: ".custom-drag-handle",
@@ -208,7 +208,7 @@ export const Flow = ({ className }: FlowProps) => {
   }
 
   const elements = [
-    ...taskNodesFromMachine.map((node: any, index: number) => taskNodeToFlowElement(node, index, taskNodesFromMachine.length)),
+    ...taskNodesFromMachine.map((node: any, index: number) => taskNodeToFlowElement(node, index, taskNodesFromMachine.length, taskNodesFromMachine.length + aiNodesFromMachine.length)),
     ...aiNodesFromMachine.map((node: any, index: number) => aiNodeToFlowElement(node, index, aiNodesFromMachine.length))
   ];
 
@@ -387,8 +387,7 @@ export const Flow = ({ className }: FlowProps) => {
           onConnectEnd={handleConnectEnd}
           onConnect={handleConnect}
           connectionLineComponent={CustomConnectionLine}
-          panOnDrag={isDefaultMode || testMode}
-          selectionOnDrag={isAiWandMode}
+          panOnDrag={isAiWandMode || isDefaultMode || testMode}
           fitView
           fitViewOptions={{
             duration: 500,

@@ -1,6 +1,7 @@
 import { createMachine, assign } from "xstate";
 import { sendParent } from "xstate/lib/actions";
 import { XYCoords, NodeContext } from "./node"
+import { TomlLine } from "./workspaceMachine";
 
 export type AiNodeEvent =
     | { type: "ADD_INCOMING_NODE"; nodeId: string }
@@ -11,7 +12,7 @@ export type AiNodeEvent =
     | { type: "REMOVE_OUTGOING_NODE"; nodeId: string }
     | { type: "UPDATE_COORDS"; value: XYCoords }
     | { type: "SET_PROMPT"; value: string }
-    | { type: "PROCESS_PROMPT" };
+    | { type: "PROCESS_PROMPT", toml: Array<TomlLine>};
 
 export interface AiNodeContext extends NodeContext {
     id: string;
@@ -162,6 +163,12 @@ export const createAiNodeMachine = (
             },
             services: {
                 submitAiPrompt: (context, event) => {
+                    if (!("toml" in event)) {
+                        throw new Error(`'toml' prop required on event triggering submitAiPrompt fn`)
+                    } 
+
+                    const currentToml = event.toml.reduce((prev, curr) => prev + `\n${curr.value}`, ``)
+
                     return fetch("/api/generate", {
                         method: "POST",
                         headers: {
@@ -170,7 +177,9 @@ export const createAiNodeMachine = (
                         },
                         body: JSON.stringify(
                             {
-                                prompt: context.prompt
+                                prompt: context.prompt,
+                                toml: currentToml,
+                                aiNodeId: context.id
                             }
                         )
                     })

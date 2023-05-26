@@ -1,4 +1,4 @@
-import { CogIcon, CodeBracketSquareIcon, BeakerIcon, UserIcon, AcademicCapIcon, ChatBubbleLeftRightIcon, SunIcon, MoonIcon } from "@heroicons/react/24/solid"
+import { CogIcon, CodeBracketSquareIcon, BeakerIcon, UserIcon, ForwardIcon, ChatBubbleLeftRightIcon, SunIcon, MoonIcon } from "@heroicons/react/24/solid"
 import { useEffect, useState } from "react"
 
 export interface SideMenuProps {
@@ -45,7 +45,7 @@ export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps
                     <ul className="flex flex-col items-start">
                         <li className="group h-[60px]" onClick={() => onSelectedIndexChange(0)}>
                             <button className="hover:bg-primary/10 gap-3 py-3 px-4 cursor-pointer flex items-center">
-                                <AcademicCapIcon className={`${selectedIndex === 0 ? "drop-shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_0_8px_rgba(255,255,255,1)] fill-foreground" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-foreground`} />
+                                <ForwardIcon className={`${selectedIndex === 0 ? "drop-shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_0_8px_rgba(255,255,255,1)] fill-foreground" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-foreground`} />
                             </button>
                         </li>
                         <li className="group h-[60px]" onClick={() => onSelectedIndexChange(1)}>

@@ -1,0 +1,116 @@
+{
+  "type": "cron",
+  "name": "",
+  "externalJobId": "",
+  "gasLimit": "",
+  "maxTaskDuration": "",
+  "forwardingAllowed": false,
+  "edges": [
+    {
+      "id": "edge_1",
+      "source": "task_0",
+      "sourceCustomId": "my_http_task",
+      "target": "ai_1",
+      "targetCustomId": "ai_1"
+    }
+  ],
+  "totalNodesAdded": 2,
+  "totalEdgesAdded": 2,
+  "jobTypeSpecific": {
+    "cron": { "schedule": { "value": "0 0 18 * * *", "valid": true } },
+    "directrequest": {
+      "contractAddress": { "value": "", "valid": false },
+      "minContractPaymentLinkJuels": { "value": "", "valid": true },
+      "minIncomingConfirmations": { "value": "", "valid": true }
+    },
+    "fluxmonitor": {},
+    "keeper": {},
+    "offchainreporting": {},
+    "webhook": {}
+  },
+  "jobTypeVariables": {
+    "directrequest": {
+      "logTopics": {
+        "value": "",
+        "values": [],
+        "valid": true,
+        "type": "string"
+      },
+      "logData": {
+        "value": "",
+        "valid": true,
+        "type": "bytes",
+        "fromType": "hex"
+      }
+    },
+    "cron": {},
+    "fluxmonitor": {},
+    "keeper": {},
+    "offchainreporting": {},
+    "webhook": {}
+  },
+  "toml": [
+    { "value": "type = \"cron\"" },
+    { "value": "schemaVersion = 1" },
+    { "value": "schedule = \"CRON_TZ=UTC 0 0 18 * * *\"", "valid": true },
+    { "value": "" },
+    { "value": "observationSource = \"\"\"" },
+    {
+      "value": "my_http_task [type=\"http\"",
+      "valid": true,
+      "isObservationSrc": true
+    },
+    {
+      "value": "              method=GET",
+      "valid": true,
+      "isObservationSrc": true
+    },
+    {
+      "value": "              url=\"http://price.foo/eth-usd\"",
+      "valid": true,
+      "isObservationSrc": true
+    },
+    {
+      "value": "              requestData=\"\"]",
+      "valid": true,
+      "isObservationSrc": true
+    },
+    { "value": "", "isObservationSrc": true },
+    { "value": "my_http_task -> ai_1", "isObservationSrc": true },
+    { "value": "\"\"\"" }
+  ],
+  "nodes": {
+    "tasks": [
+      {
+        "ref": { "id": "task_0" },
+        "context": {
+          "customId": "my_http_task",
+          "coords": { "x": 210, "y": 0 },
+          "taskType": "HTTP",
+          "incomingNodes": [],
+          "outgoingNodes": ["ai_1"],
+          "taskSpecific": {
+            "url": {
+              "raw": "http://price.foo/eth-usd",
+              "rich": "http://price.foo/eth-usd"
+            }
+          },
+          "mock": { "enabled": true },
+          "isValid": true
+        }
+      }
+    ],
+    "ai": [
+      {
+        "ref": { "id": "ai_1" },
+        "context": {
+          "id": "ai_1",
+          "coords": { "x": 210, "y": 435 },
+          "incomingNodes": ["my_http_task"],
+          "outgoingNodes": [],
+          "prompt": "now parse the response and extract the 'price' from it. the response will look like this: { data: { price: 123.34 } }"
+        }
+      }
+    ]
+  }
+}

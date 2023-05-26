@@ -4,13 +4,13 @@ import {
 } from "next/types";
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
-    const { prompt } = request.body;
+    const { prompt, toml, aiNodeId } = request.body;
 
     const payload = {
         model: "gpt-3.5-turbo",
         messages: [{
             role: "user",
-            content: embellishPrompt(prompt),
+            content: embellishPrompt(prompt, toml, aiNodeId),
         }],
         temperature: 0.3,
         // max_tokens: 200,
@@ -32,7 +32,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
     response.status(200).json(json);
 }
 
-const embellishPrompt = (prompt: string) => {
+const embellishPrompt = (prompt: string, toml: string, aiNodeId: string) => {
     return `You are a generator of Chainlink Job Specs in TOML format.
 The user will state what they want the next task(s) in their job spec pipeline to do and you will reply with relevant tasks and params.
 The previous task in the pipeline is provided as context when generating the next task(s).
@@ -557,12 +557,12 @@ Given a values array of [ 2, 5, 2, "foo", "foo" "bar", "foo", 2 ] will return:
 }
 '
 
-Previous task: """
-my_http_task [type="http" method=GET url="http://price.foo/eth-usd" requestData=""]
+User's current job spec: """
+${toml}
 """
 
-User's request for next task(s): """
-now parse the response and extract the 'price' from it. the response will look like this: { data: { price: 123.34 } }
+User's request for the ${aiNodeId} task(s): """
+${prompt}
 """
 `
 }

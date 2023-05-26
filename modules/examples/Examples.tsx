@@ -3,6 +3,7 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext } from "react";
 import { useSelector } from "@xstate/react";
 import empty from "../../examples/empty.json";
+import aiPrompt from "../../examples/aiPrompt.json";
 import ethCall from "../../examples/ethcall.json";
 import getUint256 from "../../examples/getUint256.json";
 import median from "../../examples/median.json";
@@ -53,6 +54,12 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                     onClick={() => handleRehydrate(empty)}
                 >
                     Empty Project
+                </Button>
+                <Separator orientation="vertical" />
+                <Button variant="ghost"
+                    onClick={() => handleRehydrate(aiPrompt)}
+                >
+                    AI Prompt
                 </Button>
                 <Separator orientation="vertical" />
                 <Button variant="ghost"

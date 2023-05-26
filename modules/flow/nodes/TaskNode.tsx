@@ -95,6 +95,10 @@ export const TaskNode = ({
   const [tempCustomId, setTempCustomId] = useState<string>(customId);
   const [customIdError, setCustomIdError] = useState<boolean>(false);
 
+  useEffect(() => {
+    setTempCustomId(customId)
+  }, [customId])
+
   const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
 

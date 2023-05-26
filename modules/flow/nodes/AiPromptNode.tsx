@@ -4,12 +4,14 @@ import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { TextArea } from "./fields";
+import { Button } from "@/components/ui/button";
 
 const nodesSelector = (state: any) => state.context.nodes;
 
 const customIdSelector = (state: any) => state.context.customId;
 const outgoingNodesSelector = (state: any) => state.context.outgoingNodes;
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
+const tomlSelector = (state: any) => state.context.toml;
 const isConnectingSelector = (state: any) => state.context.isConnecting
 const testModeSelector = (state: any) => state.matches("testModeLoading") || state.matches("testMode")
 
@@ -57,6 +59,11 @@ export const AiPromptNode = ({
     nodesSelector
   );
 
+  const toml = useSelector(
+    globalServices.workspaceService,
+    tomlSelector
+  )
+
   const isConnecting = useSelector(
     globalServices.workspaceService,
     isConnectingSelector
@@ -80,7 +87,7 @@ export const AiPromptNode = ({
   };
 
   const handleSubmit = () => {
-    machine.send("PROCESS_PROMPT")
+    machine.send("PROCESS_PROMPT", { toml })
   }
 
   return (
@@ -128,17 +135,18 @@ export const AiPromptNode = ({
           <div className="flex flex-col gap-2 relative">
             <p className="text-xl font-bold">AI Wizard</p>
             <TextArea
-              textAreaClassName="h-48"
-              placeholder="e.g now parse the payload and extract the 'price' value. The format from the previous task response is { data: [{ price: 125.43 }]}"
+              textAreaClassName="h-60"
+              placeholder={
+                `What would you like this task to do?\n\ne.g. now parse the payload and extract the 'price' value. The format from the previous task response is { data: [{ price: 125.43 }]}
+              `}
               value={prompt}
               onChange={(newValue) => machine.send("SET_PROMPT", { value: newValue })}
             />
-            <div
-              className="btn btn-outline"
+            <Button
               onClick={handleSubmit}
             >
               Generate
-            </div>
+            </Button>
           </div>
         </div>
         {useDefaultHandles && (

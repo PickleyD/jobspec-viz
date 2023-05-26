@@ -285,9 +285,6 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               CONNECTION_SUCCESS: {
                 actions: ["handleConnectionSuccessAiPromptNodeAddition"],
               },
-              HANDLE_AI_PROMPT_COMPLETION: {
-                actions: ["handleAiPromptCompletion"]
-              }
             }
           },
         },
@@ -313,6 +310,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 isConnecting: (_context, _event) => false,
               }),
             ],
+          },
+          HANDLE_AI_PROMPT_COMPLETION: {
+            actions: ["handleAiPromptCompletion"]
           }
         },
       },
@@ -999,6 +999,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                     context: nodeContextToPersist,
                   }
                 }),
+                ai: context.nodes.ai.map((entry) => {
+
+                  const { ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
+
+                  return {
+                    ...entry,
+                    context: nodeContextToPersist,
+                  }
+                }),
               },
             };
 
@@ -1024,6 +1033,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 ...entry,
                 // @ts-ignore
                 ref: spawn(createTaskNodeMachine(entry.context || {}), entry.ref.id),
+              })),
+              ai: savedContext.nodes.ai.map((entry) => ({
+                ...entry,
+                // @ts-ignore
+                ref: spawn(createAiNodeMachine(entry.context || {}), entry.ref.id),
               })),
             }
           };
