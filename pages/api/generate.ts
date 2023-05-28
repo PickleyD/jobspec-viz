@@ -49,6 +49,7 @@ a description of the task
 p:
 the available parameters
 ('#dtnum' means 'Possible data types: number OR stringified number OR bytes-ified number OR $(variable)')
+('allowedFaults' parameter means the max num of input tasks that can error without this task erroring. Default: N - 1, where N is the num of inputs.
 
 i:
 task inputs
@@ -459,7 +460,7 @@ Accepts numerical inputs. Returns mean (average).
 
 p:
 values: array of values.
-allowedFaults (optional): max num of input tasks that can error without this task erroring. Defaults to N - 1, where N is the num of inputs.
+allowedFaults: (optional)
 precision: the num of decimal places in result.
 
 o:
@@ -479,7 +480,7 @@ Accepts numerical values and returns median of them.
 
 p:
 values: an array of values.
-allowedFaults (optional): the max num of input tasks that can error without this task erroring. Default: N - 1, where N is the num of inputs.
+allowedFaults: (optional)
 
 o:
 The median of the values.
@@ -531,7 +532,7 @@ Accepts multiple numerical inputs and returns mode (most common) of them. If mor
 
 p:
 values: an array of values from which to select a mode.
-allowedFaults (optional): the max num of input tasks that can error without this task erroring. Default: N - 1, where N is the num of inputs.
+allowedFaults: (optional)
 
 o:
     Map containing two keys:
@@ -556,6 +557,52 @@ Given a values array of [ 2, 5, 2, "foo", "foo" "bar", "foo", 2 ] will return:
   "occurrences": 3
 }
 '
+
+t: multiply
+
+p:
+input: #dtnum.
+times: #dtnum.
+
+o:
+result
+
+e:
+'
+my_multiply_task [type="multiply" input="$(json_parse_result)" times=3]
+'
+
+t: sum
+
+p:
+values: an array of values.
+allowedFaults: (optional)
+
+o:
+Sum of the values in 'values'.
+
+e:
+'
+my_sum_task [type="sum"
+             values=<[ $(f1), $(f2), $(f3) ]>
+             allowedFaults=1]
+'
+If f1=2,f2=5,f3=20, task will return 27.
+
+t: uppercase
+Returns uppercase of input string.
+
+p:
+input: str.
+
+o:
+uppercase str.
+
+e:
+'
+my_uppercase_task [type="uppercase" input="Hello!"]
+'
+input Hello! will return HELLO!
 
 User's current job spec: """
 ${toml}
