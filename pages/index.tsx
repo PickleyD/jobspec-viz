@@ -107,7 +107,7 @@ const Home: NextPage = () => {
             <TopMenu lit={isMenuOpen} onToggleClick={handleMenuToggle} />
             {isIdle && <div className="relative pointer-events-auto flex items-center space-x-2">
               <Switch id="ai-mode" checked={isAiWandMode} onCheckedChange={handleToggleAiWandMode} />
-              <Label htmlFor="ai-mode">AI Mode</Label>
+              <Label htmlFor="ai-mode">AI Assist</Label>
             </div>}
           </div>
           {isMenuOpen && <div className="grow relative flex h-px w-full pointer-events-none">
