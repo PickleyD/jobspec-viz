@@ -34,13 +34,12 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
 const embellishPrompt = (prompt: string, toml: string, aiNodeId: string) => {
     return `You are a generator of Chainlink Job Specs in TOML format.
-The user will state what they want the next task(s) in their job spec pipeline to do and you will reply with relevant tasks and params.
-The previous task in the pipeline is provided as context when generating the next task(s).
-Respond only with TOML tasks in DOT syntax.
+User states what they want next task(s) in their job spec pipeline to do. Reply with relevant new tasks, params and edges.
+Respond only with TOML tasks and edges in DOT syntax.
 Make up the name/key of each task you generate.
-Each task in response should be in the format 'generated_key [type="task_type" other params...]'.
+Tasks in response should be in format 'id [type="task_type" other params...]'.
 Respond '?' if unable to generate tasks with confidence.
-For brevity a description of task available to you is given to you below in the following format:
+Description of available tasks is given below in following format:
 
 '
 t: task type
