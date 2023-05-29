@@ -16,7 +16,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
     const { isLoggedIn } = useUser()
 
     const { data, error, isLoading, isFetching } = useQuery({
-        queryKey: ["getJobSpecs"], 
+        queryKey: ["getJobSpecs"],
         queryFn: () => fetch("/api/job-specs").then(res => {
             if (res.status !== 200) {
                 throw new Error("An error occurred")
@@ -34,7 +34,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
     }
 
     const renderJobSpecs = ({ data, error, isLoading, isFetching }: { data: any, error: unknown, isLoading: boolean, isFetching: boolean }) => {
-        
+
         if (!isFetching && !data && !error) return null
 
         if (isLoading) return <span>Loading...</span>
@@ -51,7 +51,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
 
     return (
         <>
-            <div className="flex items-center justify-start gap-2 mb-4">
+            <div className="flex items-center justify-start gap-2 mb-6">
                 <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">My profile</h4>
                 <Tooltip className="text-sm text-muted-foreground">
                     <p>
@@ -59,8 +59,8 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                     </p>
                 </Tooltip>
             </div>
-            <div className="flex-col justify-end p-4 w-80 gap-8 flex">
-                <div className="flex justify-center">
+            <div className="flex-col w-80 gap-8 flex">
+                <div className="flex justify-start">
                     <div className="p-2 bg-white/10 rounded-lg">
                         <ConnectWallet
                             btnTitle="Connect Wallet"
@@ -75,10 +75,15 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                         />
                     </div>
                 </div>
-                <h4 className={`${isLoggedIn ? "" : "text-muted-foreground"} font-bold`}>My Saved Job Specs</h4>
-                <ul>
-                    {renderJobSpecs({ data, error, isLoading, isFetching })}
-                </ul>
+                <div className="flex flex-col gap-2">
+                    <h4 className={`${isLoggedIn ? "" : "text-muted-foreground"} font-bold`}>My Saved Job Specs</h4>
+                    {
+                        !isLoggedIn && <p className="text-xs italic p-4">Sign in to save/load your job specs</p>
+                    }
+                    <ul>
+                        {renderJobSpecs({ data, error, isLoading, isFetching })}
+                    </ul>
+                </div>
             </div>
         </>
     );
