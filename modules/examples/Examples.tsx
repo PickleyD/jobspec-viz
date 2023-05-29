@@ -42,7 +42,7 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
     return (
         <>
             <div className="flex items-center justify-start gap-2 mb-4">
-                <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Templates</h4>
+                <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Quickstart Templates</h4>
                 <Tooltip className="text-sm text-muted-foreground">
                     <p>
                         Select from a preconfigured template job spec to get you started.
