@@ -37,10 +37,10 @@ export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps
     }, [])
 
     return <div className="pointer-events-auto relative flex flex-col h-full text-base-content rounded-bl-lg bg-transparent">
-        <div className={`transition-opacity absolute h-px w-20 left-1 bg-gradient-to-r from-transparent via-accent-foreground to-transparent top-[-1px]`} />
+        <div className={`transition-opacity absolute h-px w-20 left-1 bg-gradient-to-r from-transparent via-accent dark:via-accent-foreground to-transparent top-[-1px]`} />
         <div className="flex flex-col gap-8 h-full">
             <div className="relative h-full">
-                <div className={`transition-transform ${getMenuItemShineTranslate(selectedIndex)} absolute h-[80px] w-[2px] bg-gradient-to-b from-transparent via-accent-foreground to-transparent left-[-1px] opacity-50`} />
+                <div className={`transition-transform ${getMenuItemShineTranslate(selectedIndex)} absolute h-[80px] w-[2px] bg-gradient-to-b from-transparent via-accent dark:via-accent-foreground to-transparent left-[-1px] opacity-50`} />
                 <div className="flex flex-col justify-between h-full">
                     <ul className="flex flex-col items-start">
                         <li className="group h-[60px]" onClick={() => onSelectedIndexChange(0)}>

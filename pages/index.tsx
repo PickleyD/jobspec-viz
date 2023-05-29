@@ -120,11 +120,11 @@ const Home: NextPage = () => {
                 <div class="absolute inset-0 bg-split-handle bg-no-repeat bg-center cursor-resize"></div>
                 <div class="absolute inset-0 bg-black opacity-0 hover:opacity-25"></div>
                 `
-                gutter.className = `overflow-hidden relative pointer-events-auto gutter gutter-${direction} bg-gradient-copper rounded-r-lg`
+                gutter.className = `overflow-hidden relative pointer-events-auto gutter gutter-${direction} bg-border dark:bg-gradient-copper rounded-r-lg`
                 return gutter
               }}>
               <div className="relative pointer-events-auto">
-                <div className="grow relative flex h-full w-full border border-accent rounded-bl-lg">
+                <div className="grow relative flex h-full w-full border dark:border-accent rounded-bl-lg">
                   <div className="rounded-bl-lg absolute bg-card inset-0 overflow-hidden">
                     <div className="w-screen h-screen absolute bg-gradient-to-t from-card via-muted/20 to-transparent" />
                     <div className="w-screen h-screen absolute bg-gradient-to-br from-card to-muted/50" />

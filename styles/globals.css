@@ -87,7 +87,7 @@ a {
     --secondary: 48 100% 33%;
     --secondary-foreground: 192 15% 95%;
 
-    --accent: 48 50% 90%;
+    --accent: 48 0% 90%;
     --accent-foreground: 24 0% 0%;
 
     --destructive: 0 100% 50%;
