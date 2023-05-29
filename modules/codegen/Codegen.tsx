@@ -65,7 +65,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
         <button className="hover:underline text-muted-foreground font-bold" onClick={handleImportClick}>Import</button>
       </div>
       <div
-        className="p-4 mockup-code text-sm bg-black relative rounded-lg"
+        className="p-4 mockup-code text-sm bg-muted relative rounded-lg"
         ref={codeRef}
       >
         <div className="relative flex items-center justify-start gap-2 mb-4">
