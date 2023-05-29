@@ -68,11 +68,11 @@ export const SideMenu = ({ selectedIndex, onSelectedIndexChange }: SideMenuProps
                                 <BeakerIcon className={`${selectedIndex === 4 ? "drop-shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_0_8px_rgba(255,255,255,1)] fill-foreground" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-foreground`} />
                             </button>
                         </li>
-                        <li className="group h-[60px]" onClick={() => onSelectedIndexChange(5)}>
+                        {/* <li className="group h-[60px]" onClick={() => onSelectedIndexChange(5)}>
                             <button className="hover:bg-primary/10 gap-3 py-3 px-4 cursor-pointer flex items-center">
                                 <ChatBubbleLeftRightIcon className={`${selectedIndex === 5 ? "drop-shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_0_8px_rgba(255,255,255,1)] fill-foreground" : "fill-gray-600"} h-8 w-8 transition-colors group-hover:fill-foreground`} />
                             </button>
-                        </li>
+                        </li> */}
                     </ul>
                     <div className="mb-8 group h-[60px]" onClick={handleThemeToggle}>
                         <button className="hover:bg-primary/10 gap-3 py-3 px-4 cursor-pointer flex items-center">
