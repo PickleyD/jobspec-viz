@@ -343,8 +343,8 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
             if (aiNodeToReplace && newNodes.length > 0) {
                 const { coords, incomingNodes, outgoingNodes } = aiNodeToReplace.ref.state.context
 
-                // Replace position of new nodes with old AI node position
-                newNodes.forEach(node => node.ref.state.context.coords = coords)
+                // Replace position of new nodes with old AI node position (shifted along by the index of the node)
+                newNodes.forEach((node, index) => node.ref.state.context.coords = ({ x: coords.x + (index * 320), y: coords.y }))
 
                 // Replace incomingNodes of first generated node with those from AI node
                 newNodes[0].ref.state.context.incomingNodes = incomingNodes
@@ -355,7 +355,11 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
 
             const totalTaskNodes = [...context.nodes.tasks, ...newNodes]
 
-            let totalEdges = [...context.edges, ...edges]
+            let totalEdges = [
+                ...context.edges,
+                ...edges
+            ]
+
             if (aiNodeToReplace && newNodes.length > 0) {
                 totalEdges = totalEdges.map(edge => {
 
@@ -917,22 +921,35 @@ const constructTaskNodesAndEdgesFromObsSrc = (currNodes: Nodes, currEdges: Edges
 
     const currNumTaskNodes = currNodes.tasks.length
 
-    const nodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
+    const newNodesWithComputedIds = parsedObservationSrc.nodes.map((node, index) => {
         return {
             ...node,
             computedId: `task_${index + currNumTaskNodes}`
         }
     })
 
+    const totalNodesMapping = [
+        ...currNodes.tasks.map(node => ({
+            computedId: node.ref.id,
+            id: node.ref.state.context.customId,
+        })),
+        ...newNodesWithComputedIds.map(newNode => ({
+            computedId: newNode.computedId,
+            id: newNode.id
+        }))
+    ]
+
+    const currEdgesLen = currEdges.length
+
     const edges = parsedObservationSrc.edges.map((edge, index) => {
 
         const sourceCustomId: string = (edge.targets[0] as NodeRef).id
         const targetCustomId: string = (edge.targets[1] as NodeRef).id
-        const sourceWithComputedId = nodesWithComputedIds.find(entry => entry.id === sourceCustomId)
-        const targetWithComputedId = nodesWithComputedIds.find(entry => entry.id === targetCustomId)
+        const sourceWithComputedId = totalNodesMapping.find(entry => entry.id === sourceCustomId)
+        const targetWithComputedId = totalNodesMapping.find(entry => entry.id === targetCustomId)
 
         return {
-            id: `edge_${index}`,
+            id: `edge_${index + currEdgesLen + 1}`,
             source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
             sourceCustomId: sourceCustomId,
             target: targetWithComputedId ? targetWithComputedId.computedId : "",
@@ -940,8 +957,7 @@ const constructTaskNodesAndEdgesFromObsSrc = (currNodes: Nodes, currEdges: Edges
         }
     })
 
-
-    const nodes = nodesWithComputedIds.map((node, index) => {
+    const nodes = newNodesWithComputedIds.map((node, index) => {
 
         // @ts-ignore
         const taskSpecificNodeAttrs = node.attributes.values.filter(val => val[0] !== "type")
