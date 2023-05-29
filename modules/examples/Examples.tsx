@@ -49,7 +49,7 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                     </p>
                 </Tooltip>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 max-w-[500px]">
                 <Button className="basis-1/2"
                     onClick={() => handleRehydrate(empty)}
                 >

@@ -8,7 +8,7 @@ export interface TaskConfigTabsProps {
 
 export const TaskConfigTabs = ({ defaultValue = "config", config = <></>, test = <></> }: TaskConfigTabsProps) => {
 
-    return <div className="w-full py-2">
+    return <div className="w-full p-2 bg-background rounded-lg">
         <Tabs defaultValue={defaultValue} className="">
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="config">Config</TabsTrigger>

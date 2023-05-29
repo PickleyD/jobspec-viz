@@ -26,7 +26,7 @@ export const DirectRequestVariableSetters = ({ className = "", disabled = false 
     )
 
     return <>
-        <div className="grid grid-rows-2 grid-flow-col gap-2 max-w-lg overflow-auto">
+        <div className="grid grid-cols-2 grid-flow-row gap-3">
             <div className="w-[410px]">
                 <TextArrayField
                     label="$(jobRun.logTopics)"

@@ -131,9 +131,9 @@ const Home: NextPage = () => {
                   </div>
                   <div className="absolute invert dark:invert-0 bg-noise opacity-20 inset-0" />
                   <SideMenu selectedIndex={selectedSideMenuItem} onSelectedIndexChange={handleSelectedSideMenuItemChange} />
-                  <div className="h-full overflow-auto relative">
-                    <div className="w-max relative min-h-full">
-                      <div className="p-4 relative h-full">
+                  <div className="h-full overflow-auto relative w-full">
+                    <div className="min-w-max w-full relative min-h-full">
+                      <div className="p-4 relative h-full w-full">
                         {
                           renderSideMenuContent(selectedSideMenuItem)
                         }

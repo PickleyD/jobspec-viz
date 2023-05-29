@@ -75,7 +75,7 @@ export const Configurator = () => {
 
   return (
     <div className="">
-      <div className="flex items-center justify-start gap-2 mb-4">
+      <div className="flex items-center justify-start gap-2 mb-6">
         <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Config</h4>
         <Tooltip className="text-sm text-muted-foreground">
           <p>Chainlink nodes support the execution of a number of job types. Each job type has some unique fields and pipeline variables.</p>
@@ -93,8 +93,8 @@ export const Configurator = () => {
         </SelectContent>
       </Select>
 
-      <div className="grid grid-cols-3 gap-2 max-w-xl">
-        <div className="flex flex-col w-full max-w-xs">
+      <div className="grid grid-cols-2 gap-3 max-w-xl">
+        <div className="flex flex-col w-full max-w-sm">
           <FieldLabel name="Name" optional />
           <Input
             disabled={disabled}
@@ -105,7 +105,7 @@ export const Configurator = () => {
           />
         </div>
 
-        <div className="flex flex-col w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-sm">
           <FieldLabel name="External Job ID" optional />
           <Input
             disabled={disabled}
@@ -116,7 +116,7 @@ export const Configurator = () => {
           />
         </div>
 
-        <div className="flex flex-col w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-sm">
           <FieldLabel name="Gas Limit" optional />
           <Input
             disabled={disabled}
@@ -127,7 +127,7 @@ export const Configurator = () => {
           />
         </div>
 
-        <div className="flex flex-col w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-sm">
           <FieldLabel name="Max. Task Duration" optional />
           <Input
             disabled={disabled}
@@ -138,7 +138,7 @@ export const Configurator = () => {
           />
         </div>
 
-        <div className="flex flex-col w-full max-w-xs">
+        <div className="flex flex-col w-full max-w-sm">
           <FieldLabel name="Forwarding Allowed" />
           <Select
             disabled={disabled}
@@ -156,8 +156,8 @@ export const Configurator = () => {
         </div>
       </div>
 
-      <div className="bg-muted p-2 rounded-lg mt-6 max-w-xl">
-        <div className="flex flex-col w-full max-w-xs">
+      <div className="border p-2 rounded-lg mt-6 w-full min-w-max">
+        <div className="flex flex-col w-full max-w-xs mb-4">
           <FieldLabel name="Job Type" />
           <Select
             disabled={disabled}
