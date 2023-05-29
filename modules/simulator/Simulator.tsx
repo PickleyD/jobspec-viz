@@ -111,7 +111,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
 
   return (
     <>
-      <div className="flex items-center justify-start gap-2 mb-4">
+      <div className="flex items-center justify-start gap-2 mb-6">
         <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Test</h4>
         <Tooltip className="text-sm text-muted-foreground">
           <p>
@@ -119,7 +119,7 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
           </p>
         </Tooltip>
       </div>
-      <div className="flex items-center justify-center p-4">
+      <div className="flex items-center justify-center">
         <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[20rem]">
           <div className="flex items-center gap-2 mb-2 mt-3">
             <Switch id="test-mode" checked={testMode || testModeLoading} onCheckedChange={handleToggleTestMode} />

@@ -55,7 +55,7 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
 
   return (
     <>
-      <div className="flex items-center justify-start gap-12 mb-4">
+      <div className="flex items-center justify-start gap-12 mb-6">
         <div className="flex items-center justify-start gap-2">
           <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Code</h4>
           <Tooltip className="text-sm text-muted-foreground">
@@ -65,14 +65,14 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
         <button className="hover:underline text-muted-foreground font-bold" onClick={handleImportClick}>Import</button>
       </div>
       <div
-        className="p-4 mockup-code text-sm bg-muted relative rounded-lg"
+        className="p-4 mockup-code text-sm bg-white dark:bg-muted relative rounded-lg"
         ref={codeRef}
       >
         <div className="relative flex items-center justify-start gap-2 mb-4">
           <div className="p-2 flex gap-1">
-            <div className={`grayscale-[70%] bg-[#ff6a6a] rounded-full h-3 w-3`} />
-            <div className={`grayscale-[70%] bg-[#6ae1ff] rounded-full h-3 w-3`} />
-            <div className={`grayscale-[70%] bg-[#ffe16a] rounded-full h-3 w-3`} />
+            <div className={`dark:grayscale-[70%] bg-[#ffaaaa] dark:bg-[#ff6a6a] rounded-full h-3 w-3`} />
+            <div className={`dark:grayscale-[70%] bg-[#aaeeff] dark:bg-[#6ae1ff] rounded-full h-3 w-3`} />
+            <div className={`dark:grayscale-[70%] bg-[#ffeeaa] dark:bg-[#ffe16a] rounded-full h-3 w-3`} />
           </div>
           <Button onClick={handleCopyToClipboard} variant="outline" className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
             {showCheckIcon ? <CheckIcon className="h-4 w-4 group-hover:stroke-background" /> : <DocumentDuplicateIcon className="h-4 w-4 group-hover:stroke-background" />}

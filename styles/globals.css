@@ -97,17 +97,17 @@ a {
 
     --radius: 0.5rem;
 
-    --success: 120 100% 23%;
-    --success-light: 120 100% 30%;
-    --success-dark: 120 100% 10%;
+    --success: 120 100% 35%;
+    --success-light: 120 100% 40%;
+    --success-dark: 120 100% 30%;
 
-    --error: 0 100% 30%;
-    --error-light: 0 100% 35%;
-    --error-dark: 0 100% 25%;
+    --error: 0 100% 50%;
+    --error-light: 0 100% 55%;
+    --error-dark: 0 100% 45%;
 
-    --pending: 48 100% 33%;
-    --pending-light: 48 100% 38%;
-    --pending-dark: 48 100% 28%;
+    --pending: 48 100% 50%;
+    --pending-light: 48 100% 55%;
+    --pending-dark: 48 100% 45%;
   }
 
   .dark {
