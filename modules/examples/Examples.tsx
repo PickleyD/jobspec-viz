@@ -41,7 +41,7 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
 
     return (
         <>
-            <div className="flex items-center justify-start gap-2 mb-4">
+            <div className="flex items-center justify-start gap-2 mb-6">
                 <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Quickstart Templates</h4>
                 <Tooltip className="text-sm text-muted-foreground">
                     <p>
@@ -49,28 +49,28 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                     </p>
                 </Tooltip>
             </div>
-            <div className="flex flex-col">
-                <Button variant="ghost"
+            <div className="grid grid-cols-2 gap-3">
+                <Button className="basis-1/2"
                     onClick={() => handleRehydrate(empty)}
                 >
                     Empty Project
                 </Button>
-                <Separator orientation="vertical" />
-                <Button variant="ghost"
+                {/* <Separator orientation="vertical" /> */}
+                <Button className="basis-1/2"
                     onClick={() => handleRehydrate(aiPrompt)}
                 >
                     AI Prompt
                 </Button>
-                <Separator orientation="vertical" />
-                <Button variant="ghost"
+                {/* <Separator orientation="vertical" /> */}
+                <Button className="basis-1/2" 
                     onClick={() => handleRehydrate(ethCall)}
                 >{`ETH Call`}</Button>
-                <Separator orientation="vertical" />
-                <Button variant="ghost"
+                {/* <Separator orientation="vertical" /> */}
+                <Button className="basis-1/2"
                     onClick={() => handleRehydrate(getUint256)}
                 >{`Get -> Uint256`}</Button>
-                <Separator orientation="vertical" />
-                <Button variant="ghost"
+                {/* <Separator orientation="vertical" /> */}
+                <Button className="basis-1/2"
                     onClick={() => handleRehydrate(median)}
                 >{`Median Answer`}</Button>
             </div>
