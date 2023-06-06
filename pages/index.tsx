@@ -9,6 +9,9 @@ import { SideMenu, TopMenu } from "../components/menu";
 import Split from "react-split"
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
@@ -18,12 +21,10 @@ const isIdleSelector = (state: any) => state.matches("idle")
 const isAiWandModeSelector = (state: any) => state.matches("idle.aiWandMode")
 
 const Home: NextPage = () => {
-  const [helpMsgDisplayed, setHelpMsgDisplayed] = useState<boolean>(true);
-
   const [newProjectHeroDisplayed, setNewProjectHeroDisplayed] =
     useState<boolean>(true);
 
-  const handleNewEmptyProject = () => setNewProjectHeroDisplayed(false);
+  const handleEnterApp = () => setNewProjectHeroDisplayed(false);
 
   const globalServices = useContext(GlobalStateContext);
 
@@ -85,6 +86,68 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ImportModal />
+      {newProjectHeroDisplayed && (
+        <div className="absolute z-50 h-full w-full pointer-events-auto backdrop-blur-sm flex items-center justify-center p-8">
+          <div className="bg-black relative h-full w-full max-w-[800px] max-h-[500px] rounded-lg flex flex-col items-start justify-start gap-8">
+            <div className="absolute bg-noise opacity-20 inset-0 rounded-lg" />
+            <div className="absolute top-4 right-4 h-96 w-96 z-10">
+              <div className="relative h-96 w-96">
+                <Image src="/blob.svg" layout="fill" />
+                <div className="absolute top-12 h-40 w-full">
+                  <div className="relative h-full w-full">
+                    <Image src="/illustration.svg" layout="fill" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute top-4 right-4 z-50">
+              <Button onClick={() => setNewProjectHeroDisplayed(false)}
+                variant="outline"
+                className="w-7 h-7 rounded-full p-0 group transition-colors hover:bg-white border-white"
+              >
+                <XMarkIcon className="h-5 w-5 stroke-white group-hover:stroke-black" />
+                <span className="sr-only">Close modal</span>
+              </Button>
+            </div>
+            <div className="z-20 flex flex-col items-start justify-center gap-6 p-8">
+              <div className="flex flex-col items-start justify-center gap-8 py-4">
+                <div className="relative h-20 w-[141px]">
+                  <Image src="/linkit.svg" alt="linkit logo" layout="fill" />
+                </div>
+                <h2 className="text-gray-300 text-sm font-bold max-w-sm">
+                  Learn, create, and test your next Chainlink job spec —{" "}
+                  <span className="text-[#ffeea8]">
+                    directly from your web browser
+                  </span>
+                </h2>
+              </div>
+              <Separator orientation="horizontal" className="bg-gray-500" />
+              <div className="grid grid-cols-4 gap-x-6 gap-y-4 text-white text-sm place-items-start">
+                <div className="border-4 border-primary text-xl rounded-full w-12 h-12 flex items-center justify-center">1</div>
+                <div className="border-4 border-primary text-xl rounded-full w-12 h-12 flex items-center justify-center">2</div>
+                <div className="border-4 border-primary text-xl rounded-full w-12 h-12 flex items-center justify-center">3</div>
+                <div className="border-4 border-primary text-xl rounded-full w-12 h-12 flex items-center justify-center">4</div>
+                <span>Import your existing job spec or pick from a quickstart template.</span>
+                <span>Drag, drop, connect tasks and get help from the <span className="text-[#ffeea8]">
+                  AI assistant
+                </span> to tweak your pipeline.</span>
+                <span>Our simulated environment provides the easiest way to test and debug your pipeline.</span>
+                <span>When you're ready, export the generated TOML and you're good to go!</span>
+              </div>
+              <div className="w-full flex items-center justify-end">
+                <a href="https://don.tools" target="_blank" rel="noopener noreferrer" className="hover:underline text-gray-400 text-sm w-fit flex items-center gap-2">
+                  <span>
+                    Created by DON Tools
+                  </span>
+                  <div className="h-8 w-8">
+                    <Image src="/don-tools-logo.svg" width={80} height={80} />
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <main className="w-full h-full relative">
         <div className="w-full h-full fixed z-0">
           <Flow />
@@ -146,30 +209,6 @@ const Home: NextPage = () => {
             </Split>
           </div>}
         </div>
-        {/* <div className="w-full h-full invisible md:visible fixed z-10 pointer-events-none">
-          <div className="p-8 pt-10 absolute left-0 flex flex-col gap-4">
-            <UserProfilePanel className="pointer-events-none w-fit" />
-            <label
-              tabIndex={0}
-              onClick={() => setNewProjectHeroDisplayed(true)}
-              className={`ml-2 mt-2 pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
-            >
-              <ForwardIcon className="h-5 w-5" />
-            </label>
-            <a
-              href="https://docs.chain.link/docs/jobs/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <label
-                tabIndex={0}
-                className={`ml-2 pointer-events-auto btn border-0 hover:border-2 hover:border-secondary btn-circle`}
-              >
-                <BookOpenIcon className="h-5 w-5" />
-              </label>
-            </a>
-          </div> 
-        </div> */}
       </main>
     </div>
   );
