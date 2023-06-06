@@ -39,8 +39,12 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
         );
     };
 
+    const handleImportClick = () => {
+        globalServices.workspaceService.send("OPEN_MODAL", { name: "import" })
+    }
+
     return (
-        <>
+        <div className="flex flex-col gap-4">
             <div className="flex items-center justify-start gap-2 mb-6">
                 <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Quickstart Templates</h4>
                 <Tooltip className="text-sm text-muted-foreground">
@@ -62,7 +66,7 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                     AI Prompt
                 </Button>
                 {/* <Separator orientation="vertical" /> */}
-                <Button className="basis-1/2" 
+                <Button className="basis-1/2"
                     onClick={() => handleRehydrate(ethCall)}
                 >{`ETH Call`}</Button>
                 {/* <Separator orientation="vertical" /> */}
@@ -74,6 +78,12 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                     onClick={() => handleRehydrate(median)}
                 >{`Median Answer`}</Button>
             </div>
-        </>
+            <div className="flex gap-2 w-full items-center">
+                <Separator orientation="horizontal" className="shrink" />
+                <span>OR</span>
+                <Separator orientation="horizontal" className="shrink" />
+            </div>
+            <button className="hover:underline text-muted-foreground font-bold" onClick={handleImportClick}>Import an existing job spec</button>
+        </div>
     );
 };
