@@ -2,7 +2,7 @@ import { Handle, NodeProps, Position } from "reactflow";
 import React, { useContext, useEffect, useId, useState } from "react";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../../context/GlobalStateContext";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { Squares2X2Icon, XMarkIcon, PlayIcon } from "@heroicons/react/24/outline";
 import { TASK_TYPE } from "../../workspace/taskNodeMachine";
 import { XYCoords } from "../../workspace/node";
@@ -242,12 +242,10 @@ export const TaskNode = ({
           <div className="inset-0 absolute bg-gradient-radial-bottom dark:from-foreground/[.06] from-foreground/[.15] to-transparent rounded-md" />
           <div className="absolute invert dark:invert-0 bg-noise opacity-20 inset-0 rounded-md" />
           {deletable &&
-            <div
-              onClick={handleDeleteNode}
-              className="z-30 absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
-            >
-              <TrashIcon className="fill-current w-6" />
-            </div>
+            <Button onClick={handleDeleteNode} variant="outline" className="z-30 absolute top-[14px] right-[38px] w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+              <TrashIcon className="h-4 w-4 group-hover:stroke-background" />
+              <span className="sr-only">Delete node</span>
+            </Button>
           }
           {testMode &&
             <div className="absolute inset-0 transparent z-20">
@@ -266,7 +264,7 @@ export const TaskNode = ({
               } */}
             </div>
           }
-          <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab z-30">
+          <div className="custom-drag-handle absolute top-[6px] right-2 h-10 w-6 flex items-center justify-center cursor-grab z-30">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="fill-current"

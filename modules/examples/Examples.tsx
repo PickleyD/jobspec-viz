@@ -83,7 +83,7 @@ export const Examples = ({ className = "" }: ExamplesProps) => {
                 <span>OR</span>
                 <Separator orientation="horizontal" className="shrink" />
             </div>
-            <button className="hover:underline text-muted-foreground font-bold" onClick={handleImportClick}>Import an existing job spec</button>
+            <button className="hover:underline hover:text-foreground text-muted-foreground font-bold" onClick={handleImportClick}>Import an existing job spec</button>
         </div>
     );
 };
