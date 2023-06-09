@@ -170,6 +170,9 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                     constructedMachineContext.edges = edges
                     constructedMachineContext.totalNodesAdded = nodes.length
                     constructedMachineContext.totalEdgesAdded = edges.length
+
+                    // Shifted position along by the index of the node
+                    nodes.forEach((node, index) => node.ref.state.context.coords = ({ x: node.ref.state.context.coords.x + (index * 320), y: node.ref.state.context.coords.y }))
                 }
 
                 return Promise.resolve({ constructedMachineContext, warnings })
@@ -943,16 +946,16 @@ const constructTaskNodesAndEdgesFromObsSrc = (currNodes: Nodes, currEdges: Edges
     const currEdgesLen = currEdges.length
 
     let edgesSplitIntoSingleLengths: Edges = []
-    
+
     parsedObservationSrc.edges.forEach((edge) => {
         const numSplits = edge.targets.length - 1
 
         for (let i = 0; i < numSplits; i++) {
             const sourceCustomId: string = (edge.targets[i] as NodeRef).id
-            const targetCustomId: string = (edge.targets[i+1] as NodeRef).id
+            const targetCustomId: string = (edge.targets[i + 1] as NodeRef).id
             const sourceWithComputedId = totalNodesMapping.find(entry => entry.id === sourceCustomId)
             const targetWithComputedId = totalNodesMapping.find(entry => entry.id === targetCustomId)
-    
+
             edgesSplitIntoSingleLengths.push({
                 id: `edge_${edgesSplitIntoSingleLengths.length + currEdgesLen + 1}`,
                 source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
