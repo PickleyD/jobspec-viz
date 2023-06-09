@@ -100,7 +100,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                 },
             };
 
-            return fetch("/api/job-specs/null/versions", {
+            return fetch("/api/job-spec-versions", {
                 method: "POST",
                 headers: {
                     Accept: "application/json",

@@ -1,12 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getUser } from "../../../auth/user"
-import prisma from '../../../../../lib/prisma';
+import { getUser } from "../auth/user"
+import prisma from '../../../lib/prisma';
 
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
   };
   
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
+
+    console.log("INSIDE FN")
 
     const user = await getUser(request)
 
@@ -19,8 +21,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
     const { address } = user
 
-    const { specId } = request.query
-
     // Add a new version to the job spec
     if (request.method === "POST") {
         const { content } = request.body
@@ -32,26 +32,11 @@ export default async function handler(request: NextApiRequest, response: NextApi
         }
 
         try {
-            let jobSpecCreate
-            if (specId !== "null") {
-                jobSpecCreate = {
-                    connectOrCreate: {
-                        where: {
-                            id: typeof(specId) === "number" ? parseInt(specId) : parseInt(specId[0])
-                        },
-                        create: {
-                            created_by: address.toLowerCase()
-                        }
-                    }
-                }
-            }
-            else {
-                jobSpecCreate = {
+            let jobSpecCreate = {
                     create: {
                         created_by: address.toLowerCase()
                     }
                 }
-            }
 
             const jobSpecVersion = await prisma.job_spec_version.create({
                 data: {
