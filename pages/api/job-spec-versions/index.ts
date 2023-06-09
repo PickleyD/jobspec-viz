@@ -5,7 +5,9 @@ import prisma from '../../../lib/prisma';
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
   };
-  
+
+
+// TODO - I have temporarily moved this file from /job-specs/[slug]/versions and altered it to get around a Vercel bug
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
 
     const user = await getUser(request)
