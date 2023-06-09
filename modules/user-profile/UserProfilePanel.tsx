@@ -3,6 +3,7 @@ import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ConnectWallet, useUser } from "@thirdweb-dev/react";
+import { Button } from "@/components/ui/button";
 
 export interface UserProfilePanelProps {
     className?: string;
@@ -26,6 +27,10 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
         }),
         enabled: isLoggedIn
     })
+
+    const handleSaveJobSpecVersion = () => {
+        globalServices.workspaceService.send("SAVE_JOB_SPEC_VERSION")
+    }
 
     const handleLoadJobSpecVersion = (jsonContent: any) => {
         globalServices.workspaceService.send("RESTORE_STATE", {
@@ -83,6 +88,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                     <ul>
                         {renderJobSpecs({ data, error, isLoading, isFetching })}
                     </ul>
+                    <Button onClick={handleSaveJobSpecVersion}>Save Job Spec</Button>
                 </div>
             </div>
         </>
