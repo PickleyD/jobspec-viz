@@ -1,24 +1,23 @@
-import { Popover, PopoverProps } from "./Popover"
-import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
-export interface TooltipProps extends Omit<PopoverProps, "label" | "content"> {
+export interface TooltipProps {
     children: React.ReactNode;
     className?: string;
 }
 
-export const Tooltip = ({ children, className = "", ...rest }: TooltipProps) => {
+export const Tooltip = ({ children, className = "" }: TooltipProps) => {
 
-    return <Popover
-        className="w-6 h-6"
-        label={(open) => <label
-            tabIndex={0}
-            className={`border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
-        >
-            <InformationCircleIcon className="swap-off h-4 w-4 text-white" />
-            <XMarkIcon className="swap-on h-4 w-4 text-white" />
-        </label>}
-        content={<div className={`p-4 max-w-sm flex flex-col gap-2 ${className}`}>
+    return <Popover>
+        <PopoverTrigger asChild>
+            <Button variant="outline" className="w-6 h-6 rounded-full group transition-colors hover:bg-foreground p-0">
+                <InformationCircleIcon className="h-4 w-4 group-hover:stroke-background" />
+                <span className="sr-only">Open tooltip</span>
+            </Button>
+        </PopoverTrigger>
+        <PopoverContent className={`${className} w-80`}>
             {children}
-        </div>}
-        {...rest} />
+        </PopoverContent>
+    </Popover>
 }

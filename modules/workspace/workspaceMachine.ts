@@ -6,26 +6,38 @@ import {
   actions,
   ActorRefFrom,
   StateMachine,
+  raise
 } from "xstate";
 import {
   createTaskNodeMachine,
   TaskNodeOptions,
   TaskNodeContext,
   TaskNodeEvent,
-  TASK_TYPE,
-  XYCoords,
+  TASK_TYPE
 } from "./taskNodeMachine";
+import {
+  NodeOptions,
+  XYCoords
+} from "./node"
 import {
   Edge,
   OnConnectStartParams,
   ReactFlowInstance,
-} from "react-flow-renderer";
-import { isAddress } from "ethers/lib/utils";
+} from "reactflow";
+import { ethers } from "ethers";
+import Web3 from "web3";
+import toml from "toml"
+import { fromDot, NodeRef, attribute as _ } from "ts-graphviz"
+import { toast } from "react-hot-toast"
+import { workspaceMachineOptions as defaultWorkspaceMachineOptions } from "./workspaceMachineOptions";
+import { AiNodeContext, AiNodeEvent, createAiNodeMachine } from "./aiNodeMachine";
 
-type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
+export type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
 
-type WorkspaceEvent =
+export type Edges = Array<CustomEdge>
+
+export type WorkspaceEvent =
   | {
     type: "SET_REACT_FLOW_INSTANCE";
     value: ReactFlowInstance;
@@ -39,7 +51,7 @@ type WorkspaceEvent =
       fromNodeId: string;
     };
   }
-  | { type: "DELETE_TASK_NODE"; nodeId: string }
+  | { type: "DELETE_NODE"; nodeId: string }
   | {
     type: "REPLACE_TASK_NODE";
     nodeId: string;
@@ -55,6 +67,9 @@ type WorkspaceEvent =
   | { type: "SET_JOB_TYPE"; value: JOB_TYPE }
   | { type: "SET_NAME"; value: string }
   | { type: "SET_EXTERNAL_JOB_ID"; value: string }
+  | { type: "SET_GAS_LIMIT"; value: string }
+  | { type: "SET_MAX_TASK_DURATION"; value: string }
+  | { type: "SET_FORWARDING_ALLOWED"; value: string }
   | {
     type: "SET_JOB_TYPE_SPECIFIC_PROPS";
     jobType: JOB_TYPE;
@@ -80,15 +95,36 @@ type WorkspaceEvent =
   | { type: "SIMULATOR_PREV_TASK" }
   | { type: "TRY_RUN_CURRENT_TASK" }
   | { type: "SIMULATOR_NEXT_TASK" }
+  | { type: "SIMULATOR_PROMPT_SIDE_EFFECT" }
   | { type: "PERSIST_STATE" }
-  | { type: "RESTORE_STATE"; savedContext: WorkspaceContext };
+  | { type: "RESTORE_STATE"; savedContext: WorkspaceContext }
+  | { type: "TRY_RUN_CURRENT_SIDE_EFFECT" }
+  | { type: "SKIP_CURRENT_SIDE_EFFECT" }
+  | { type: "SAVE_JOB_SPEC_VERSION" }
+  | { type: "OPEN_MODAL"; name: ModalName }
+  | { type: "CLOSE_MODAL"; data: { name: ModalName } }
+  | { type: "IMPORT_SPEC"; content: string }
+  | { type: "TOGGLE_AI_WAND" }
+  | {
+    type: "ADD_AI_PROMPT_NODE";
+    options: NodeOptions;
+    edgeDetails: {
+      newNodeType: NEW_NODE_TYPE;
+      fromHandleId: string;
+      fromNodeId: string;
+    }
+  }
+  | { type: "HANDLE_AI_PROMPT_COMPLETION", value: string, parentNodes: Array<string>, childNodes: Array<string>, aiNodeId: string  };
 
-interface WorkspaceContext {
+export interface WorkspaceContext {
   reactFlowInstance: ReactFlowInstance | null;
   type: JOB_TYPE;
   name: string;
   externalJobId: string;
-  edges: CustomEdge[];
+  gasLimit: string;
+  maxTaskDuration: string;
+  forwardingAllowed: boolean;
+  edges: Edges;
   nodes: Nodes;
   jobTypeSpecific: JobTypeFieldMap;
   jobTypeVariables: JobTypeVarFieldMap;
@@ -102,7 +138,12 @@ interface WorkspaceContext {
   parsingError: string;
   currentTaskIndex: number;
   jobLevelVars64?: string;
+  provider: ReturnType<typeof getProvider>;
+  // Would use a Set for openModals but changes aren't detected in consumers
+  openModals: Array<ModalName>;
 }
+
+type ModalName = "import"
 
 type JobTypeFieldMap = { [key in JOB_TYPE]: { [key: string]: Field } };
 
@@ -126,7 +167,7 @@ type JobLevelVarField = {
 const dataTypes = ["string", "bytes", "bytes32", "int", "float", "decimal", "bool", "address", "null"]
 type DATA_TYPES = typeof dataTypes[number]
 
-type TaskInstructions = {
+export type TaskInstructions = {
   id: string;
   inputs: Array<{
     id: string;
@@ -147,9 +188,12 @@ type Result = {
   vars: { [key: string]: any };
 };
 
-type Nodes = {
+export type Nodes = {
   tasks: Array<{
     ref: ActorRefFrom<StateMachine<TaskNodeContext, any, TaskNodeEvent>>;
+  }>;
+  ai: Array<{
+    ref: ActorRefFrom<StateMachine<AiNodeContext, any, AiNodeEvent>>;
   }>;
 };
 
@@ -159,7 +203,8 @@ export type TomlLine = {
   isObservationSrc?: boolean;
 };
 
-export type JOB_TYPE = "cron" | "directrequest";
+export const JOB_TYPES = ["cron", "directrequest", "fluxmonitor", "keeper", "offchainreporting", "webhook"] as const
+export type JOB_TYPE = typeof JOB_TYPES[number];
 
 const getNextUniqueTaskId = (tasks: Array<any>) => {
   const tasksCustomIdsWithDefaultFormat = tasks
@@ -175,7 +220,7 @@ const getNextUniqueTaskId = (tasks: Array<any>) => {
   return id.toString();
 };
 
-const validateAddress = (input: string) => isAddress(input);
+const validateAddress = (input: string) => ethers.utils.isAddress(input);
 
 const validateJobTypeSpecifics = (jobTypeSpecifics: any, event: any) => {
   const { jobType, prop, value } = event;
@@ -205,17 +250,132 @@ const validateJobTypeSpecifics = (jobTypeSpecifics: any, event: any) => {
   return validatedJobTypeSpecifics;
 };
 
+const getProvider = (network = "") => {
+  const networkToUse = "homestead"
+
+  return ethers.getDefaultProvider(networkToUse, {
+    // TODO: Add more services
+    alchemy: process.env.NEXT_PUBLIC_ALCHEMY_ID
+  })
+}
+
 export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
   {
     id: "workspace",
     initial: "idle",
     states: {
       idle: {
+        initial: "defaultMode",
+        states: {
+          defaultMode: {
+            on: {
+              TOGGLE_AI_WAND: {
+                target: "aiWandMode"
+              },
+              CONNECTION_SUCCESS: {
+                actions: ["handleConnectionSuccessTaskNodeAddition", "regenerateToml"],
+              }
+            }
+          },
+          aiWandMode: {
+            on: {
+              TOGGLE_AI_WAND: {
+                target: "defaultMode"
+              },
+              CONNECTION_SUCCESS: {
+                actions: ["handleConnectionSuccessAiPromptNodeAddition"],
+              },
+            }
+          },
+        },
         on: {
           TOGGLE_TEST_MODE: {
             target: "testModeLoading",
           },
+          SAVE_JOB_SPEC_VERSION: {
+            target: "savingJobSpecVersion",
+          },
+          IMPORT_SPEC: {
+            target: "importing"
+          },
+          CONNECTION_START: {
+            actions: assign({
+              isConnecting: (_context, _event) => true,
+              connectionParams: (_context, event) => event.params,
+            }),
+          },
+          CONNECTION_END: {
+            actions: [
+              assign({
+                isConnecting: (_context, _event) => false,
+              }),
+            ],
+          },
+          HANDLE_AI_PROMPT_COMPLETION: {
+            actions: ["handleAiPromptCompletion"]
+          }
         },
+      },
+      importing: {
+        invoke: {
+          src: "importJobSpec",
+          onDone: {
+            target: "idle",
+            actions: [
+              assign((context, event) => {
+
+                const newPartialContext: Partial<WorkspaceContext> = event.data.constructedMachineContext
+
+                let newContext = {
+                  ...context,
+                  ...newPartialContext
+                }
+
+                if ("nodes" in newPartialContext && newPartialContext.nodes) {
+                  newContext = {
+                    ...newContext,
+                    nodes: {
+                      ...newContext.nodes,
+                      tasks: newPartialContext.nodes.tasks.map((entry: any) => ({
+                        ...entry,
+                        // @ts-ignore
+                        ref: spawn(createTaskNodeMachine(entry.ref.state.context || {}), entry.ref.id),
+                      })),
+                    }
+                  }
+                }
+
+                return newContext
+              }),
+              raise({ type: "CLOSE_MODAL", data: { name: "import" } }),
+              "createImportToast",
+              "regenerateToml",
+            ]
+          },
+          onError: {
+            target: "idle",
+            actions: [
+              "createImportToast"
+            ]
+          }
+        }
+      },
+      savingJobSpecVersion: {
+        invoke: {
+          src: "saveJobSpecVersion",
+          onDone: {
+            target: "idle",
+            actions: [
+              (context, event) => toast.success("Job Spec saved successful")
+            ]
+          },
+          onError: {
+            target: "idle",
+            actions: [
+              (context, event) => toast.error(event.data.message)
+            ]
+          }
+        }
       },
       testModeLoading: {
         initial: "parsingDag",
@@ -278,6 +438,20 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             always: [{ target: "idle" }],
           },
           error: {},
+          sideEffectPrompt: {
+            on: {
+              TRY_RUN_CURRENT_SIDE_EFFECT: { target: "processingCurrentSideEffect" },
+              SKIP_CURRENT_SIDE_EFFECT: { target: "skippingCurrentSideEffect" }
+            },
+          },
+          processingCurrentSideEffect: {
+            entry: ["executeCurrentSideEffect"],
+            always: [{ target: "idle" }],
+          },
+          skippingCurrentSideEffect: {
+            entry: ["skipCurrentSideEffect"],
+            always: [{ target: "idle" }],
+          },
         },
         on: {
           TOGGLE_TEST_MODE: {
@@ -353,6 +527,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               };
             }),
           },
+          SIMULATOR_PROMPT_SIDE_EFFECT: {
+            target: ".sideEffectPrompt"
+          }
         },
       },
       error: {},
@@ -362,11 +539,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       type: "cron",
       name: "",
       externalJobId: "",
+      gasLimit: "",
+      maxTaskDuration: "",
+      forwardingAllowed: false,
       edges: [],
       totalNodesAdded: 0,
       totalEdgesAdded: 0,
       nodes: {
         tasks: [],
+        ai: []
       },
       jobTypeSpecific: {
         cron: {
@@ -389,6 +570,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             valid: true,
           },
         },
+        fluxmonitor: {},
+        keeper: {},
+        offchainreporting: {},
+        webhook: {}
       },
       jobTypeVariables: {
         directrequest: {
@@ -406,6 +591,10 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           }
         },
         cron: {},
+        fluxmonitor: {},
+        keeper: {},
+        offchainreporting: {},
+        webhook: {},
       },
       isConnecting: false,
       connectionParams: { nodeId: null, handleId: null, handleType: null },
@@ -415,6 +604,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
       parsingError: "",
       currentTaskIndex: 0,
       jobLevelVars64: undefined,
+      provider: getProvider(),
+      openModals: []
     },
     on: {
       SET_REACT_FLOW_INSTANCE: {
@@ -501,23 +692,104 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           ];
         }),
       },
-      DELETE_TASK_NODE: {
+      ADD_AI_PROMPT_NODE: {
+        // @ts-ignore
+        actions: actions.pure((context, event) => {
+          const { fromHandleId, fromNodeId, newNodeType } = event.edgeDetails;
+
+          // from will be a task (or other) node
+          const fromNodeCustomId =
+            context.nodes.tasks.find((taskNode) => taskNode.ref.id === fromNodeId)?.ref
+              .state.context.customId || "";
+
+          const isFirstNode = !fromHandleId || !newNodeType;
+          const isForwardConnection = newNodeType === "target";
+
+          const newNodeId = `ai_${event.options.id ?? context.totalNodesAdded
+            }`;
+
+          const fromId = isForwardConnection ? fromNodeId : newNodeId;
+          const toId = isForwardConnection ? newNodeId : fromNodeId;
+
+          const fromPresentationId = isForwardConnection
+            ? fromNodeCustomId
+            : newNodeId;
+          const toPresentationId = isForwardConnection
+            ? newNodeId
+            : fromNodeCustomId;
+
+          return [
+            assign({
+              totalNodesAdded: context.totalNodesAdded + 1,
+              totalEdgesAdded: context.totalEdgesAdded + 1,
+              nodes: {
+                ...context.nodes,
+                ai: [
+                  ...context.nodes.ai,
+                  {
+                    // add a new aiNodeMachine actor with a unique name
+                    ref: spawn(
+                      createAiNodeMachine({
+                        id: newNodeId,
+                        coords: event.options.initialCoords,
+                        ...(!isFirstNode &&
+                          (isForwardConnection
+                            ? { incomingNodes: [fromNodeCustomId] }
+                            : { outgoingNodes: [fromNodeCustomId] })),
+                      }),
+                      newNodeId
+                    ),
+                  },
+                ],
+              },
+              edges:
+                fromNodeId && fromHandleId
+                  ? [
+                    ...context.edges,
+                    {
+                      id: `edge_${context.totalEdgesAdded}`,
+                      source: fromId,
+                      sourceCustomId: fromPresentationId,
+                      target: toId,
+                      targetCustomId: toPresentationId,
+                    },
+                  ]
+                  : context.edges,
+            }),
+            send(
+              {
+                type: isForwardConnection
+                  ? "ADD_OUTGOING_NODE"
+                  : "ADD_INCOMING_NODE",
+                nodeId: newNodeId,
+              },
+              { to: fromNodeId }
+            ),
+            "regenerateToml",
+          ];
+        }),
+      },
+      DELETE_NODE: {
         actions: [
           assign({
             nodes: (context, event) => ({
               ...context.nodes,
               tasks: [
                 ...context.nodes.tasks.filter(
-                  (task) => task.ref.state.context.customId !== event.nodeId
+                  (node) => node.ref.id !== event.nodeId
+                ),
+              ],
+              ai: [
+                ...context.nodes.ai.filter(
+                  (node) => node.ref.id !== event.nodeId
                 ),
               ],
             }),
-            edges: (context, event) =>
-              context.edges.filter(
+            edges: (context, event) => context.edges.filter(
                 (edge) =>
-                  edge.sourceCustomId !== event.nodeId &&
-                  edge.targetCustomId !== event.nodeId
-              ),
+                  edge.source !== event.nodeId &&
+                  edge.target !== event.nodeId
+              )
           }),
           "regenerateToml",
         ],
@@ -597,6 +869,30 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           "regenerateToml",
         ],
       },
+      SET_GAS_LIMIT: {
+        actions: [
+          assign({
+            gasLimit: (context, event) => event.value,
+          }),
+          "regenerateToml",
+        ],
+      },
+      SET_MAX_TASK_DURATION: {
+        actions: [
+          assign({
+            maxTaskDuration: (context, event) => event.value,
+          }),
+          "regenerateToml",
+        ],
+      },
+      SET_FORWARDING_ALLOWED: {
+        actions: [
+          assign({
+            forwardingAllowed: (context, event) => event.value === "true",
+          }),
+          "regenerateToml",
+        ],
+      },
       SET_JOB_TYPE_SPECIFIC_PROPS: {
         actions: [
           assign({
@@ -640,24 +936,9 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
           // "regenerateToml"
         ],
       },
-      CONNECTION_START: {
-        actions: assign({
-          isConnecting: (_context, _event) => true,
-          connectionParams: (_context, event) => event.params,
-        }),
-      },
-      CONNECTION_END: {
-        actions: [
-          assign({
-            isConnecting: (_context, _event) => false,
-          }),
-        ],
-      },
-      CONNECTION_SUCCESS: {
-        actions: ["addTaskNode", "regenerateToml"],
-      },
       STORE_TASK_RUN_RESULT: {
         actions: assign((context, event) => {
+          console.log(event)
           return {
             taskRunResults: [
               ...context.taskRunResults,
@@ -700,6 +981,8 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               parsingError,
               currentTaskIndex,
               jobLevelVars64,
+              provider,
+              openModals,
               ...toPersist } = context
 
             // Instead of saving the full context as-is, we'll expand the context of each spawned machine
@@ -709,6 +992,15 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 tasks: context.nodes.tasks.map((entry) => {
 
                   const { runResult, ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
+
+                  return {
+                    ...entry,
+                    context: nodeContextToPersist,
+                  }
+                }),
+                ai: context.nodes.ai.map((entry) => {
+
+                  const { ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
 
                   return {
                     ...entry,
@@ -735,485 +1027,48 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
             ...context,
             ...savedContext,
             nodes: {
+              ...context.nodes,
               tasks: savedContext.nodes.tasks.map((entry) => ({
                 ...entry,
                 // @ts-ignore
                 ref: spawn(createTaskNodeMachine(entry.context || {}), entry.ref.id),
               })),
+              ai: savedContext.nodes.ai.map((entry) => ({
+                ...entry,
+                // @ts-ignore
+                ref: spawn(createAiNodeMachine(entry.context || {}), entry.ref.id),
+              })),
             }
           };
         }),
       },
+      OPEN_MODAL: {
+        actions: assign((context, { name }) => {
+          return {
+            openModals: context.openModals.includes(name) ? context.openModals : [...context.openModals, name]
+          }
+        })
+      },
+      CLOSE_MODAL: {
+        actions: assign((context, event) => {
+          const { name } = event.data
+          return {
+            openModals: context.openModals.filter(entry => entry !== name)
+          }
+        })
+      },
+      // SET_NETWORK: {
+      //   actions: [
+      //     assign((context, event) => {
+      //       return {
+      //         network: event.value
+      //       }
+      //     })
+      //   ]
+      // }
     },
   },
-  {
-    guards: {
-      hasParsingError: (context, event) => {
-        return context.parsingError.length > 0
-      }
-    },
-    services: {
-      parseSpec: (context, event) => {
-
-        return fetch("/api/graph", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json; charset=UTF-8",
-          },
-          body: JSON.stringify({
-            spec: `${context.toml
-              .filter((line) => line.isObservationSrc)
-              .map((line) => line.value)
-              .join("\n")}`,
-          }),
-        })
-          .then(res => res.json().then(json => {
-            return json
-          }))
-      },
-      processJobLevelVariables: (context, event) => {
-        return fetch("/api/var-helper", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(
-            {
-              // TODO: Need to prepend with jobSpec instead of jobRun for non job-specific variables
-              jobRun: Object.fromEntries(Object.entries(context.jobTypeVariables[context.type]).map(([k, v]) => {
-
-                return [k, ({
-                  ...v.values !== undefined && { values: v.values },
-                  ...(v.values === undefined && v.value !== undefined) && { value: v.value },
-                  type: v.type || "string",
-                  fromType: v.fromType || "string"
-                })]
-              }))
-            }
-          )
-        })
-          .then(res => res.json().then(json => {
-            return res.ok ? json : Promise.reject(json);
-          })
-          );
-      },
-    },
-    actions: {
-      // @ts-ignore
-      setCurrentTaskPendingRun: actions.pure((context, _) => {
-        if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
-
-        const currentTask = context.parsedTaskOrder[context.currentTaskIndex];
-        const currentTaskCustomId = currentTask.id;
-
-        const currentTaskId = getTaskNodeByCustomId(
-          context,
-          currentTaskCustomId
-        )?.ref.id;
-
-        return [send({ type: "SET_PENDING_RUN" }, { to: currentTaskId })];
-      }),
-      // @ts-ignore
-      resetNextTask: actions.pure((context, _) => {
-        const nextTaskIndex = context.currentTaskIndex + 1;
-
-        if (nextTaskIndex >= context.parsedTaskOrder.length) return;
-
-        const nextTask = context.parsedTaskOrder[context.currentTaskIndex + 1];
-        const nextTaskCustomId = nextTask.id;
-
-        const nextTaskId = getTaskNodeByCustomId(context, nextTaskCustomId)?.ref
-          .id;
-
-        return [send({ type: "RESET" }, { to: nextTaskId })];
-      }),
-      validateJobTypeSpecificProps: assign({
-        jobTypeSpecific: (context, event) =>
-          validateJobTypeSpecifics(context.jobTypeSpecific, event),
-      }),
-      addTaskNode: send((context: WorkspaceContext, event: WorkspaceEvent) => {
-        const isForwardConnection =
-          context.connectionParams?.handleType === "source";
-        const newNodeType = isForwardConnection ? "target" : "source";
-        const fromHandleId = context.connectionParams?.handleId || "";
-        const fromNodeId = context.connectionParams?.nodeId || "";
-
-        const taskType = "SUM";
-        const initialCoords =
-          "initialCoords" in event
-            ? adjustNewSourceNodeHeightByTypeDefault(
-              event.initialCoords,
-              taskType,
-              isForwardConnection
-            )
-            : { x: 0, y: 0 };
-
-        return {
-          type: "ADD_TASK_NODE",
-          options: {
-            initialCoords,
-            taskType,
-          },
-          edgeDetails: {
-            newNodeType,
-            fromHandleId,
-            fromNodeId,
-          },
-        };
-      }),
-      // @ts-ignore
-      processCurrentTask: actions.pure((context: WorkspaceContext, event) => {
-        if (context.currentTaskIndex >= context.parsedTaskOrder.length) return;
-
-        // Try to execute the current task and then proceed if successful
-        const currentTask = context.parsedTaskOrder[context.currentTaskIndex];
-        const currentTaskCustomId = currentTask.id;
-
-        const currentTaskId = getTaskNodeByCustomId(
-          context,
-          currentTaskCustomId
-        )?.ref.id;
-
-        const input64s = currentTask.inputs
-          .filter((input) => input.propagateResult === true)
-          .map(
-            (input) =>
-              context.taskRunResults.find((trr) => trr.id === input.id)?.result
-                .val64
-          );
-
-        const vars64 =
-          context.taskRunResults.length > 0
-            ? context.taskRunResults[context.taskRunResults.length - 1].result
-              .vars64
-            : context.jobLevelVars64;
-
-        return [
-          send(
-            { type: "TRY_RUN_TASK", input64s, vars64 },
-            { to: currentTaskId }
-          ),
-        ];
-      }),
-      regenerateToml: assign((context, event) => {
-
-        const { type: jobType, name, externalJobId } = context;
-
-        const lines: Array<TomlLine> = [];
-
-        lines.push(
-          { value: `type = "${jobType}"` },
-          { value: `schemaVersion = 1` }
-        );
-        name && lines.push({ value: `name = "${name}"` });
-        externalJobId &&
-          lines.push({ value: `externalJobId = "${externalJobId}"` });
-
-        switch (jobType) {
-          case "cron": {
-            const { value, valid } = context.jobTypeSpecific.cron.schedule;
-            lines.push({ value: `schedule = "CRON_TZ=UTC ${value}"`, valid });
-            break;
-          }
-          case "directrequest": {
-            const { value: contractAddress, valid: contractAddressValid } =
-              context.jobTypeSpecific.directrequest.contractAddress;
-            const {
-              value: minContractPaymentLinkJuels,
-              valid: minContractPaymentLinkJuelsValid,
-            } =
-              context.jobTypeSpecific.directrequest.minContractPaymentLinkJuels;
-            const {
-              value: minIncomingConfirmations,
-              valid: minIncomingConfirmationsValid,
-            } = context.jobTypeSpecific.directrequest.minIncomingConfirmations;
-            lines.push({
-              value: `contractAddress = "${contractAddress}"`,
-              valid: contractAddressValid,
-            });
-            minContractPaymentLinkJuels !== "" &&
-              lines.push({
-                value: `minContractPaymentLinkJuels = "${minContractPaymentLinkJuels}"`,
-                valid: minContractPaymentLinkJuelsValid,
-              });
-            minIncomingConfirmations !== "" &&
-              lines.push({
-                value: `minIncomingConfirmations = ${minIncomingConfirmations}`,
-                valid: minIncomingConfirmationsValid,
-              });
-            break;
-          }
-          default:
-            break;
-        }
-
-        lines.push({ value: `` });
-
-        lines.push({ value: `observationSource = """` });
-
-        const observationSrcLines: Array<TomlLine> = [];
-
-        context.nodes.tasks.forEach((task) => {
-          const { customId, taskType, taskSpecific, incomingNodes, isValid } =
-            task.ref.state.context;
-
-          const spacer = new Array(customId ? customId.length + 1 : 0).join(
-            " "
-          );
-
-          switch (taskType) {
-            case "HTTP": {
-              const processedRequestData = taskSpecific.requestData?.raw
-                ? taskSpecific.requestData?.raw
-                  .replace(/\s/g, "")
-                  .replace(/"/g, `\\\"`)
-                : "";
-
-              observationSrcLines.push(
-                { value: `${customId} [type="http"`, valid: isValid },
-                {
-                  value: `${spacer}  method=${taskSpecific.method?.raw || "GET"}`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  url="${taskSpecific.url?.raw || ""}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  requestData="${processedRequestData}"]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "BRIDGE": {
-              const processedRequestData = taskSpecific.requestData?.raw
-                ? taskSpecific.requestData?.raw
-                  .replace(/\s/g, "")
-                  .replace(/"/g, `\\\"`)
-                : "";
-
-              observationSrcLines.push(
-                { value: `${customId} [type="bridge"`, valid: isValid },
-                {
-                  value: `${spacer}  name="${taskSpecific.name?.raw || ""}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  requestData="${processedRequestData}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  async="${taskSpecific.async?.raw || "no"}"]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "JSONPARSE": {
-
-              const processedData = taskSpecific.data?.raw
-                ? taskSpecific.data?.raw
-                  .replace(/\s/g, "")
-                  .replace(/"/g, `\\\"`)
-                : "";
-
-              observationSrcLines.push(
-                { value: `${customId} [type="jsonparse"`, valid: isValid },
-                {
-                  value: `${spacer}  data="${processedData}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  path="${taskSpecific.path?.raw || ""}"]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "CBORPARSE": {
-              observationSrcLines.push(
-                { value: `${customId} [type="cborparse"`, valid: isValid },
-                {
-                  value: `${spacer}  data="${taskSpecific.data?.raw || ""}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  mode="${taskSpecific.mode?.raw || "diet"}"]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "ETHTX": {
-              observationSrcLines.push(
-                { value: `${customId} [type="ethtx"`, valid: isValid },
-                {
-                  value: `${spacer}  to="${taskSpecific.to?.raw || ""}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  data="${taskSpecific.data?.raw || ""}"]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "SUM": {
-              observationSrcLines.push(
-                { value: `${customId} [type="sum"`, valid: isValid },
-                {
-                  value: `${spacer}  values=<${taskSpecific.values?.raw || ""}>${taskSpecific.allowedFaults?.raw ? "" : "]"
-                    }`,
-                  valid: isValid,
-                }
-              );
-              taskSpecific.allowedFaults &&
-                observationSrcLines.push({
-                  value: `${spacer}  allowedFaults=${taskSpecific.allowedFaults?.raw}]`,
-                  valid: isValid,
-                });
-              break;
-            }
-            case "MULTIPLY": {
-              observationSrcLines.push(
-                { value: `${customId} [type="multiply"`, valid: isValid },
-                {
-                  value: `${spacer}  input="${taskSpecific.input?.raw || ""}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  times="${taskSpecific.times?.raw || ""}"]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "DIVIDE": {
-              observationSrcLines.push(
-                { value: `${customId} [type="divide"`, valid: isValid },
-                {
-                  value: `${spacer}  input="${taskSpecific.input?.raw || ""}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  divisor="${taskSpecific.divisor?.raw || ""}"`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  precision="${taskSpecific.precision?.raw || ""
-                    }"]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "ANY": {
-              observationSrcLines.push({
-                value: `${customId} [type="any"]`,
-                valid: isValid,
-              });
-              break;
-            }
-            case "MEAN": {
-              observationSrcLines.push(
-                { value: `${customId} [type="mean"`, valid: isValid },
-                {
-                  value: `${spacer}  values=<[ ${incomingNodes
-                    .map(wrapVariable)
-                    .join(", ")} ]>]`,
-                  valid: isValid,
-                },
-                {
-                  value: `${spacer}  precision=${taskSpecific.precision?.raw || 2}]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "MODE": {
-              observationSrcLines.push(
-                { value: `${customId} [type="mode"`, valid: isValid },
-                {
-                  value: `${spacer}  values=<[ ${incomingNodes
-                    .map(wrapVariable)
-                    .join(", ")} ]>]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "MEDIAN": {
-              observationSrcLines.push(
-                { value: `${customId} [type="median"`, valid: isValid },
-                {
-                  value: `${spacer}  values=<[ ${incomingNodes
-                    .map(wrapVariable)
-                    .join(", ")} ]>]`,
-                  valid: isValid,
-                }
-              );
-              break;
-            }
-            case "ETHABIDECODELOG": {
-              observationSrcLines.push(
-                { value: `${customId} [type="ethabidecodelog"`, valid: isValid },
-                { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
-                { value: `${spacer}  data="${taskSpecific.data?.raw || ""}"`, valid: isValid },
-                { value: `${spacer}  topics="${taskSpecific.topics?.raw || ""}"]`, valid: isValid },
-              )
-              break;
-            }
-            case "ETHABIDECODE": {
-              observationSrcLines.push(
-                { value: `${customId} [type="ethabidecode"`, valid: isValid },
-                { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
-                { value: `${spacer}  data="${taskSpecific.data?.raw || ""}"]`, valid: isValid },
-              )
-              break;
-            }
-            case "ETHABIENCODE": {
-              const processedData = taskSpecific.data?.raw
-                ? taskSpecific.data?.raw
-                  // .replace(/\s/g, "")
-                  .replace(/"/g, `\\\"`)
-                : "";
-
-              observationSrcLines.push(
-                { value: `${customId} [type="ethabiencode"`, valid: isValid },
-                { value: `${spacer}  abi="${taskSpecific.abi?.raw || ""}"`, valid: isValid },
-                { value: `${spacer}  data="${processedData}"]`, valid: isValid },
-              )
-              break;
-            }
-          }
-        });
-
-        context.edges.length > 0 && observationSrcLines.push({ value: `` });
-
-        context.edges.map((edge) => {
-          observationSrcLines.push({
-            value: `${edge.sourceCustomId} -> ${edge.targetCustomId}`,
-          });
-        });
-
-        lines.push(
-          ...observationSrcLines.map((line) => ({
-            ...line,
-            isObservationSrc: true,
-          }))
-        );
-
-        lines.push({ value: `"""` });
-
-        return {
-          toml: lines,
-        };
-      }),
-    },
-  }
+  defaultWorkspaceMachineOptions
 );
 
 const getTaskNodeByCustomId = (context: WorkspaceContext, nodeId: string) =>

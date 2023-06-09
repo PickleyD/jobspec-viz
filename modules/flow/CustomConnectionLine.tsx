@@ -3,7 +3,7 @@ import {
   ConnectionLineComponentProps,
   getBezierPath,
   Position,
-} from "react-flow-renderer";
+} from "reactflow";
 import { snapToGrid, NODE_WIDTH } from "./Flow";
 
 const PLACEHOLDER_HEIGHT = 100;
@@ -11,43 +11,35 @@ const PLACEHOLDER_RADIUS = 8;
 const PLACEHOLDER_STROKE_WIDTH = 4;
 
 export const CustomConnectionLine = ({
-  sourceX,
-  sourceY,
-  sourcePosition,
-  targetX,
-  targetY,
-  targetPosition,
+  fromX,
+  fromY,
+  fromPosition,
+  toX,
+  toY,
+  toPosition,
   fromHandle
 }: ConnectionLineComponentProps) => {
 
   // If fromHandle.position is bottom this means a connection is being drawn from the bottom of a node
   const isForwardsConnection = fromHandle?.position === Position.Bottom;
 
-  // In a backwards connection sourceX, sourceY are the changing coordinates, so snap them
-  const { snappedX: snappedSourceX, snappedY: snappedSourceY } =
-    isForwardsConnection
-      ? { snappedX: sourceX, snappedY: sourceY }
-      : snapToGrid({
-          x: sourceX,
-          y: sourceY,
+  const { snappedX: snappedSourceX, snappedY: snappedSourceY } = snapToGrid({
+          x: fromX,
+          y: fromY,
         });
 
-  // In a forwards connection targetX, targetY are the changing coordinates, so snap them
-  const { snappedX: snappedTargetX, snappedY: snappedTargetY } =
-    isForwardsConnection
-      ? snapToGrid({
-          x: targetX,
-          y: targetY,
-        })
-      : { snappedX: targetX, snappedY: targetY };
+  const { snappedX: snappedTargetX, snappedY: snappedTargetY } = snapToGrid({
+          x: toX,
+          y: toY,
+        });
 
   const pathParams = {
     sourceX: snappedSourceX,
     sourceY: snappedSourceY,
-    sourcePosition,
+    sourcePosition: fromPosition,
     targetX: snappedTargetX,
     targetY: snappedTargetY,
-    targetPosition,
+    targetPosition: toPosition,
   };
 
   return (
@@ -55,18 +47,18 @@ export const CustomConnectionLine = ({
       <g>
         <path
           fill="none"
-          stroke="#fff"
+          className="stroke-foreground"
           strokeWidth={PLACEHOLDER_STROKE_WIDTH}
-          d={getBezierPath(pathParams)}
+          d={getBezierPath(pathParams)[0]}
         />
         <rect
           x={
-            (isForwardsConnection ? snappedTargetX : snappedSourceX) -
+            (isForwardsConnection ? snappedTargetX : snappedTargetX) -
             NODE_WIDTH / 2 +
             PLACEHOLDER_STROKE_WIDTH / 2
           }
           y={
-            (isForwardsConnection ? snappedTargetY : snappedSourceY - PLACEHOLDER_HEIGHT) +
+            (isForwardsConnection ? snappedTargetY : snappedTargetY - PLACEHOLDER_HEIGHT) +
             PLACEHOLDER_STROKE_WIDTH / 2
           }
           width={NODE_WIDTH - PLACEHOLDER_STROKE_WIDTH}
@@ -75,7 +67,7 @@ export const CustomConnectionLine = ({
           ry={PLACEHOLDER_RADIUS}
           className={`fill-black/25 stroke-black/50 stroke-[4px]`}
         />
-        <circle cx={isForwardsConnection ? snappedTargetX : snappedSourceX} cy={isForwardsConnection ? snappedTargetY : snappedSourceY} fill="#fff" r={10} />
+        <circle cx={snappedTargetX} cy={snappedTargetY} fill="#fff" r={10} />
       </g>
     </>
   );

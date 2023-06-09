@@ -1,19 +1,19 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext } from "react";
-import { CogIcon } from "@heroicons/react/24/solid";
 import { CronFields, CronVariableSetters, DirectRequestFields, DirectRequestVariableSetters } from "./jobTypes"
 import { JOB_TYPE } from "../workspace/workspaceMachine"
-import { ExpanderPanel, Tooltip } from "../../components";
+import { Tooltip, FieldLabel } from "../../components";
 import { TaskConfigTabs } from "../flow/nodes/fields";
-
-export interface ConfiguratorProps {
-  className?: string;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 const jobTypeSelector = (state: any) => state.context.type;
 const nameSelector = (state: any) => state.context.name;
 const externalJobIdSelector = (state: any) => state.context.externalJobId;
+const gasLimitSelector = (state: any) => state.context.gasLimit;
+const maxTaskDurationSelector = (state: any) => state.context.maxTaskDuration;
+const forwardingAllowedSelector = (state: any) => state.context.forwardingAllowed;
 const testModeSelector = (state: any) => state.matches("testMode") || state.matches("testModeLoading")
 
 const renderJobTypeSpecificFields = (jobType: JOB_TYPE) => {
@@ -38,7 +38,7 @@ const renderJobTypeSpecificVariableSetters = (jobType: JOB_TYPE, props: any) => 
   }
 }
 
-export const Configurator = ({ className = "" }: ConfiguratorProps) => {
+export const Configurator = () => {
   const globalServices = useContext(GlobalStateContext);
 
   const jobType = useSelector(
@@ -53,6 +53,18 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
     globalServices.workspaceService,
     externalJobIdSelector
   )
+  const gasLimit = useSelector(
+    globalServices.workspaceService,
+    gasLimitSelector
+  )
+  const maxTaskDuration = useSelector(
+    globalServices.workspaceService,
+    maxTaskDurationSelector
+  )
+  const forwardingAllowed = useSelector(
+    globalServices.workspaceService,
+    forwardingAllowedSelector
+  )
 
   const testMode = useSelector(
     globalServices.workspaceService,
@@ -62,100 +74,125 @@ export const Configurator = ({ className = "" }: ConfiguratorProps) => {
   const disabled = testMode
 
   return (
-    <ExpanderPanel className={className} icon={CogIcon} title="Job Configuration">
-      <div className="p-4 pr-6">
-        <div className="flex items-center justify-start gap-2">
-          <div className="text-left text-base uppercase underline underline-offset-4 py-1 w-fit font-bold tracking-widest">
-            Config
-          </div>
-          <Tooltip className="text-sm text-gray-300">
-            <p>Chainlink nodes support the execution of a number of job types. Each job type has some unique fields and pipeline variables.</p>
-            <p>Here you can select your job's type and the relevant configuration fields will become available.</p>
-          </Tooltip>
-        </div>
+    <div className="">
+      <div className="flex items-center justify-start gap-2 mb-6">
+        <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Config</h4>
+        <Tooltip className="text-sm text-muted-foreground">
+          <p>Chainlink nodes support the execution of a number of job types. Each job type has some unique fields and pipeline variables.</p>
+          <p>Here you can select your job's type and the relevant configuration fields will become available.</p>
+        </Tooltip>
+      </div>
 
-        <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text text-xs">Chainlink Version</span>
-          </label>
-          <select
-            disabled={true}
-            className="select select-bordered select-sm"
-            defaultValue="v1.8.1"
-            onChange={() => {}}
-          >
-            <option value="v1.8.1">v1.8.1</option>
-          </select>
-        </div>
+      <FieldLabel name="Chainlink Version" />
+      <Select disabled={true} value="v1.11.0">
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Chainlink Version" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="v1.11.0">v1.11.0</SelectItem>
+        </SelectContent>
+      </Select>
 
-        <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text text-xs">Job Type</span>
-          </label>
-          <select
+      <div className="grid grid-cols-2 gap-3 max-w-xl">
+        <div className="flex flex-col w-full max-w-sm">
+          <FieldLabel name="Name" optional />
+          <Input
             disabled={disabled}
-            className="select select-bordered select-sm"
-            value={jobType}
-            onChange={(event) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: event.target.value })}
+            type="text"
+            placeholder=""
+            value={name}
+            onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
+          />
+        </div>
+
+        <div className="flex flex-col w-full max-w-sm">
+          <FieldLabel name="External Job ID" optional />
+          <Input
+            disabled={disabled}
+            type="text"
+            placeholder=""
+            value={externalJobId}
+            onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
+          />
+        </div>
+
+        <div className="flex flex-col w-full max-w-sm">
+          <FieldLabel name="Gas Limit" optional />
+          <Input
+            disabled={disabled}
+            type="text"
+            placeholder=""
+            value={gasLimit}
+            onChange={(event) => globalServices.workspaceService.send("SET_GAS_LIMIT", { value: event.target.value })}
+          />
+        </div>
+
+        <div className="flex flex-col w-full max-w-sm">
+          <FieldLabel name="Max. Task Duration" optional />
+          <Input
+            disabled={disabled}
+            type="text"
+            placeholder=""
+            value={maxTaskDuration}
+            onChange={(event) => globalServices.workspaceService.send("SET_MAX_TASK_DURATION", { value: event.target.value })}
+          />
+        </div>
+
+        <div className="flex flex-col w-full max-w-sm">
+          <FieldLabel name="Forwarding Allowed" />
+          <Select
+            disabled={disabled}
+            value={forwardingAllowed.toString()}
+            onValueChange={(newValue) => globalServices.workspaceService.send("SET_FORWARDING_ALLOWED", { value: newValue })}
           >
-            <option value="cron">CRON</option>
-            <option value="directrequest">Direct Request</option>
-            <option value="fluxmonitor" disabled>Flux Monitor</option>
-            <option value="keeper" disabled>Keeper</option>
-            <option value="offchainreporting" disabled>Off-chain Reporting</option>
-            <option value="webhook" disabled>Webhook</option>
-          </select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="false">No</SelectItem>
+              <SelectItem value="true">Yes</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="border p-2 rounded-lg mt-6 w-full min-w-max">
+        <div className="flex flex-col w-full max-w-xs mb-4">
+          <FieldLabel name="Job Type" />
+          <Select
+            disabled={disabled}
+            value={jobType}
+            onValueChange={(newValue) => globalServices.workspaceService.send("SET_JOB_TYPE", { value: newValue })}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cron">CRON</SelectItem>
+              <SelectItem value="directrequest">Direct Request</SelectItem>
+              <SelectItem value="fluxmonitor" disabled>Flux Monitor</SelectItem>
+              <SelectItem value="keeper" disabled>Keeper</SelectItem>
+              <SelectItem value="offchainreporting" disabled>Off-chain Reporting</SelectItem>
+              <SelectItem value="webhook" disabled>Webhook</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <TaskConfigTabs
           config={
-            <div className="flex gap-2">
-              <div className="py-2">
-
-                <div className="form-control w-full max-w-xs">
-                  <label className="label">
-                    <span className="label-text text-xs">Name</span>
-                    <span className="label-text-alt text-xs">(optional)</span>
-                  </label>
-                  <input
-                    disabled={disabled}
-                    type="text"
-                    placeholder=""
-                    className="input input-bordered input-sm w-full max-w-xs"
-                    value={name}
-                    onChange={(event) => globalServices.workspaceService.send("SET_NAME", { value: event.target.value })}
-                  />
-                </div>
-
-                <div className="form-control w-full max-w-xs">
-                  <label className="label">
-                    <span className="label-text text-xs">External Job ID</span>
-                    <span className="label-text-alt text-xs">(optional)</span>
-                  </label>
-                  <input
-                    disabled={disabled}
-                    type="text"
-                    placeholder=""
-                    className="input input-bordered input-sm w-full max-w-xs"
-                    value={externalJobId}
-                    onChange={(event) => globalServices.workspaceService.send("SET_EXTERNAL_JOB_ID", { value: event.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="py-2">
-                {
-                  renderJobTypeSpecificFields(jobType)
-                }
-              </div>
+            <div className="flex flex-col gap-2 p-4 bg-background h-full w-full">
+              {
+                renderJobTypeSpecificFields(jobType)
+              }
             </div>
           }
-          test={<>
+          test={<div className="bg-background p-4 h-full w-full">
             {
               renderJobTypeSpecificVariableSetters(jobType, { disabled })
             }
-          </>}
+          </div>}
         />
       </div>
-    </ExpanderPanel>
+    </div>
   );
 };

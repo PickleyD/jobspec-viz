@@ -1,10 +1,11 @@
 import React, { useContext } from 'react';
-import { EdgeProps, getBezierEdgeCenter, getBezierPath } from 'react-flow-renderer';
+import { EdgeProps, getBezierPath } from 'reactflow';
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
-import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Popover } from '../../components';
+import { CameraIcon } from '@heroicons/react/24/outline';
 import { VarsDisplay } from './varsDisplay/VarsDisplay';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 const sourceTaskRunResultSelector = (state: any, sourceId?: string) => {
     if (!sourceId) return
@@ -29,16 +30,7 @@ export const CustomEdge = ({
     data,
     markerEnd,
 }: EdgeProps) => {
-    const edgePath = getBezierPath({
-        sourceX,
-        sourceY,
-        sourcePosition,
-        targetX,
-        targetY,
-        targetPosition,
-    });
-
-    const [labelX, labelY] = getBezierEdgeCenter({
+    const [edgePath, labelX, labelY] = getBezierPath({
         sourceX,
         sourceY,
         sourcePosition,
@@ -57,7 +49,7 @@ export const CustomEdge = ({
     return (
         <svg xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <path id={id} d={edgePath} />
+                <path id={id} d={edgePath} className="stroke-foreground" />
             </defs>
             <use href={`#${id}`} className="react-flow__edge-path" />
             {sourceTaskRunResult && <svg xmlns="http://www.w3.org/2000/svg">
@@ -67,14 +59,17 @@ export const CustomEdge = ({
                         height={foreignObjectSize}
                         transform={`translate(-${foreignObjectSize / 2} -${foreignObjectSize / 2})`}>
                         <div className="h-full w-full flex items-center justify-center">
-                            <Popover label={(open) => <label
-                                tabIndex={0}
-                                className={`shadow-widget border-gray-700 border-2 focus:border-2 fous:border-secondary hover:border-2 hover:border-secondary focus:border-secondary bg-base-100 h-8 w-8 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""}`}
-                            >
-                                <EyeIcon className="swap-off h-5 w-5 text-white" />
-                                <XMarkIcon className="swap-on h-5 w-5 text-white" />
-                            </label>}
-                                content={<VarsDisplay vars={sourceTaskRunResult.vars}/>} />
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+                                        <CameraIcon className="h-4 w-4 group-hover:stroke-background" />
+                                        <span className="sr-only">View variables snapshot</span>
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent>
+                                    <VarsDisplay vars={sourceTaskRunResult.vars} />
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     </foreignObject>
                     <animateMotion id="motion" rotate="0" begin="0s" dur="500ms"

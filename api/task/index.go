@@ -25,11 +25,13 @@ type Task struct {
 }
 
 type Response struct {
-	Value  string                 `json:"value"`
-	Val64  string                 `json:"val64"`
-	Vars   map[string]interface{} `json:"vars"`
-	Vars64 string                 `json:"vars64"`
-	Error  string                 `json:"error"`
+	Value            string                 `json:"value"`
+	Val64            string                 `json:"val64"`
+	Vars             map[string]interface{} `json:"vars"`
+	Vars64           string                 `json:"vars64"`
+	Error            string                 `json:"error"`
+	SideEffectData   string                 `json:"sideEffectData"`
+	SideEffectData64 string                 `json:"sideEffectData64"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -51,60 +53,54 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	response := Response{}
 
+	pipelineVars := pipeline.NewVarsFrom(vars)
+
+	task, taskErr := getTask(TaskType(t.Name), t.Options)
+
+	if taskErr != nil {
+		// TODO: Define and return different error types
+		msg := "Bad request"
+		http.Error(w, msg, http.StatusBadRequest)
+	}
+
+	inputs := make([]pipeline.Result, 0, len(t.Inputs64))
+	for _, r := range t.Inputs64 {
+		inputsDec, _ := base64.StdEncoding.DecodeString(r)
+
+		inputsTemp := pipeline.JSONSerializable{}
+		inputsTemp.UnmarshalJSON(inputsDec)
+
+		inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
+	}
+
+	result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
+
+	// Append the result to the vars
+	// TODO - existence check and warning for overwrite?
 	if t.MockResponse != nil {
 		vars[t.Id] = t.MockResponse
-
-		varsEnc := customToBase64(vars)
-
-		response = Response{
-			Value:  fmt.Sprintf("%v", t.MockResponse),
-			Val64:  customToBase64(t.MockResponse),
-			Vars:   vars,
-			Vars64: varsEnc,
-			Error:  "",
-		}
 	} else {
-		pipelineVars := pipeline.NewVarsFrom(vars)
-
-		task, taskErr := getTask(TaskType(t.Name), t.Options)
-
-		if taskErr != nil {
-			// TODO: Define and return different error types
-			msg := "Bad request"
-			http.Error(w, msg, http.StatusBadRequest)
-		}
-
-		inputs := make([]pipeline.Result, 0, len(t.Inputs64))
-		for _, r := range t.Inputs64 {
-			inputsDec, _ := base64.StdEncoding.DecodeString(r)
-
-			inputsTemp := pipeline.JSONSerializable{}
-			inputsTemp.UnmarshalJSON(inputsDec)
-
-			inputs = append(inputs, pipeline.Result{Value: inputsTemp.Val})
-		}
-
-		result, _ := task.Run(ctx, logger.NullLogger, pipelineVars, inputs)
-
-		// Append the result to the vars
-		// TODO - existence check?
 		vars[t.Id] = result.Value
+	}
 
-		varsEnc := customToBase64(vars)
-		resultValEnc := customToBase64(result.Value)
+	varsEnc := customToBase64(vars)
 
-		resultErr := ""
-		if result.Error != nil {
-			resultErr = result.Error.Error()
-		}
+	resultValEnc := customToBase64(vars[t.Id])
 
-		response = Response{
-			Value:  fmt.Sprintf("%v", result.Value),
-			Val64:  resultValEnc,
-			Vars:   vars,
-			Vars64: varsEnc,
-			Error:  resultErr,
-		}
+	response = Response{
+		Value:  fmt.Sprintf("%v", vars[t.Id]),
+		Val64:  resultValEnc,
+		Vars:   vars,
+		Vars64: varsEnc,
+	}
+
+	if result.Error != nil {
+		response.Error = result.Error.Error()
+	}
+
+	if result.SideEffectData != nil {
+		response.SideEffectData = fmt.Sprintf("%v", result.SideEffectData)
+		response.SideEffectData64 = customToBase64(result.SideEffectData)
 	}
 
 	jsonSer := pipeline.JSONSerializable{
@@ -148,8 +144,8 @@ func (t TaskType) String() string {
 }
 
 const (
-	TaskTypeHTTP TaskType = "http"
-	// TaskTypeBridge           TaskType = "bridge"
+	TaskTypeHTTP      TaskType = "http"
+	TaskTypeBridge    TaskType = "bridge"
 	TaskTypeMean      TaskType = "mean"
 	TaskTypeMedian    TaskType = "median"
 	TaskTypeMode      TaskType = "mode"
@@ -162,7 +158,7 @@ const (
 	// TaskTypeVRF              TaskType = "vrf"
 	// TaskTypeVRFV2            TaskType = "vrfv2"
 	// TaskTypeEstimateGasLimit TaskType = "estimategaslimit"
-	// TaskTypeETHCall          TaskType = "ethcall"
+	TaskTypeETHCall      TaskType = "ethcall"
 	TaskTypeETHTx        TaskType = "ethtx"
 	TaskTypeETHABIEncode TaskType = "ethabiencode"
 	// TaskTypeETHABIEncode2    TaskType = "ethabiencode2"
@@ -176,7 +172,9 @@ const (
 	TaskTypeHexEncode       TaskType = "hexencode"
 	TaskTypeBase64Decode    TaskType = "base64decode"
 	TaskTypeBase64Encode    TaskType = "base64encode"
-
+	TaskTypeLessThan        TaskType = "lessthan"
+	TaskTypeLength          TaskType = "length"
+	TaskTypeLookup          TaskType = "lookup"
 	// // Testing only.
 	// TaskTypePanic TaskType = "panic"
 	// TaskTypeMemo  TaskType = "memo"
@@ -189,7 +187,7 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	jsonString, _ := json.Marshal(options)
 
 	// seeing as we're just running a single task with no context
-	// or pipeline variables we can just use an empty base task
+	// we can just use an empty base task
 	baseTask := pipeline.NewBaseTask(0, "", nil, nil, 0)
 
 	var task pipeline.Task
@@ -218,8 +216,20 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 
 		task = &httpTask
 
-	// case TaskTypeBridge:
-	// 	task = &BridgeTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeBridge:
+		var opts pipeline.BridgeTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.BridgeTask{
+			BaseTask:          baseTask,
+			Name:              opts.Name,
+			RequestData:       opts.RequestData,
+			IncludeInputAtKey: opts.IncludeInputAtKey,
+			Async:             opts.Async,
+			CacheTTL:          opts.CacheTTL,
+		}
 	case TaskTypeMean:
 		var opts pipeline.MeanTask
 		if err := json.Unmarshal(jsonString, &opts); err != nil {
@@ -309,8 +319,28 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 	// 	task = &VRFTaskV2{BaseTask: BaseTask{id: ID, dotID: dotID}}
 	// case TaskTypeEstimateGasLimit:
 	// 	task = &EstimateGasLimitTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
-	// case TaskTypeETHCall:
-	// 	task = &ETHCallTask{BaseTask: BaseTask{id: ID, dotID: dotID}}
+	case TaskTypeETHCall:
+		var opts pipeline.ETHCallTask
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.ETHCallTask{
+			BaseTask:            baseTask,
+			From:                opts.From,
+			Data:                opts.Data,
+			EVMChainID:          opts.EVMChainID,
+			Contract:            opts.Contract,
+			Gas:                 opts.Gas,
+			GasPrice:            opts.GasPrice,
+			GasTipCap:           opts.GasTipCap,
+			GasFeeCap:           opts.GasFeeCap,
+			GasUnlimited:        opts.GasUnlimited,
+			ExtractRevertReason: opts.ExtractRevertReason,
+
+			// CUSTOM
+			SpecGasLimit: opts.SpecGasLimit,
+		}
 	case TaskTypeETHTx:
 		var opts pipeline.ETHTxTask
 		if err := json.Unmarshal(jsonString, &opts); err != nil {
@@ -458,6 +488,40 @@ func getTask(taskType TaskType, options map[string]interface{}) (pipeline.Task, 
 		task = &pipeline.Base64DecodeTask{
 			BaseTask: baseTask,
 			Input:    opts.Input,
+		}
+	case TaskTypeLessThan:
+		var opts pipeline.LessThanTask
+
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.LessThanTask{
+			BaseTask: baseTask,
+			Left:     opts.Left,
+			Right:    opts.Right,
+		}
+	case TaskTypeLength:
+		var opts pipeline.LengthTask
+
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.LengthTask{
+			BaseTask: baseTask,
+			Input:    opts.Input,
+		}
+	case TaskTypeLookup:
+		var opts pipeline.LookupTask
+
+		if err := json.Unmarshal(jsonString, &opts); err != nil {
+			log.Fatal(err)
+		}
+
+		task = &pipeline.LookupTask{
+			BaseTask: baseTask,
+			Key:      opts.Key,
 		}
 	default:
 		return nil, fmt.Errorf(`unknown task type: "%v"`, taskType)

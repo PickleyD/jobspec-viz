@@ -19,5 +19,9 @@
         "jobRun.blockReceiptsRoot",
         "jobRun.blockTransactionsRoot",
         "jobRun.blockStateRoot"
-    ]
+    ],
+    "fluxmonitor": [],
+    "keeper": [],
+    "offchainreporting": [],
+    "webhook": []
 }

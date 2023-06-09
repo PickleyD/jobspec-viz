@@ -1,68 +1,114 @@
-const defaultTheme = require("tailwindcss/defaultTheme");
+const { fontFamily } = require("tailwindcss/defaultTheme");
 
 module.exports = {
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
     "./modules/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       colors: {
-        'success-light': "#3ddd78",
-        'success-dark': "#1a9a49",
-        'error-light': "#ef4444",
-        'error-dark': "#bd1010",
-        'secondary-light': "#f7b13c",
-        'secondary-dark': "#c57f08"
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          light: "hsl(var(--success-light))",
+          dark: "hsl(var(--success-dark))",
+        },
+        error: {
+          DEFAULT: "hsl(var(--error))",
+          light: "hsl(var(--error-light))",
+          dark: "hsl(var(--error-dark))",
+        },
+        pending: {
+          DEFAULT: "hsl(var(--pending))",
+          light: "hsl(var(--pending-light))",
+          dark: "hsl(var(--pending-dark))",
+        }
       },
       animation: {
         'spin-slow': 'spin 3s linear infinite',
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
       backgroundImage: {
         'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-radial-top': 'radial-gradient(circle 100px at center top, var(--tw-gradient-stops))',
+        'gradient-radial-bottom': 'radial-gradient(circle 100px at center bottom, var(--tw-gradient-stops))',
+        'gradient-copper': 'linear-gradient(#3a200f, #5d3318, #3a200f)',
+        'noise': `url("/noise.svg")`,
+        'split-handle': `url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==')`
+      },
+      borderRadius: {
+        lg: `var(--radius)`,
+        md: `calc(var(--radius) - 2px)`,
+        sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Inter", ...defaultTheme.fontFamily.sans],
+        sans: ["Inter", ...fontFamily.sans],
         hand: ["PatrickHand", "cursive"],
       },
-      boxShadow: {
-        widget: [
-          "0.3px 0.3px 0.3px -0.2px hsl(254deg 100% 16% / 0.9)",
-          "0.4px 0.4px 0.4px -0.6px hsl(254deg 100% 16% / 0.8)",
-          "1.1px 1.1px 1.2px -1.2px hsl(254deg 100% 16% / 0.7)",
-          "2.9px 2.9px 3.1px -1.9px hsl(254deg 100% 16% / 0.6)",
-          "6.5px 6.4px 6.8px -2.5px hsl(254deg 100% 16% / 0.5)",
-          "12.3px 12.1px 12.9px -3.1px hsl(254deg 100% 16% / 0.4)",
-          "21.1px 20.7px 22.2px -3.7px hsl(254deg 100% 16% / 0.3)",
-          "33.3px 32.7px 35px -4.4px hsl(254deg 100% 16% / 0.2)",
-          "49.6px 48.7px 52.1px -5px hsl(254deg 100% 16% / 0.1)",
+      dropShadow: {
+        glow: [
+          "0 0px 20px rgba(255,255, 255, 0.35)",
+          "0 0px 65px rgba(255, 255,255, 0.2)",
         ],
-      }
-    },
-  },
-  daisyui: {
-    themes: [
-      {
-        mytheme: {
-          primary: "#3406D1",
-          secondary: "#f59e0b",
-          accent: "#37CDBE",
-          neutral: "#000000",
-          "neutral-content": "#FFFFFF",
-          "base-100": "#000000",
-          "base-300": "#131313",
-          "base-content": "#FFFFFF",
-          info: "#3ABFF8",
-          success: "#22c55e",
-          warning: "#FBBD23",
-          error: "#eb1515",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
         },
       },
-    ],
+    },
   },
   plugins: [
     require('@headlessui/tailwindcss'),
-    require("daisyui")
+    require("tailwindcss-animate")
   ],
 };

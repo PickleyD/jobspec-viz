@@ -1,18 +1,21 @@
+import { Textarea } from "@/components/ui/textarea";
 import React, { useState } from "react";
+import { FieldLabel } from "@/components";
 
 export interface TextAreaProps extends Omit<React.ComponentProps<"textarea">, "onChange"> {
     displayJsonValidity?: boolean;
     label?: string;
-    value: string;
-    onChange: (newValue: string) => void;
+    value?: string;
+    onChange?: (newValue: string) => void;
     onValidJsonChange?: (newJson: string) => void;
     placeholder?: string;
     optional?: boolean;
     className?: string;
+    textAreaClassName?: string;
 }
 
 export const TextArea = ({
-    displayJsonValidity = true,
+    displayJsonValidity = false,
     label,
     value,
     onChange,
@@ -20,7 +23,8 @@ export const TextArea = ({
     placeholder = "",
     optional = false,
     className = "",
-    ...rest
+    textAreaClassName = "",
+    disabled
 }: TextAreaProps) => {
 
     const [isValidJson, setIsValidJson] = useState<boolean>(true)
@@ -28,25 +32,19 @@ export const TextArea = ({
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = event.target.value
         const isValidJson = isJsonString(value)
-        onChange(value)
+        onChange && onChange(value)
         setIsValidJson(isValidJson)
         isValidJson && onValidJsonChange(JSON.stringify(JSON.parse(value)))
     }
 
-    return <div className={`${className} form-control w-full`}>
-        {label && <label className="label pb-0">
-            <span className="label-text">{label}</span>
-            {
-                optional && <span className="label-text-alt">(optional)</span>
-            }
-        </label>
-        }
-        <textarea
+    return <div className={`${className} flex flex-col w-full`}>
+        {label && <FieldLabel name={label} optional />}
+        <Textarea
             onChange={handleChange}
             placeholder={placeholder}
             value={value}
-            className={`textarea textarea-bordered h-full ${displayJsonValidity ? getBorderClasses(isValidJson) : ""}`}
-            {...rest}
+            className={`${textAreaClassName} ${displayJsonValidity ? getBorderClasses(isValidJson) : ""} ${disabled ? "text-muted-foreground" : ""}`}
+            disabled={disabled}
         />
     </div>
 }

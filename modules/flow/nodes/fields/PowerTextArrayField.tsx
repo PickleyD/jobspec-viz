@@ -1,12 +1,14 @@
 import { useSelector } from "@xstate/react";
-import React, { useContext, useState } from "react";
+import React, { useContext, useId, useState } from "react";
 import { GlobalStateContext } from "../../../../context/GlobalStateContext";
 import pipelineVarsData from "../../../../data/jobTypeSpecificPipelineVars.json";
 import { JOB_TYPE } from "../../../workspace/workspaceMachine";
-import { BoltIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Popover } from "../../../../components";
+import { BoltIcon } from "@heroicons/react/24/outline";
+import { FieldLabel } from "../../../../components";
 import { VarSelector } from "./VarSelector";
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 export interface PowerTextArrayFieldProps {
     label: string;
@@ -16,6 +18,7 @@ export interface PowerTextArrayFieldProps {
     ownerNodeCustomId: string,
     placeholder?: string;
     optional?: boolean;
+    className?: string;
 }
 
 const jobTypeSelector = (state: any) => state.context.type;
@@ -35,6 +38,7 @@ export const PowerTextArrayField = ({
     ownerNodeCustomId,
     placeholder = "Enter each item on a new line",
     optional = false,
+    className = "",
 }: PowerTextArrayFieldProps) => {
     const globalServices = useContext(GlobalStateContext);
 
@@ -85,50 +89,48 @@ export const PowerTextArrayField = ({
         document.execCommand("insertText", false, rawVal)
     }
 
+    const fieldId = useId()
+
     const [showRich, setShowRich] = useState<boolean>(true)
 
+  const textAreaClasses = 'h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+
     return (
-        <div className="form-control w-full max-w-xs">
-            <label className="label pb-0">
-                <span className="label-text">{label}</span>
-                {optional && <span className="label-text-alt">(optional)</span>}
-            </label>
+        <div className={`${className} flex flex-col w-full max-w-xs`}>
+            <FieldLabel htmlFor={fieldId} name={label} optional />
             <div className="relative">
                 <div className="grid grid-cols-1 grid-rows-1">
                     <ContentEditable
+                        id={fieldId}
                         html={convertArrayValueToNewlines(value.raw) || ""}
                         onChange={handleChange}
                         onBlur={handleBlur}
                         onFocus={handleFocus}
                         onPaste={handlePaste}
-                        className="row-span-full col-span-full textarea textarea-bordered h-full whitespace-nowrap overflow-auto"
+                        className={`${textAreaClasses} row-span-full col-span-full h-full whitespace-nowrap overflow-auto`}
                     />
                     <ContentEditable
-                        html={value.rich || `<div class="text-gray-300">${placeholder}</div>`}
+                        html={value.rich || `<div class="text-muted-foreground">${placeholder}</div>`}
                         onChange={() => { }}
-                        className={`${showRich ? "" : "invisible"} row-span-full col-span-full whitespace-nowrap overflow-auto textarea textarea-bordered absolute top-0 bottom-0 right-0 left-0 pr-8 pointer-events-none`}
+                        className={`${textAreaClasses} ${showRich ? "" : "invisible"} h-full row-span-full col-span-full whitespace-nowrap overflow-auto textarea textarea-bordered pr-8 pointer-events-none`}
                     />
                 </div>
                 <div className="absolute right-1 bottom-1">
-                    <Popover
-                        label={(open) => (
-                            <label
-                                tabIndex={0}
-                                className={`border-gray-700 focus:border hover:border hover:border-secondary focus:border-secondary bg-base-100 h-6 w-6 min-h-0 btn btn-circle swap swap-rotate ${open ? "swap-active" : ""
-                                    }`}
-                            >
-                                <BoltIcon className="swap-off h-4 w-4 text-white" />
-                                <XMarkIcon className="swap-on h-4 w-4 text-white" />
-                            </label>
-                        )}
-                        content={
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+                                <BoltIcon className="h-4 w-4 group-hover:stroke-background" />
+                                <span className="sr-only">Open variables picker</span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-0 w-fit">
                             <VarSelector
                                 onVarSelected={handleItemSelected}
                                 jobVariables={jobTypeSpecificPipelineVars}
                                 taskVariables={tasks.filter((customId: string) => customId !== ownerNodeCustomId) ?? []}
                             />
-                        }
-                    />
+                        </PopoverContent>
+                    </Popover>
                 </div>
             </div>
         </div>

@@ -11,26 +11,31 @@ export type Test = {
     inputs: Array<Var>;
     options?: { [key: string]: any };
     vars?: { [key: string]: Var };
+    jobRun?: { [key: string]: Var };
+    jobSpec?: { [key: string]: Var };
     want?: Var;
     want64?: string;
     expectError?: boolean;
     mockResponse?: any;
+    wantSideEffectData?: Var;
 }
 
 export const generateTest = (test: Test, inputs64Override?: Array<string>) => {
-    return handleVarsConversion(test.vars, test.inputs)
+    return handleVarsConversion(test.vars, test.jobRun, test.jobSpec, test.inputs)
         .then((response) => {
             return performTask(test, response.body.vars64, inputs64Override || response.body.inputs64)
         })
 }
 
-const handleVarsConversion = (vars: Test["vars"], inputs: Test["inputs"]) => {
+const handleVarsConversion = (vars: Test["vars"], jobRun: Test["jobRun"], jobSpec: Test["jobSpec"], inputs: Test["inputs"]) => {
     return cy.request(
         "POST",
         "api/var-helper",
         {
-            ...vars && { vars: vars },
-            ...inputs && { inputs: inputs },
+            ...vars && { vars },
+            ...jobRun && { jobRun },
+            ...jobSpec && { jobSpec },
+            ...inputs && { inputs },
         },
     )
 }
@@ -58,7 +63,8 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
                     //         keep: test.want?.value
                     //     }
                     // },
-                    ...test.want && { want: test.want }
+                    ...test.want && { want: test.want },
+                    ...test.wantSideEffectData && { wantSideEffectData: test.wantSideEffectData }
                 },
             ).then((varHelperResponse) => {
                 if (test.want64) {
@@ -70,6 +76,10 @@ const performTask = (test: Test, vars64?: string, inputs64?: Array<string>) => {
 
                 if (test.expectError) {
                     expect(taskResponse.body.error).to.not.empty
+                }
+
+                if (test.wantSideEffectData) {
+                    expect(taskResponse.body.sideEffectData64).to.eq(varHelperResponse.body.wantSideEffectData64)
                 }
 
                 return taskResponse.body

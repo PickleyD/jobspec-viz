@@ -8,22 +8,24 @@ import ReactFlow, {
   OnConnectEnd,
   OnConnectStart,
   Node as ReactFlowNode,
-  Connection,
-  addEdge
-} from "react-flow-renderer";
+  Connection
+} from "reactflow";
+import 'reactflow/dist/style.css';
 import dynamic, { DynamicOptions, Loader } from "next/dynamic";
 const Background = dynamic<BackgroundProps>(
-  import("react-flow-renderer").then((mod) => mod.Background) as
+  import("reactflow").then((mod) => mod.Background) as
   | DynamicOptions<{}>
   | Loader<{}>,
   { ssr: false }
 ); // disable ssr
 import {
+  AiPromptNode,
   TaskNode,
   HttpTaskNode,
   BridgeTaskNode,
   JsonParseTaskNode,
   CborParseTaskNode,
+  EthCallTaskNode,
   EthTxTaskNode,
   DivideTaskNode,
   MultiplyTaskNode,
@@ -31,21 +33,28 @@ import {
   SumTaskNode,
   EthAbiEncodeTaskNode,
   EthAbiDecodeTaskNode,
-  EthAbiDecodeLogTaskNode
+  EthAbiDecodeLogTaskNode,
+  LessThanTaskNode,
+  LengthTaskNode,
+  LookupTaskNode
 } from "./nodes";
 import clsx from "clsx";
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { XYCoords, TASK_TYPE } from "../workspace/taskNodeMachine";
+import { TASK_TYPE } from "../workspace/taskNodeMachine";
+import { XYCoords } from "../workspace/node";
 import { CustomConnectionLine } from "./CustomConnectionLine";
 import { CustomEdge } from "./CustomEdge";
 import { NEW_NODE_TYPE } from "../workspace/workspaceMachine";
 
 const taskNodesSelector = (state: any) => state.context.nodes.tasks;
+const aiNodesSelector = (state: any) => state.context.nodes.ai;
 const edgesSelector = (state: any) => state.context.edges;
 const reactFlowInstanceSelector = (state: any) => state.context.reactFlowInstance;
 const testModeSelector = (state: any) => state.matches("testModeLoading") || state.matches("testMode")
+const defaultModeSelector = (state: any) => state.matches("idle.defaultMode")
+const aiWandModeSelector = (state: any) => state.matches("idle.aiWandMode")
 
 export const NODE_WIDTH = 300;
 export const SNAP_GRID = 15;
@@ -74,6 +83,11 @@ export const Flow = ({ className }: FlowProps) => {
     taskNodesSelector
   );
 
+  const aiNodesFromMachine = useSelector(
+    globalServices.workspaceService,
+    aiNodesSelector
+  );
+
   const edgesFromMachine = useSelector(
     globalServices.workspaceService,
     edgesSelector
@@ -89,7 +103,17 @@ export const Flow = ({ className }: FlowProps) => {
     testModeSelector
   )
 
-  const nodeToFlowElement = (node: any, index: number, numNodes: number) => {
+  const isDefaultMode = useSelector(
+    globalServices.workspaceService,
+    defaultModeSelector
+  )
+
+  const isAiWandMode = useSelector(
+    globalServices.workspaceService,
+    aiWandModeSelector
+  )
+
+  const taskNodeToFlowElement = (node: any, index: number, numTaskNodes: number, numTotalNodes: number) => {
     const nodeType = node.ref.machine.id;
 
     const { coords, taskType } = node.ref.state.context;
@@ -100,8 +124,8 @@ export const Flow = ({ className }: FlowProps) => {
       data: {
         type: taskType,
         machine: node.ref,
-        deletable: numNodes > 1,
-        numNodes: numNodes
+        deletable: numTaskNodes > 1,
+        numNodes: numTotalNodes
       },
       position: coords,
       dragHandle: ".custom-drag-handle",
@@ -122,6 +146,9 @@ export const Flow = ({ className }: FlowProps) => {
         break;
       case "ETHTX":
         flowElement.type = "ethTxTask";
+        break;
+      case "ETHCALL":
+        flowElement.type = "ethCallTask";
         break;
       case "DIVIDE":
         flowElement.type = "divideTask";
@@ -153,6 +180,15 @@ export const Flow = ({ className }: FlowProps) => {
       case "ETHABIENCODE":
         flowElement.type = "ethAbiEncodeTask";
         break;
+      case "LESSTHAN":
+        flowElement.type = "lessThanTask";
+        break;
+      case "LENGTH":
+        flowElement.type = "lengthTask";
+        break;
+      case "LOOKUP":
+        flowElement.type = "lookupTask";
+        break;
       default:
         flowElement.type = "task";
         break;
@@ -161,7 +197,29 @@ export const Flow = ({ className }: FlowProps) => {
     return flowElement;
   };
 
-  const elements = [...taskNodesFromMachine.map((node: any, index: number) => nodeToFlowElement(node, index, taskNodesFromMachine.length))];
+  const aiNodeToFlowElement = (node: any, index: number, numTotalNodes: number) => {
+    const nodeType = node.ref.machine.id;
+
+    const { coords } = node.ref.state.context;
+
+    let flowElement = {
+      id: node.ref.id,
+      type: nodeType,
+      data: {
+        machine: node.ref,
+        numNodes: numTotalNodes
+      },
+      position: coords,
+      dragHandle: ".custom-drag-handle",
+    };
+
+    return flowElement
+  }
+
+  const elements = [
+    ...taskNodesFromMachine.map((node: any, index: number) => taskNodeToFlowElement(node, index, taskNodesFromMachine.length, taskNodesFromMachine.length + aiNodesFromMachine.length)),
+    ...aiNodesFromMachine.map((node: any, index: number) => aiNodeToFlowElement(node, index, aiNodesFromMachine.length))
+  ];
 
   const [prevElements, setPrevElements] = useState<Array<{
     id: string;
@@ -228,9 +286,11 @@ export const Flow = ({ className }: FlowProps) => {
       zoom: 1,
     };
 
+    const { clientX, clientY } = "touches" in event ? event.touches[0] : event
+
     const snappedCoords = snapToGrid({
-      x: (event.clientX - viewport.x) / viewport.zoom - NODE_WIDTH / 2,
-      y: (event.clientY - viewport.y) / viewport.zoom,
+      x: (clientX - viewport.x) / viewport.zoom - NODE_WIDTH / 2,
+      y: (clientY - viewport.y) / viewport.zoom,
     });
 
     globalServices.workspaceService.send("CONNECTION_SUCCESS", {
@@ -284,12 +344,14 @@ export const Flow = ({ className }: FlowProps) => {
 
   const nodeTypes = useMemo(
     () => ({
+      aiPrompt: AiPromptNode,
       task: TaskNode,
       httpTask: HttpTaskNode,
       bridgeTask: BridgeTaskNode,
       jsonParseTask: JsonParseTaskNode,
       cborParseTask: CborParseTaskNode,
       ethTxTask: EthTxTaskNode,
+      ethCallTask: EthCallTaskNode,
       divideTask: DivideTaskNode,
       multiplyTask: MultiplyTaskNode,
       meanTask: MeanTaskNode,
@@ -299,7 +361,10 @@ export const Flow = ({ className }: FlowProps) => {
       sumTask: SumTaskNode,
       ethAbiDecodeLogTask: EthAbiDecodeLogTaskNode,
       ethAbiDecodeTask: EthAbiDecodeTaskNode,
-      ethAbiEncodeTask: EthAbiEncodeTaskNode
+      ethAbiEncodeTask: EthAbiEncodeTaskNode,
+      lessThanTask: LessThanTaskNode,
+      lengthTask: LengthTaskNode,
+      lookupTask: LookupTaskNode
     }),
     []
   );
@@ -330,6 +395,7 @@ export const Flow = ({ className }: FlowProps) => {
           onConnectEnd={handleConnectEnd}
           onConnect={handleConnect}
           connectionLineComponent={CustomConnectionLine}
+          panOnDrag={isAiWandMode || isDefaultMode || testMode}
           fitView
           fitViewOptions={{
             duration: 500,
@@ -338,8 +404,8 @@ export const Flow = ({ className }: FlowProps) => {
           nodesDraggable={!testMode}
           minZoom={0.35}
         >
-          <Controls />
-          <Background gap={15} />
+          <Controls position="bottom-right" />
+          <Background gap={15} color="#666666" />
         </ReactFlow>
       </div>
     </ReactFlowProvider>

@@ -1,12 +1,14 @@
 import { TaskNode } from "./TaskNode";
-import { NodeProps } from "react-flow-renderer";
+import { NodeProps } from "reactflow";
 import React from "react";
 import { useSelector } from "@xstate/react";
 import { PowerTextArea } from "./fields";
+import { FieldLabel } from "../../../components";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const incomingNodesSelector = (state: any) => state.context.incomingNodes;
 const dataSelector = (state: any) => state.context.taskSpecific.data;
-const modeSelector = (state: any) => state.context.taskSpecific.mode;
+const modeSelector = (state: any) => state.context.taskSpecific.mode?.raw;
 const customIdSelector = (state: any) => state.context.customId
 
 export const CborParseTaskNode = (nodeProps: NodeProps) => {
@@ -34,19 +36,21 @@ export const CborParseTaskNode = (nodeProps: NodeProps) => {
                 })}
                 ownerNodeCustomId={taskCustomId}
             />
-            <div className="form-control w-full max-w-xs">
-                <label className="label">
-                    <span className="label-text">Mode</span>
-                </label>
-                <select
-                    className="select select-bordered"
-                    defaultValue="diet"
+            <div className="flex flex-col w-full max-w-xs">
+                <FieldLabel name="Mode" />
+                <Select
                     value={mode}
-                    onChange={(event) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { mode: event.target.value } })}
+                    defaultValue="diet"
+                    onValueChange={(newValue) => machine.send("SET_TASK_SPECIFIC_PROPS", { value: { mode: { raw: newValue, rich: newValue } } })}
                 >
-                    <option value="diet">Diet</option>
-                    <option value="standard">Standard</option>
-                </select>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="diet">Diet</SelectItem>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
         </TaskNode>
     );

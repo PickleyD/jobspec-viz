@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model job_spec_version {
+  id          BigInt    @id @default(autoincrement())
+  job_spec    BigInt
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  name        String?
+  description String?
+  content     Json?
+  created_by  String
+  users       user      @relation(fields: [created_by], references: [address], onDelete: NoAction, onUpdate: NoAction)
+  job_specs   job_spec  @relation(fields: [job_spec], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([created_by])
+  @@index([job_spec])
+}
+
+model job_spec {
+  id                BigInt             @id @default(autoincrement())
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  created_by        String
+  deleted_at        DateTime?          @db.Timestamptz(6)
+  job_spec_versions job_spec_version[]
+}
+
+model user {
+  address           String             @unique
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  name              String?
+  num_logins        BigInt?
+  last_login        DateTime?          @updatedAt
+  job_spec_versions job_spec_version[]
+}

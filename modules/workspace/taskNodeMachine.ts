@@ -1,15 +1,9 @@
-import { isAddress } from "ethers/lib/utils";
-import { createMachine, assign } from "xstate";
+import { ethers } from "ethers";
+import { createMachine, assign, send, actions } from "xstate";
 import { sendParent } from "xstate/lib/actions";
+import { NodeContext, NodeOptions, XYCoords } from "./node"
 
-export type XYCoords = {
-  x: number;
-  y: number;
-};
-
-export type TaskNodeOptions = {
-  id: string;
-  initialCoords: XYCoords;
+export type TaskNodeOptions = NodeOptions & {
   taskType: TASK_TYPE;
 };
 
@@ -26,22 +20,42 @@ export type TaskNodeEvent =
   | { type: "UPDATE_COORDS"; value: XYCoords }
   | { type: "SET_PENDING_RUN" }
   | { type: "TRY_RUN_TASK"; input64s: Array<string>; vars64: string }
+  | { type: "TRY_RUN_SIDE_EFFECT"; provider: any; }
+  | { type: "SKIP_SIDE_EFFECT" }
   | { type: "RESET" };
 
-export const tasks = ["HTTP", "BRIDGE", "JSONPARSE", "CBORPARSE", "ETHTX", "SUM", "DIVIDE", "MULTIPLY", "ANY", "MODE", "MEAN", "MEDIAN", "ETHABIENCODE", "ETHABIDECODE", "ETHABIDECODELOG"] as const
+export const tasks = [
+  "HTTP",
+  "BRIDGE",
+  "JSONPARSE",
+  "CBORPARSE",
+  "ETHCALL",
+  "ETHTX",
+  "SUM",
+  "DIVIDE",
+  "MULTIPLY",
+  "ANY",
+  "MODE",
+  "MEAN",
+  "MEDIAN",
+  "ETHABIENCODE",
+  "ETHABIDECODE",
+  "ETHABIDECODELOG",
+  "LESSTHAN",
+  "LENGTH",
+  "LOOKUP"
+] as const
 export type TASK_TYPE = typeof tasks[number]
 
 type TaskMock = {
+  mockResponseDataInput?: any;
   mockResponseData?: any;
   enabled: boolean;
 }
 
-export interface TaskNodeContext {
+export interface TaskNodeContext extends NodeContext {
   customId?: string;
-  coords: XYCoords;
   taskType: TASK_TYPE;
-  incomingNodes: Array<string>;
-  outgoingNodes: Array<string>;
   taskSpecific: {
     [key: string]: {
       raw: string;
@@ -68,10 +82,10 @@ const defaultContext: TaskNodeContext = {
   runResult: undefined
 };
 
-const validateAddress = (input: string) => isAddress(input)
+const validateAddress = (input: string) => ethers.utils.isAddress(input)
 
 const validateTask = (context: TaskNodeContext) => {
-  let result = false;
+  let result = true;
 
   switch (context.taskType) {
     case "HTTP": {
@@ -100,6 +114,14 @@ const validateTask = (context: TaskNodeContext) => {
       result = context.taskSpecific.to
         && (context.taskSpecific.to.raw?.length ?? 0) > 0
         && validateAddress(context.taskSpecific.to.raw)
+        && context.taskSpecific.data
+        && (context.taskSpecific.data.raw?.length ?? 0) > 0
+      break;
+    }
+    case "ETHCALL": {
+      result = context.taskSpecific.contract
+        && (context.taskSpecific.contract.raw?.length ?? 0) > 0
+        && validateAddress(context.taskSpecific.contract.raw)
         && context.taskSpecific.data
         && (context.taskSpecific.data.raw?.length ?? 0) > 0
       break;
@@ -189,9 +211,9 @@ export const createTaskNodeMachine = (
                   nodeId: context.customId,
                   type: "STORE_TASK_RUN_RESULT"
                 })),
-                sendParent(() => ({
-                  type: "SIMULATOR_NEXT_TASK"
-                }))
+                // sendParent(() => ({
+                //   type: "SIMULATOR_NEXT_TASK"
+                // }))
               ]
             },
             onError: { target: "error" }
@@ -199,13 +221,87 @@ export const createTaskNodeMachine = (
         },
         inspectingResult: {
           always: [
+            { target: "pendingSideEffect", cond: "resultHasPendingSideEffectData" },
             { target: "error", cond: "resultHasError" },
             { target: "success" }
           ]
         },
         success: {
+          entry: [
+            sendParent(() => ({
+              type: "SIMULATOR_NEXT_TASK"
+            }))
+          ]
         },
         error: {
+          entry: [
+            sendParent(() => ({
+              type: "SIMULATOR_NEXT_TASK"
+            }))
+          ]
+        },
+        pendingSideEffect: {
+          entry: [
+            sendParent(() => ({
+              type: "SIMULATOR_PROMPT_SIDE_EFFECT"
+            }))
+          ],
+          on: {
+            TRY_RUN_SIDE_EFFECT: {
+              target: "executingSideEffect"
+            },
+            SKIP_SIDE_EFFECT: {
+              target: "skippingSideEffect"
+            },
+          }
+        },
+        executingSideEffect: {
+          invoke: {
+            src: "executeSideEffect",
+            id: "executeSideEffect",
+            onDone: {
+              target: "pendingRun",
+              // @ts-ignore
+              actions: actions.pure((context, event) => {
+                return [
+                  assign({
+                    // @ts-ignore
+                    mock: (context, event) => ({
+                      // @ts-ignore
+                      mockResponseDataInput: event.data,
+                      // @ts-ignore
+                      mockResponseData: event.data,
+                      enabled: true
+                    })
+                  }),
+                  sendParent(() => ({
+                    type: "TRY_RUN_CURRENT_TASK"
+                  }))
+                ];
+              }),
+            },
+            onError: { target: "error" }
+          }
+        },
+        skippingSideEffect: {
+          entry: [
+            actions.pure((context, event) => {
+              return [
+                assign({
+                  // @ts-ignore
+                  mock: (context, event) => ({
+                    // @ts-ignore
+                    ...context.mock,
+                    enabled: true
+                  })
+                }),
+                sendParent(() => ({
+                  type: "TRY_RUN_CURRENT_TASK"
+                }))
+              ];
+            })
+          ],
+          always: [{ target: "pendingRun" }]
         }
       },
       on: {
@@ -288,10 +384,9 @@ export const createTaskNodeMachine = (
           actions: [
             assign({
               taskSpecific: (context, event) => {
-                const rawAndRich = typeof event.value === "string" ? { raw: event.value, rich: event.value } : event.value
                 return {
                   ...context.taskSpecific,
-                  ...rawAndRich,
+                  ...event.value,
                 }
               },
             }),
@@ -310,7 +405,7 @@ export const createTaskNodeMachine = (
         UPDATE_COORDS: {
           actions: [
             assign({
-              coords: (context, event) => (event.value),
+              coords: (_, event) => (event.value),
             })
           ],
         },
@@ -336,6 +431,8 @@ export const createTaskNodeMachine = (
       },
       services: {
         runTask: (context, event) => {
+          console.log(context)
+          console.log(event)
           return fetch("/api/task", {
             method: "POST",
             headers: {
@@ -358,6 +455,23 @@ export const createTaskNodeMachine = (
                 error: json.error.message
               }
             }))
+        },
+        executeSideEffect: (context, event) => {
+
+          const { To: to, Data: base64Data } = JSON.parse(context.runResult.sideEffectData)
+
+          if (!('provider' in event)) {
+            return Promise.reject("No 'provider' prop on the event inside 'executeSideEffect'")
+          }
+
+          const hexEncodedData = '0x' + Buffer.from(base64Data, 'base64').toString('hex');
+
+          const result = event.provider.call({
+            to: to,
+            data: hexEncodedData
+          })
+
+          return result
         }
       },
       guards: {
@@ -365,7 +479,10 @@ export const createTaskNodeMachine = (
           return context.incomingNodes.length === 0
         },
         resultHasError: (context, event) => {
-          return context.runResult.error.length > 0
+          return context.runResult.error && context.runResult.error.length > 0
+        },
+        resultHasPendingSideEffectData: (context, event) => {
+          return context.runResult.sideEffectData.length > 0 && context.mock.enabled !== true
         }
       }
     },

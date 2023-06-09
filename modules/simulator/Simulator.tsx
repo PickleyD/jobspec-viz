@@ -1,6 +1,5 @@
-import { ExpanderPanel, Tooltip } from "../../components";
+import { Tooltip } from "../../components";
 import {
-  BeakerIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
   CheckCircleIcon,
@@ -8,10 +7,15 @@ import {
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "@xstate/react";
+import { SideEffectPrompt } from "./SideEffectPrompt";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
-const testModeSelector = (state: any) => state.matches("testMode");
-const testModeLoadingSelector = (state: any) =>
-  state.matches("testModeLoading");
+const isTestModeSelector = (state: any) => state.matches("testMode");
+const isTestModeLoadingSelector = (state: any) => state.matches("testModeLoading");
+const isSideEffectPromptSelector = (state: any) => state.matches("testMode.sideEffectPrompt")
 const taskInstructionsSelector = (state: any) => state.context.parsedTaskOrder;
 const currentTaskIndexSelector = (state: any) => state.context.currentTaskIndex;
 const taskRunResultsSelector = (state: any) => state.context.taskRunResults;
@@ -26,13 +30,18 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
 
   const testMode = useSelector(
     globalServices.workspaceService,
-    testModeSelector
+    isTestModeSelector
   );
 
   const testModeLoading = useSelector(
     globalServices.workspaceService,
-    testModeLoadingSelector
+    isTestModeLoadingSelector
   );
+
+  const isSideEffectPrompt = useSelector(
+    globalServices.workspaceService,
+    isSideEffectPromptSelector
+  )
 
   const taskInstructions = useSelector(
     globalServices.workspaceService,
@@ -101,44 +110,33 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
     });
 
   return (
-    <ExpanderPanel className={className} icon={BeakerIcon} title="Testing">
-      <div className="flex items-center justify-center p-4">
-        <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[14rem]">
-          <div className="flex gap-1 items-center">
-            <label className="label cursor-pointer flex gap-2 items-center">
-              <span
-                className={`label-text ${testMode || testModeLoading ? "" : "text-gray-500"
-                  }`}
-              >
-                Test Mode
-              </span>
-              <input
-                type="checkbox"
-                className="toggle toggle-secondary"
-                checked={testMode || testModeLoading}
-                onChange={handleToggleTestMode}
-              />
-            </label>
-            <Tooltip className="text-sm text-gray-300" placement="bottom-end">
-              <p>
-                Here is the generated TOML job spec. Copy and paste it into your
-                Chainlink node UI when setting up your job!
-              </p>
-            </Tooltip>
+    <>
+      <div className="flex items-center justify-start gap-2 mb-6">
+        <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Test</h4>
+        <Tooltip className="text-sm text-muted-foreground">
+          <p>
+            Enable test mode to parse your pipeline and step through task execution in a simulated environment.
+          </p>
+        </Tooltip>
+      </div>
+      <div className="flex items-center justify-center">
+        <div className="w-full flex flex-col items-start justify-start gap-4 max-w-[20rem]">
+          <div className="flex items-center gap-2 mb-2 mt-3">
+            <Switch id="test-mode" checked={testMode || testModeLoading} onCheckedChange={handleToggleTestMode} />
+            <Label htmlFor="test-mode">Test Mode</Label>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="btn-group flex flex-row w-full">
-              <button
+            <div className="flex flex-row w-full gap-1">
+              <Button
                 onClick={handlePrevIndex}
                 disabled={!testMode || currentTaskIndex === 0}
-                className={`${testMode ? "" : "btn-disabled"
-                  } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
               >
                 <ChevronLeftIcon className="w-5 h-5" />
-              </button>
-              <div
-                className={`${testMode ? "" : "btn-disabled"
-                  } btn grow pointer-events-none cursor-default btn-sm normal-case`}
+              </Button>
+              <Button
+                variant="outline"
+                disabled={!testMode}
+                className={`grow pointer-events-none cursor-default normal-case`}
               >
                 {testModeLoading ? (
                   "Loading..."
@@ -147,60 +145,61 @@ export const Simulator = ({ className = "" }: SimulatorProps) => {
                 ) : (
                   getTaskId(currentTaskIndex)
                 )}
-              </div>
-              <button
+              </Button>
+              <Button
                 onClick={handleNextIndex}
                 disabled={
                   !testMode || currentTaskIndex >= taskInstructions.length
                 }
-                className={`${testMode ? "" : "btn-disabled"
-                  } btn border-gray-700 hover:border-secondary focus:border-secondary btn-sm`}
               >
                 <ChevronRightIcon className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
-            <progress
-              className={`${testMode ? "" : "disabled"} progress bg-gray-700 ${testModeLoading ? "" : "progress-secondary"
-                } w-56`}
+            <Progress
+              className={`bg-gray-700 w-56`}
               value={testModeLoading ? undefined : progress}
-              max="100"
-            ></progress>
+            ></Progress>
           </div>
-          <div className="flex flex-col gap-1 w-full">
-            {(latestTaskRunResult.value || latestTaskRunResult.error) && (
-              <p className="text-xs text-gray-300">Current Result:</p>
-            )}
-            <div className="flex flex-col gap-1">
-              {taskRunResults.length > 0 && (
-                <div className="flex flex-col">
-                  <p className="text-sm text-gray-300">Value:</p>
-                  <p className="text-sm text-secondary overflow-auto max-h-[10rem]">
-                    {latestTaskRunResult.value}
-                  </p>
-                </div>
+          {isSideEffectPrompt ? <SideEffectPrompt /> :
+            <div className="flex flex-col gap-1 w-full">
+              {(latestTaskRunResult.value || latestTaskRunResult.error) && (
+                <p className="text-xs text-muted-foreground">Current Result:</p>
               )}
-              {latestTaskRunResult.error && (
-                <div className="flex flex-col">
-                  <p className="text-sm text-gray-300">Error:</p>
-                  <p className="text-sm text-error overflow-auto max-h-[10rem]">
-                    {latestTaskRunResult.error}
-                  </p>
-                </div>
-              )}
-              {parsingError.length > 0 && (
-                <div className="flex flex-col">
-                  <p className="text-sm text-gray-300">Error:</p>
-                  <p className="text-sm text-error overflow-auto max-h-[10rem]">
-                    {parsingError}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+              <div className="flex flex-col gap-1">
+                {
+                  latestTaskRunResult.value !== undefined
+                  && latestTaskRunResult.value.length > 0
+                  && (
+                    <div className="flex flex-col">
+                      <p className="text-sm text-muted-foreground">Value:</p>
+                      <p className="text-sm text-secondary overflow-auto max-h-[10rem]">
+                        {latestTaskRunResult.value}
+                      </p>
+                    </div>
+                  )
+                }
+                {latestTaskRunResult.error && (
+                  <div className="flex flex-col">
+                    <p className="text-sm text-muted-foreground">Error:</p>
+                    <p className="text-sm text-error overflow-auto max-h-[10rem]">
+                      {latestTaskRunResult.error}
+                    </p>
+                  </div>
+                )}
+                {parsingError.length > 0 && (
+                  <div className="flex flex-col">
+                    <p className="text-sm text-muted-foreground">Error:</p>
+                    <p className="text-sm text-error overflow-auto max-h-[10rem]">
+                      {parsingError}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>}
         </div>
         {/* <button onClick={handlePersist}>persist</button>
         <button onClick={handleRehydrate}>rehydrate</button> */}
       </div>
-    </ExpanderPanel>
+    </>
   );
 };

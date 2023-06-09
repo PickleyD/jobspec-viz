@@ -1,12 +1,11 @@
 import { useSelector } from "@xstate/react";
 import { GlobalStateContext } from "../../context/GlobalStateContext";
 import { useContext, useRef } from "react";
-import { CodeBracketIcon } from "@heroicons/react/24/solid";
 import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { ExpanderPanel } from "../../components";
 import { TomlLine } from "../workspace/workspaceMachine";
 import { Tooltip } from "../../components";
+import { Button } from "@/components/ui/button";
 
 export interface CodegenProps {
   className?: string;
@@ -50,27 +49,37 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
     return sel;
   };
 
+  const handleImportClick = () => {
+    globalServices.workspaceService.send("OPEN_MODAL", { name: "import" })
+  }
+
   return (
-    <ExpanderPanel className={className} icon={CodeBracketIcon} title="Codegen">
-      <div
-        className="mockup-code text-sm bg-base-100 relative"
-        ref={codeRef}
-      >
-        <div className="absolute top-3.5 left-20 flex items-center gap-2">
-          <label
-            onClick={handleCopyToClipboard}
-            tabIndex={0}
-            className={`${showCheckIcon ? "swap-active" : ""
-              } swap swap-rotate pointer-events-auto btn btn-circle h-6 w-6 min-h-0 border-gray-700 focus:border fous:border-secondary hover:border hover:border-secondary focus:border-secondary`}
-          >
-            <DocumentDuplicateIcon className="h-4 w-4 swap-off" />
-            <CheckIcon className="h-4 w-4 swap-on" />
-          </label>
-          <Tooltip className="text-sm text-gray-300">
+    <>
+      <div className="flex items-center justify-start gap-12 mb-6">
+        <div className="flex items-center justify-start gap-2">
+          <h4 className="uppercase text-sm font-bold tracking-wider text-muted-foreground">Code</h4>
+          <Tooltip className="text-sm text-muted-foreground">
             <p>Here is the generated TOML job spec. Copy and paste it into your Chainlink node UI when setting up your job!</p>
           </Tooltip>
         </div>
-        <div className="max-h-96 max-w-3xl overflow-auto pr-6">
+        <button className="hover:underline text-muted-foreground font-bold" onClick={handleImportClick}>Import</button>
+      </div>
+      <div
+        className="p-4 mockup-code text-sm bg-white dark:bg-muted relative rounded-lg"
+        ref={codeRef}
+      >
+        <div className="relative flex items-center justify-start gap-2 mb-4">
+          <div className="p-2 flex gap-1">
+            <div className={`dark:grayscale-[70%] bg-[#ffaaaa] dark:bg-[#ff6a6a] rounded-full h-3 w-3`} />
+            <div className={`dark:grayscale-[70%] bg-[#aaeeff] dark:bg-[#6ae1ff] rounded-full h-3 w-3`} />
+            <div className={`dark:grayscale-[70%] bg-[#ffeeaa] dark:bg-[#ffe16a] rounded-full h-3 w-3`} />
+          </div>
+          <Button onClick={handleCopyToClipboard} variant="outline" className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+            {showCheckIcon ? <CheckIcon className="h-4 w-4 group-hover:stroke-background" /> : <DocumentDuplicateIcon className="h-4 w-4 group-hover:stroke-background" />}
+            <span className="sr-only">Copy to clipboard</span>
+          </Button>
+        </div>
+        <div className="max-h-96 max-w-3xl overflow-auto px-4">
           {
             toml.map((line, index) => <pre key={index} data-prefix=">"
             // Disable red/green validity indication unless can think of a way to handle 'propagateResult' of false on inputs,
@@ -82,6 +91,6 @@ export const Codegen = ({ className = "" }: CodegenProps) => {
           }
         </div>
       </div>
-    </ExpanderPanel>
+    </>
   );
 };

@@ -1,4 +1,6 @@
+import { Textarea } from "@/components/ui/textarea";
 import React from "react";
+import { FieldLabel } from "../../../../components";
 
 export interface TextArrayFieldProps {
     label: string;
@@ -24,18 +26,13 @@ export const TextArrayField = ({
         onChangeAsArray && onChangeAsArray(asArray)
     }
 
-    return <div className="form-control w-full">
-        <label className="label pb-0">
-            <span className="label-text">{label}</span>
-            {
-                optional && <span className="label-text-alt">(optional)</span>
-            }
-        </label>
-        <textarea
+    return <div className="flex flex-col w-full">
+        <FieldLabel name={label} optional />
+        <Textarea
             onChange={handleChange}
             placeholder={placeholder}
             value={convertValueToNewlines(value)}
-            className="whitespace-nowrap textarea textarea-bordered h-24 overflow-x-auto"
+            className="whitespace-nowrap textarea textarea-bordered overflow-x-auto"
         />
     </div>
 }

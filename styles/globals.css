@@ -32,13 +32,13 @@ body {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #444;
   border-radius: 4px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #666;
 }
 
 a {
@@ -61,4 +61,107 @@ a {
   stroke-dasharray: 8 !important;
   animation: chunkydashdraw 0.5s linear infinite !important;
   stroke: white !important;
+}
+
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --muted: 0 0% 90%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --card: 0 0% 95%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --border: 214.3 31.8% 10%;
+    --input: 214.3 31.8% 10%;
+
+    --primary: 192 100% 33%;
+    --primary-foreground: 192 15% 95%;
+    
+    --secondary: 48 100% 33%;
+    --secondary-foreground: 192 15% 95%;
+
+    --accent: 48 0% 90%;
+    --accent-foreground: 24 0% 0%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 215 20.2% 65.1%;
+
+    --radius: 0.5rem;
+
+    --success: 120 100% 35%;
+    --success-light: 120 100% 40%;
+    --success-dark: 120 100% 30%;
+
+    --error: 0 100% 50%;
+    --error-light: 0 100% 55%;
+    --error-dark: 0 100% 45%;
+
+    --pending: 48 100% 50%;
+    --pending-light: 48 100% 55%;
+    --pending-dark: 48 100% 45%;
+  }
+
+  .dark {
+    --background: 192 15% 5%;
+    --foreground: 213 31% 91%;
+
+    --muted: 192 15% 10%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+
+    --popover: 224 71% 4%;
+    --popover-foreground: 215 20.2% 65.1%;
+
+    --card: 192 5% 4%;
+    --card-foreground: 213 31% 91%;
+
+    --border: 192 10% 40%;
+    --input: 192 30% 23%;
+
+    --primary: 192 100% 83%;
+    --primary-foreground: 192 15% 5%;
+    
+    --secondary: 48 100% 83%;
+    --secondary-foreground: 192 15% 5%;
+
+    --accent: 24 59% 20%;
+    --accent-foreground: 24 59% 70%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 216 34% 77%;
+
+    --radius: 0.5rem;
+
+    --success: 120 100% 73%;
+    --success-light: 120 100% 78%;
+    --success-dark: 120 100% 68%;
+
+    --error: 0 100% 61%;
+    --error-light: 0 100% 66%;
+    --error-dark: 0 100% 56%;
+
+    --pending: 48 100% 73%;
+    --pending-light: 48 100% 78%;
+    --pending-dark: 48 100% 68%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
