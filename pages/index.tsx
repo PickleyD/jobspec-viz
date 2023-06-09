@@ -13,8 +13,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment 
-// @ts-ignore: Unreachable code error 
+// @ts-ignore
 // BigInt does not have `toJSON` method
 BigInt.prototype.toJSON = function (): string {
   return this.toString();
@@ -139,7 +138,7 @@ const Home: NextPage = () => {
                   AI assistant
                 </span> to tweak your pipeline.</span>
                 <span>Our simulated environment provides the easiest way to test and debug your pipeline.</span>
-                <span>When you're ready, export the generated TOML and you're good to go!</span>
+                <span>When you&apos;re ready, export the generated TOML and you&apos;re good to go!</span>
               </div>
               <div className="w-full flex items-center justify-end">
                 <a href="https://don.tools" target="_blank" rel="noopener noreferrer" className="hover:underline text-gray-400 text-sm w-fit flex items-center gap-2">
