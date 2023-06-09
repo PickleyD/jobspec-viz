@@ -8,8 +8,6 @@ import prisma from '../../../lib/prisma';
   
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
 
-    console.log("INSIDE FN")
-
     const user = await getUser(request)
 
     // Check if the user is authenticated
