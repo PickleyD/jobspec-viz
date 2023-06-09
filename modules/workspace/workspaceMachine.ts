@@ -32,7 +32,7 @@ import { toast } from "react-hot-toast"
 import { workspaceMachineOptions as defaultWorkspaceMachineOptions } from "./workspaceMachineOptions";
 import { AiNodeContext, AiNodeEvent, createAiNodeMachine } from "./aiNodeMachine";
 
-type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
+export type CustomEdge = Edge & { sourceCustomId: string; targetCustomId: string };
 export type NEW_NODE_TYPE = "source" | "target";
 
 export type Edges = Array<CustomEdge>
@@ -785,12 +785,11 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
                 ),
               ],
             }),
-            edges: (context, event) =>
-              context.edges.filter(
+            edges: (context, event) => context.edges.filter(
                 (edge) =>
-                  edge.sourceCustomId !== event.nodeId &&
-                  edge.targetCustomId !== event.nodeId
-              ),
+                  edge.source !== event.nodeId &&
+                  edge.target !== event.nodeId
+              )
           }),
           "regenerateToml",
         ],

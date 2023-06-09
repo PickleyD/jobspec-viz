@@ -1,5 +1,5 @@
 import { MachineOptions, assign, send, actions, spawn } from "xstate";
-import { WorkspaceContext, WorkspaceEvent, JOB_TYPES, TomlLine, TaskInstructions, Nodes, Edges } from "./workspaceMachine"
+import { WorkspaceContext, WorkspaceEvent, JOB_TYPES, TomlLine, TaskInstructions, Nodes, Edges, CustomEdge } from "./workspaceMachine"
 import { createTaskNodeMachine, TASK_TYPE } from "./taskNodeMachine"
 import toml from "toml"
 import { fromDot, NodeRef, attribute as _ } from "ts-graphviz"
@@ -91,7 +91,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                     ai: context.nodes.ai.map((entry) => {
 
                         const { ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
-    
+
                         return {
                             ...entry,
                             context: nodeContextToPersist,
@@ -110,9 +110,9 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                     content: parsedContext
                 }),
             })
-            .then(res => res.json().then(json => {
-                return res.ok ? json : Promise.reject(json);
-            }))
+                .then(res => res.json().then(json => {
+                    return res.ok ? json : Promise.reject(json);
+                }))
         },
         // @ts-ignore
         importJobSpec: (context, event) => {
@@ -390,6 +390,16 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                     return result
                 })
             }
+
+            // Remove duplicate edges
+            totalEdges = totalEdges.filter((value: CustomEdge, index: number) => {
+                const { id, ...withoutId } = value
+                const _withoutId = JSON.stringify(withoutId);
+                return index === totalEdges.findIndex(obj => {
+                    const { id, ...withoutId2 } = obj
+                    return JSON.stringify(withoutId2) === _withoutId;
+                });
+            });
 
             // Remove AI node
             const newAiNodes = [...context.nodes.ai.filter(aiNode => aiNode.ref.id !== aiNodeToReplace?.ref.id)]
