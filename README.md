@@ -42,4 +42,4 @@ npm run dev
 yarn dev
 ```
 
-[See the Vercel docs](https://vercel.com/docs/cli/dev) for details on how to use the API routes locally. The API routes are written in Go so you wil need Go installed on your machine.
+[See the Vercel docs](https://vercel.com/docs/cli/dev) for details on how to use the API routes locally. The API routes are written in Go, so you wil need Go installed on your machine.
