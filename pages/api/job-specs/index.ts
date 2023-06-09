@@ -2,6 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getUser } from "../auth/user"
 import prisma from '../../../lib/prisma';
 
+(BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
+
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
 
     const user = await getUser(request)

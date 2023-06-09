@@ -3,6 +3,10 @@ import { ThirdwebAuthConfig } from "@thirdweb-dev/auth/next";
 import { Json } from "@thirdweb-dev/auth";
 import prisma from "../../../lib/prisma";
 
+(BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+};
+
 export const thirdwebAuthConfig: ThirdwebAuthConfig<Json, Json> = {
     domain: process.env.NEXT_PUBLIC_AUTH_DOMAIN || "",
     wallet: new PrivateKeyWallet(process.env.THIRDWEB_AUTH_PRIVATE_KEY || ""),
