@@ -175,6 +175,7 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                 return Promise.resolve({ constructedMachineContext, warnings })
             }
             catch (err) {
+                console.error(err)
                 return Promise.reject({ error: err, warnings })
             }
         }
@@ -941,19 +942,24 @@ const constructTaskNodesAndEdgesFromObsSrc = (currNodes: Nodes, currEdges: Edges
 
     const currEdgesLen = currEdges.length
 
-    const edges = parsedObservationSrc.edges.map((edge, index) => {
+    let edgesSplitIntoSingleLengths: Edges = []
+    
+    parsedObservationSrc.edges.forEach((edge) => {
+        const numSplits = edge.targets.length - 1
 
-        const sourceCustomId: string = (edge.targets[0] as NodeRef).id
-        const targetCustomId: string = (edge.targets[1] as NodeRef).id
-        const sourceWithComputedId = totalNodesMapping.find(entry => entry.id === sourceCustomId)
-        const targetWithComputedId = totalNodesMapping.find(entry => entry.id === targetCustomId)
-
-        return {
-            id: `edge_${index + currEdgesLen + 1}`,
-            source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
-            sourceCustomId: sourceCustomId,
-            target: targetWithComputedId ? targetWithComputedId.computedId : "",
-            targetCustomId: targetCustomId
+        for (let i = 0; i < numSplits; i++) {
+            const sourceCustomId: string = (edge.targets[i] as NodeRef).id
+            const targetCustomId: string = (edge.targets[i+1] as NodeRef).id
+            const sourceWithComputedId = totalNodesMapping.find(entry => entry.id === sourceCustomId)
+            const targetWithComputedId = totalNodesMapping.find(entry => entry.id === targetCustomId)
+    
+            edgesSplitIntoSingleLengths.push({
+                id: `edge_${edgesSplitIntoSingleLengths.length + currEdgesLen + 1}`,
+                source: sourceWithComputedId ? sourceWithComputedId.computedId : "",
+                sourceCustomId: sourceCustomId,
+                target: targetWithComputedId ? targetWithComputedId.computedId : "",
+                targetCustomId: targetCustomId
+            })
         }
     })
 
@@ -994,5 +1000,5 @@ const constructTaskNodesAndEdgesFromObsSrc = (currNodes: Nodes, currEdges: Edges
         }
     })
 
-    return { nodes, edges }
+    return { nodes, edges: edgesSplitIntoSingleLengths }
 }
