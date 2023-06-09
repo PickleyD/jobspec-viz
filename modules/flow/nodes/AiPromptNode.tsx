@@ -114,12 +114,10 @@ export const AiPromptNode = ({
           <div className="inset-0 absolute bg-gradient-radial-top dark:from-foreground/[.06] from-foreground/[.15] to-transarent rounded-md" />
           <div className="inset-0 absolute bg-gradient-radial-bottom dark:from-foreground/[.06] from-foreground/[.15] to-transparent rounded-md" />
           <div className="absolute invert dark:invert-0 bg-noise opacity-20 inset-0 rounded-md" />
-          <div
-            onClick={handleDeleteNode}
-            className="z-30 absolute top-2 right-8 h-10 w-8 flex items-center justify-center cursor-pointer"
-          >
-            <TrashIcon className="fill-current w-6" />
-          </div>
+          <Button onClick={handleDeleteNode} variant="outline" className="z-30 absolute top-[14px] right-[38px] w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+            <TrashIcon className="h-4 w-4 group-hover:stroke-background" />
+            <span className="sr-only">Delete node</span>
+          </Button>
           <div className="custom-drag-handle absolute top-2 right-2 h-10 w-6 flex items-center justify-center cursor-grab z-30">
             <svg
               xmlns="http://www.w3.org/2000/svg"

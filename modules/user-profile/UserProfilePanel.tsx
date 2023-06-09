@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ConnectWallet, useUser } from "@thirdweb-dev/react";
 import { Button } from "@/components/ui/button";
+import { PlayCircleIcon } from "@heroicons/react/24/outline";
 
 export interface UserProfilePanelProps {
     className?: string;
@@ -49,8 +50,12 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
         const hasNoJobSpecs = !isLoading && !error && data.length < 1
         if (hasNoJobSpecs) return <span>No saved job specs... yet.</span>
 
-        return data.map((spec: any, index: number) => <ul key={index} onClick={() => handleLoadJobSpecVersion(spec.job_spec_versions[0].content)}>
-            {spec.job_spec_versions[0].name ?? `Unnamed ${index + 1}`}
+        return data.map((spec: any, index: number) => <ul className="py-2 flex flex-row items-center gap-3" key={index}>
+            <span>{spec.job_spec_versions[0].name ?? `Unnamed ${index + 1}`}</span>
+            <Button onClick={() => handleLoadJobSpecVersion(spec.job_spec_versions[0].content)} variant="outline" className="w-6 h-6 rounded-full p-0 group transition-colors hover:bg-foreground">
+              <PlayCircleIcon className="h-4 w-4 group-hover:stroke-background" />
+              <span className="sr-only">Load job spec</span>
+            </Button>
         </ul>)
     }
 
@@ -81,7 +86,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
                     </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                    <h4 className={`${isLoggedIn ? "" : "text-muted-foreground"} font-bold`}>My Saved Job Specs</h4>
+                    <h4 className={`${isLoggedIn ? "" : "text-muted-foreground"} font-bold`}>My Saved Job Spec Versions</h4>
                     {
                         !isLoggedIn && <p className="text-xs italic p-4">Sign in to save/load your job specs</p>
                     }
