@@ -28,12 +28,12 @@ export default async function handler(request: NextApiRequest, response: NextApi
         }
 
         try {
-            let jobSpecsCreate
-            if (specId) {
-                jobSpecsCreate = {
+            let jobSpecCreate
+            if (specId !== "null") {
+                jobSpecCreate = {
                     connectOrCreate: {
                         where: {
-                            id: typeof(specId) === "string" ? specId : specId[0]
+                            id: typeof(specId) === "number" ? parseInt(specId) : parseInt(specId[0])
                         },
                         create: {
                             created_by: address.toLowerCase()
@@ -42,14 +42,14 @@ export default async function handler(request: NextApiRequest, response: NextApi
                 }
             }
             else {
-                jobSpecsCreate = {
+                jobSpecCreate = {
                     create: {
                         created_by: address.toLowerCase()
                     }
                 }
             }
 
-            const jobSpecVersion = await prisma.job_spec_versions.create({
+            const jobSpecVersion = await prisma.job_spec_version.create({
                 data: {
                     content: content,
                     users: {
@@ -57,7 +57,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
                             address: address.toLowerCase()
                         }
                     },
-                    job_specs: jobSpecsCreate
+                    job_specs: jobSpecCreate
                 }
             })
 

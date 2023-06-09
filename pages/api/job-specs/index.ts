@@ -17,7 +17,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
 
     if (request.method === "GET") {
         try {
-            const jobSpecs = await prisma.job_specs.findMany({
+            const jobSpecs = await prisma.job_spec.findMany({
                 where: {
                     created_by: {
                         equals: address,

@@ -1032,12 +1032,12 @@ export const workspaceMachine = createMachine<WorkspaceContext, WorkspaceEvent>(
               tasks: savedContext.nodes.tasks.map((entry) => ({
                 ...entry,
                 // @ts-ignore
-                ref: spawn(createTaskNodeMachine(entry.ref.state.context || {}), entry.ref.id),
+                ref: spawn(createTaskNodeMachine(entry.context || {}), entry.ref.id),
               })),
               ai: savedContext.nodes.ai.map((entry) => ({
                 ...entry,
                 // @ts-ignore
-                ref: spawn(createAiNodeMachine(entry.ref.state.context || {}), entry.ref.id),
+                ref: spawn(createAiNodeMachine(entry.context || {}), entry.ref.id),
               })),
             }
           };

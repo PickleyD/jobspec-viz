@@ -13,6 +13,13 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment 
+// @ts-ignore: Unreachable code error 
+// BigInt does not have `toJSON` method
+BigInt.prototype.toJSON = function (): string {
+  return this.toString();
+};
+
 const reactFlowInstanceSelector = (state: any) =>
   state.context.reactFlowInstance;
 

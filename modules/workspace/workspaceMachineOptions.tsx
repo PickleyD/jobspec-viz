@@ -88,16 +88,16 @@ export const workspaceMachineOptions: MachineOptions<WorkspaceContext, Workspace
                             context: nodeContextToPersist,
                         }
                     }),
+                    ai: context.nodes.ai.map((entry) => {
+
+                        const { ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
+    
+                        return {
+                            ...entry,
+                            context: nodeContextToPersist,
+                        }
+                    }),
                 },
-                ai: context.nodes.ai.map((entry) => {
-
-                    const { ...nodeContextToPersist } = entry.ref.getSnapshot()?.context || {}
-
-                    return {
-                        ...entry,
-                        context: nodeContextToPersist,
-                    }
-                }),
             };
 
             return fetch("/api/job-specs/null/versions", {

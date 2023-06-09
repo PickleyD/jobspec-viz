@@ -9,7 +9,7 @@ export const thirdwebAuthConfig: ThirdwebAuthConfig<Json, Json> = {
     callbacks: {
         onLogin: async (address) => {
             try {
-                const user = await prisma.users.upsert({
+                const user = await prisma.user.upsert({
                     where: {
                         address: address.toLowerCase()
                     },

@@ -46,7 +46,7 @@ export const UserProfilePanel = ({ className = "" }: UserProfilePanelProps) => {
 
         if (error) return <span>An error occurred</span>
 
-        const hasNoJobSpecs = !isLoading && !error && !data
+        const hasNoJobSpecs = !isLoading && !error && data.length < 1
         if (hasNoJobSpecs) return <span>No saved job specs... yet.</span>
 
         return data.map((spec: any, index: number) => <ul key={index} onClick={() => handleLoadJobSpecVersion(spec.job_spec_versions[0].content)}>
